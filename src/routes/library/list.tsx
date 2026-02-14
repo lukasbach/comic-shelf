@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useMemo } from 'react';
-import { LibraryGrid } from '../../components/library-grid';
+import { VirtualizedGrid } from '../../components/virtualized-grid';
 import { ComicCard } from '../../components/comic-card';
 import { useComics } from '../../hooks/use-comics';
 import { useOpenComic } from '../../hooks/use-open-comic';
@@ -191,13 +191,14 @@ function LibraryList() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-hidden">
         {filteredAndSortedComics.length > 0 ? (
-          <LibraryGrid>
-            {filteredAndSortedComics.map((comic) => (
+          <VirtualizedGrid
+            items={filteredAndSortedComics}
+            renderItem={(comic) => (
               <ComicCard key={comic.id} comic={comic} onOpen={openComic} />
-            ))}
-          </LibraryGrid>
+            )}
+          />
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-2">
             <p>No comics match your filters.</p>

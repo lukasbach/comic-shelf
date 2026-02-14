@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useMemo } from 'react';
-import { LibraryGrid } from '../../components/library-grid';
+import { VirtualizedGrid } from '../../components/virtualized-grid';
 import { PageCard } from '../../components/page-card';
 import { useAllPages } from '../../hooks/use-all-pages';
 import { useOpenComicPage } from '../../hooks/use-open-comic-page';
@@ -140,21 +140,21 @@ function AllPagesList() {
             <div className="flex items-center bg-muted rounded-md p-1">
               <button
                 onClick={() => setViewFilter('all')}
-                className={`px-3 py-1 text-xs rounded transition-colors ${viewFilter === 'all' ? 'bg-background shadow-sm' : 'hover:bg-background/50'}`}
+                className={`px-3 py-1 text-xs rounded transition-colors ${viewFilter === `all` ? `bg-background shadow-sm` : `hover:bg-background/50`}`}
               >
                 All
               </button>
               <button
                 onClick={() => setViewFilter('viewed')}
                 title="Viewed"
-                className={`px-3 py-1 text-xs rounded transition-colors flex items-center gap-1 ${viewFilter === 'viewed' ? 'bg-background shadow-sm text-blue-500' : 'hover:bg-background/50 text-muted-foreground'}`}
+                className={`px-3 py-1 text-xs rounded transition-colors flex items-center gap-1 ${viewFilter === `viewed` ? `bg-background shadow-sm text-blue-500` : `hover:bg-background/50 text-muted-foreground`}`}
               >
                 <RxEyeOpen /> Viewed
               </button>
               <button
                 onClick={() => setViewFilter('not-viewed')}
                 title="Not Viewed"
-                className={`px-3 py-1 text-xs rounded transition-colors flex items-center gap-1 ${viewFilter === 'not-viewed' ? 'bg-background shadow-sm text-blue-500' : 'hover:bg-background/50 text-muted-foreground'}`}
+                className={`px-3 py-1 text-xs rounded transition-colors flex items-center gap-1 ${viewFilter === `not-viewed` ? `bg-background shadow-sm text-blue-500` : `hover:bg-background/50 text-muted-foreground`}`}
               >
                 <RxEyeClosed /> Not Viewed
               </button>
@@ -163,21 +163,21 @@ function AllPagesList() {
             <div className="flex items-center bg-muted rounded-md p-1">
               <button
                 onClick={() => setFavoriteFilter('all')}
-                className={`px-3 py-1 text-xs rounded transition-colors ${favoriteFilter === 'all' ? 'bg-background shadow-sm' : 'hover:bg-background/50'}`}
+                className={`px-3 py-1 text-xs rounded transition-colors ${favoriteFilter === `all` ? `bg-background shadow-sm` : `hover:bg-background/50`}`}
               >
                 All
               </button>
               <button
                 onClick={() => setFavoriteFilter('favorited')}
                 title="Favorited"
-                className={`px-3 py-1 text-xs rounded transition-colors flex items-center gap-1 ${favoriteFilter === 'favorited' ? 'bg-background shadow-sm text-yellow-500' : 'hover:bg-background/50 text-muted-foreground'}`}
+                className={`px-3 py-1 text-xs rounded transition-colors flex items-center gap-1 ${favoriteFilter === `favorited` ? `bg-background shadow-sm text-yellow-500` : `hover:bg-background/50 text-muted-foreground`}`}
               >
                 <RxStarFilled /> Favs
               </button>
               <button
                 onClick={() => setFavoriteFilter('not-favorited')}
                 title="Not Favorited"
-                className={`px-3 py-1 text-xs rounded transition-colors flex items-center gap-1 ${favoriteFilter === 'not-favorited' ? 'bg-background shadow-sm text-yellow-500' : 'hover:bg-background/50 text-muted-foreground'}`}
+                className={`px-3 py-1 text-xs rounded transition-colors flex items-center gap-1 ${favoriteFilter === `not-favorited` ? `bg-background shadow-sm text-yellow-500` : `hover:bg-background/50 text-muted-foreground`}`}
               >
                 <RxStar /> Not Favs
               </button>
@@ -186,13 +186,14 @@ function AllPagesList() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-hidden">
         {filteredAndSortedPages.length > 0 ? (
-          <LibraryGrid>
-            {filteredAndSortedPages.map((page) => (
+          <VirtualizedGrid
+            items={filteredAndSortedPages}
+            renderItem={(page) => (
               <PageCard key={page.id} page={page} onOpen={openComicPage} onUpdate={refetch} />
-            ))}
-          </LibraryGrid>
+            )}
+          />
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-2">
             <p>No pages match your filters.</p>

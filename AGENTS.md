@@ -165,6 +165,22 @@
 - [x] Implement theme switching (light/dark/system)
 - [x] Verify implementation with unit tests
 
+## Task 12: Grid Virtualization
+- [x] Implement generic `VirtualizedGrid` component using TanStack Virtual
+- [x] Virtualize Comic Library Explorer view
+- [x] Virtualize All Comics (List) view
+- [x] Virtualize All Pages view
+- [x] Virtualize Search results view
+- [x] Virtualize Favorites view
+- [x] Virtualize Viewer Overview mode
+- [x] Verify implementation with responsive layout matching existing grids
+
+### Implementation Details
+- **Virtualized Grid**: Created a robust `VirtualizedGrid` component that calculates the number of columns based on container width (using `ResizeObserver`) to group items into rows. This is necessary because virtualization typically works on a single dimension (rows), but the UI requires a grid.
+- **Responsive Design**: The component supports a `columnsMap` to match the application's existing Tailwind breakpoints (`sm`, `md`, `lg`, `xl`).
+- **Performance**: By only rendering the visible rows plus a small overscan, the application can now handle thousands of comics or pages in the library views without performance degradation.
+- **Layout Consistency**: All virtualized views preserve the `aspect-3/4` card layout and spacing of the original implementation.
+
 ### Implementation Details
 - **Settings Page**: Built using `@tanstack/react-form` for centralized state management. It features sections for General (theme, view mode), Slideshow (delay, auto-scroll), Hotkeys (customizable navigation, zoom, and tab controls), and Library (index path management).
 - **Hotkey System**:

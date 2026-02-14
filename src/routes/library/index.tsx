@@ -4,7 +4,7 @@ import { useComics } from '../../hooks/use-comics';
 import { useIndexPaths } from '../../hooks/use-index-paths';
 import { useOpenComic } from '../../hooks/use-open-comic';
 import { RxSymbol, RxHome, RxChevronRight } from 'react-icons/rx';
-import { LibraryGrid } from '../../components/library-grid';
+import { VirtualizedGrid } from '../../components/virtualized-grid';
 import { ComicCard } from '../../components/comic-card';
 import { FolderCard } from '../../components/folder-card';
 import { normalizePath, naturalSortComparator } from '../../utils/image-utils';
@@ -177,14 +177,16 @@ function LibraryExplorer() {
         ))}
       </div>
 
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-hidden">
         {currentItems.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
+          <div className="flex items-center justify-center h-full text-muted-foreground p-6">
             No items found.
           </div>
         ) : (
-          <LibraryGrid>
-            {currentItems.map((item) => (
+          <VirtualizedGrid
+            items={currentItems}
+            padding={24}
+            renderItem={(item) => (
               item.type === 'folder' ? (
                 <FolderCard 
                   key={item.path}
@@ -201,8 +203,8 @@ function LibraryExplorer() {
                   onOpen={openComic}
                 />
               )
-            ))}
-          </LibraryGrid>
+            )}
+          />
         )}
       </div>
     </div>

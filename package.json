@@ -20,6 +20,7 @@
     "@tanstack/react-form": "^1.28.2",
     "@tanstack/react-hotkeys": "^0.1.0",
     "@tanstack/react-router": "^1.159.10",
+    "@tanstack/react-virtual": "^3.13.18",
     "@tanstack/router-plugin": "^1.159.12",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-dialog": "^2.6.0",

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { LibraryGrid } from '../../components/library-grid';
+import { VirtualizedGrid } from '../../components/virtualized-grid';
 import { ComicCard } from '../../components/comic-card';
 import { FavoriteImageCard } from '../../components/favorite-image-card';
 import { useFavoriteComics } from '../../hooks/use-favorite-comics';
@@ -78,39 +78,41 @@ function LibraryFavorites() {
         onChange={(id) => setActiveTab(id)} 
       />
 
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-hidden">
         {activeTab === 'comics' ? (
-          <section className="flex flex-col gap-4">
+          <div className="h-full">
             {favoriteComics.length > 0 ? (
-              <LibraryGrid>
-                {favoriteComics.map((comic) => (
+              <VirtualizedGrid
+                items={favoriteComics}
+                renderItem={(comic) => (
                   <ComicCard key={comic.id} comic={comic} onOpen={openComic} />
-                ))}
-              </LibraryGrid>
+                )}
+              />
             ) : (
-              <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                 <p>No favorite comics yet.</p>
               </div>
             )}
-          </section>
+          </div>
         ) : (
-          <section className="flex flex-col gap-4">
+          <div className="h-full">
             {favoritePages.length > 0 ? (
-              <LibraryGrid>
-                {favoritePages.map((page) => (
+              <VirtualizedGrid
+                items={favoritePages}
+                renderItem={(page) => (
                   <FavoriteImageCard 
                     key={page.id} 
                     page={page} 
                     onOpen={openComicPage} 
                   />
-                ))}
-              </LibraryGrid>
+                )}
+              />
             ) : (
-              <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                 <p>No favorite pages yet.</p>
               </div>
             )}
-          </section>
+          </div>
         )}
       </div>
     </div>

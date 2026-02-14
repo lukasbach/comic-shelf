@@ -3,7 +3,7 @@ import { Comic, ComicPage } from '../../types/comic';
 import { PageThumbnail } from './page-thumbnail';
 import { useTabs } from '../../contexts/tab-context';
 import { Tab } from '../../stores/tab-store';
-import { useViewerRef } from '../../contexts/viewer-ref-context';
+import { VirtualizedGrid } from '../virtualized-grid';
 
 type OverviewModeProps = {
   comic: Comic;
@@ -22,7 +22,6 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
   const { tabs, activeTabId, updateTab } = useTabs();
   const activeTab = tabs.find((t: Tab) => t.id === activeTabId);
   const currentPage = activeTab?.currentPage ?? 0;
-  const { scrollContainerRef } = useViewerRef();
 
   const handlePageClick = (index: number) => {
     if (activeTabId) {
@@ -33,10 +32,28 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
     }
   };
 
+  if (pages.length === 0) {
+    return (
+      <div className="flex items-center justify-center p-12 text-gray-500 italic">
+        No pages found for this comic.
+      </div>
+    );
+  }
+
   return (
-    <div ref={scrollContainerRef} className="h-full overflow-y-auto overflow-x-hidden">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 p-6">
-        {pages.map((page, index) => (
+    <div className="h-full overflow-hidden">
+      <VirtualizedGrid
+        items={pages}
+        itemHeight={300} // Pages thumbnails are usually smaller
+        padding={24}
+        columnsMap={{
+          xl: 8,
+          lg: 6,
+          md: 4,
+          sm: 3,
+          default: 2,
+        }}
+        renderItem={(page, index) => (
           <PageThumbnail
             key={page.id}
             page={page}
@@ -46,13 +63,8 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
             onIncrementViewCount={() => onIncrementPageViewCount(page.id)}
             onDecrementViewCount={() => onDecrementPageViewCount(page.id)}
           />
-        ))}
-      </div>
-      {pages.length === 0 && (
-        <div className="flex items-center justify-center p-12 text-gray-500 italic">
-          No pages found for this comic.
-        </div>
-      )}
+        )}
+      />
     </div>
   );
 };

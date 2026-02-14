@@ -19,7 +19,7 @@ jobs:
       new_version: ${{ steps.get_version.outputs.version }}
       commit_sha: ${{ steps.bump.outputs.sha }}
     steps:
-      - uses: actions/checkout:v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}

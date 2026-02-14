@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { GlobalIndexingProgress, IndexingError, reindexAll } from '../services/indexing-service';
+import { useSettings } from './settings-context';
 
 type IndexingContextType = {
   isIndexing: boolean;
@@ -13,9 +14,9 @@ type IndexingContextType = {
 const IndexingContext = createContext<IndexingContextType | undefined>(undefined);
 
 export const IndexingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { settings, updateSettings, isLoading: settingsLoading } = useSettings();
   const [isIndexing, setIsIndexing] = useState(false);
   const [progress, setProgress] = useState<GlobalIndexingProgress | null>(null);
-  const [lastIndexedAt, setLastIndexedAt] = useState<string | null>(null);
   const [errors, setErrors] = useState<IndexingError[]>([]);
   const hasTriggeredInitial = useRef(false);
 
@@ -36,7 +37,7 @@ export const IndexingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             setErrors(p.errors);
         }
       });
-      setLastIndexedAt(new Date().toISOString());
+      await updateSettings({ lastIndexedAt: new Date().toISOString() });
     } catch (error) {
       console.error('Indexing failed:', error);
       setErrors(prev => [...prev, { path: 'Global', message: error instanceof Error ? error.message : String(error) }]);
@@ -44,18 +45,20 @@ export const IndexingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setIsIndexing(false);
       setProgress(null);
     }
-  }, [isIndexing]);
+  }, [isIndexing, updateSettings]);
 
   // Initial indexing trigger
   useEffect(() => {
-    if (!hasTriggeredInitial.current) {
+    if (!settingsLoading && !hasTriggeredInitial.current) {
         hasTriggeredInitial.current = true;
-        startIndexing();
+        if (settings.autoReindex) {
+          startIndexing();
+        }
     }
-  }, [startIndexing]);
+  }, [startIndexing, settingsLoading, settings.autoReindex]);
 
   return (
-    <IndexingContext.Provider value={{ isIndexing, progress, startIndexing, lastIndexedAt, errors, clearErrors }}>
+    <IndexingContext.Provider value={{ isIndexing, progress, startIndexing, lastIndexedAt: settings.lastIndexedAt, errors, clearErrors }}>
       {children}
     </IndexingContext.Provider>
   );

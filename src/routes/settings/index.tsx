@@ -85,6 +85,8 @@ function SettingsPage() {
     try {
       await indexPathService.removeIndexPath(id);
       await refreshPaths();
+      // Trigger indexing to clean up stale entries
+      startIndexing();
     } catch (error) {
       console.error('Failed to remove path:', error);
     }
@@ -322,6 +324,34 @@ function SettingsPage() {
             </div>
             
             <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800 space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                <form.Field name="autoReindex">
+                  {(field) => (
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={field.state.value}
+                        onClick={() => field.handleChange(!field.state.value)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                          field.state.value ? 'bg-blue-600' : 'bg-slate-700'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            field.state.value ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                      <div>
+                        <span className="text-sm font-medium text-slate-200">Auto-reindex on startup</span>
+                        <p className="text-[10px] text-slate-500">Scan for new comics when the application opens.</p>
+                      </div>
+                    </div>
+                  )}
+                </form.Field>
+              </div>
+
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-medium text-slate-200">Index Paths</h3>

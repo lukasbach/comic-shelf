@@ -19,6 +19,8 @@ export type AppSettings = {
   slideshowDelay: number;         // milliseconds
   slideshowAutoScroll: boolean;
   theme: 'light' | 'dark' | 'system';
+  autoReindex: boolean;
+  lastIndexedAt: string | null;
 };
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -40,6 +42,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   slideshowDelay: 5000,
   slideshowAutoScroll: true,
   theme: 'dark',
+  autoReindex: true,
+  lastIndexedAt: null,
 };
 
 const STORE_PATH = 'settings.json';

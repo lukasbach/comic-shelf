@@ -12,6 +12,7 @@ import { IndexingStatus } from './indexing-status'
 import { useFavoriteComics } from '../hooks/use-favorite-comics'
 import { useOpenComic } from '../hooks/use-open-comic'
 import { ComicContextMenu } from './comic-context-menu'
+import { getImageUrl } from '../utils/image-utils'
 
 const navItems = [
   { name: 'Explorer', to: '/library', icon: RxArchive },
@@ -62,21 +63,44 @@ export function LibrarySidebar() {
             <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
               Favorite Comics
             </div>
-            <div className="space-y-1">
+            <div className="grid grid-cols-2 gap-2 px-2 mt-1 pb-4">
               {favoriteComics.map((comic) => {
                 const isActive = location.pathname === `/viewer/${comic.id}`
+                const coverUrl = comic.thumbnail_path ? getImageUrl(comic.thumbnail_path) : null;
+                
                 return (
                   <ComicContextMenu key={comic.id} comic={comic} onUpdate={refetch}>
                     <button
                       onClick={() => openComic(comic)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                      title={comic.title}
+                      className={`group flex flex-col gap-1.5 p-1 rounded-md transition-all text-left overflow-hidden ${
                         isActive
-                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
-                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800'
+                          ? 'bg-blue-100 dark:bg-blue-900 ring-1 ring-blue-200 dark:ring-blue-800'
+                          : 'hover:bg-gray-200 dark:hover:bg-gray-800'
                       }`}
                     >
-                      <RxFileText className="w-5 h-5 shrink-0" />
-                      <span className="truncate text-left flex-1" title={comic.title}>
+                      <div className="aspect-[3/4] w-full relative rounded-sm overflow-hidden bg-gray-200 dark:bg-gray-800 shadow-sm transition-transform group-hover:scale-[1.02]">
+                        {coverUrl ? (
+                          <img 
+                            src={coverUrl} 
+                            alt={comic.title} 
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600">
+                            <RxFileText className="w-6 h-6" />
+                          </div>
+                        )}
+                        {isActive && (
+                          <div className="absolute inset-0 bg-blue-500/10" />
+                        )}
+                      </div>
+                      <span className={`text-[10px] leading-tight font-medium px-0.5 line-clamp-2 ${
+                        isActive 
+                          ? 'text-blue-700 dark:text-blue-200' 
+                          : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200'
+                      }`}>
                         {comic.title}
                       </span>
                     </button>

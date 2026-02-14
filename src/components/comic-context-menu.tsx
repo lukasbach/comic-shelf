@@ -2,16 +2,16 @@ import React, { useState } from 'react';
 import * as ContextMenu from '@radix-ui/react-context-menu';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import {
-    RxExternalLink,
-    RxPlus,
-    RxMinus,
-    RxStar,
-    RxStarFilled,
-    RxOpenInNewWindow,
-    RxArchive,
-    RxDotsVertical,
-    RxEyeOpen,
-    RxEyeClosed
+  RxExternalLink,
+  RxPlus,
+  RxMinus,
+  RxStar,
+  RxStarFilled,
+  RxOpenInNewWindow,
+  RxArchive,
+  RxDotsVertical,
+  RxEyeOpen,
+  RxEyeClosed
 } from 'react-icons/rx';
 import type { Comic, ComicPage } from '../types/comic';
 import * as comicService from '../services/comic-service';
@@ -100,7 +100,7 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
     try {
       const webview = new WebviewWindow(label, {
         url,
-        title: comic?.title || 'Comic Viewer',
+        title: comic?.title || 'ComicShelf',
         width: 1000,
         height: 800,
         center: true,

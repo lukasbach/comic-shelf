@@ -25,7 +25,7 @@ function getRouteTitle(path: string): string {
   if (path === '/library/favorites') return 'Favorites';
   if (path === '/library/search') return 'Search';
   if (path === '/settings' || path === '/settings/') return 'Settings';
-  if (path.startsWith('/viewer/')) return 'Comic Viewer';
+  if (path.startsWith('/viewer/')) return 'ComicShelf';
   return 'Library';
 }
 

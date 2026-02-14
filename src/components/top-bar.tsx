@@ -33,7 +33,7 @@ export function TopBar() {
       />
       <div className="flex items-center gap-4 relative pointer-events-none">
         <div className="text-xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mr-4">
-          ComicView
+          ComicShelf
         </div>
         <div className="pointer-events-auto">
           <BreadcrumbBar />

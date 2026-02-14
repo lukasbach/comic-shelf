@@ -80,3 +80,22 @@
   - Stale comics (no longer on disk) and orphaned thumbnails are automatically removed during indexing.
 - **Progress Tracking**: The `IndexingProvider` exports `isIndexing`, `progress`, and `errors` state. A new `IndexingStatus` component in the sidebar provides real-time feedback and error reporting.
 - **Utilities**: `getImageUrl` in `src/utils/image-utils.ts` handles the conversion of native file paths to Tauri asset URLs.
+
+## Task 6: Comic Viewer — Overview Mode
+- [x] Implement `useComicData` hook for loading comic and pages
+- [x] Create Viewer UI components (Header, Grid, Page Thumbnail)
+- [x] Implement Overview Mode responsive grid
+- [x] Integrate mode switching logic in viewer route
+- [x] Implement loading and error (not found) states
+- [x] Verify implementation with unit tests
+
+### Implementation Details
+
+- **Comic Viewer**: The viewer is located at `/viewer/$comicId`. It uses the `useComicData` hook to fetch both comic metadata and the full list of pages.
+- **Overview Mode**: This is the default view mode. it displays a responsive grid of page thumbnails.
+  - Thumbnails use the pre-generated thumbnail images for performance, falling back to original images if needed.
+  - Each thumbnail displays the page number and a favorite star if applicable.
+  - Clicking a thumbnail updates the `currentPage` in the tab state and switches the `viewMode` to `single` (implemented as a placeholder for now).
+- **Viewer Header**: A dedicated toolbar below the main top bar allows switching between `overview`, `single`, and `scroll` modes. It also displays the comic title and page count.
+- **State Management**: The viewer relies on the `TabProvider` (`useTabs` hook) to persist and manage the current mode and page per tab.
+- **Placeholders**: While Task 6 focuses on Overview mode, placeholders for `SinglePageMode` and `ScrollMode` have been added to ensure a functional mode-switching UI.

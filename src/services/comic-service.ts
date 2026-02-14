@@ -47,7 +47,7 @@ export const searchComics = async (query: string): Promise<Comic[]> => {
 
 export const upsertComic = async (comic: Omit<Comic, 'id' | 'created_at' | 'updated_at'>): Promise<number> => {
   const db = await getDb();
-  const result = await db.execute(
+  await db.execute(
     `INSERT INTO comics (path, title, artist, series, issue, cover_image_path, page_count, updated_at)
      VALUES ($1, $2, $3, $4, $5, $6, $7, datetime('now'))
      ON CONFLICT(path) DO UPDATE SET
@@ -60,7 +60,12 @@ export const upsertComic = async (comic: Omit<Comic, 'id' | 'created_at' | 'upda
        updated_at = datetime('now')`,
     [comic.path, comic.title, comic.artist, comic.series, comic.issue, comic.cover_image_path, comic.page_count]
   );
-  return result.lastInsertId ?? 0;
+
+  const results = await db.select<{ id: number }[]>('SELECT id FROM comics WHERE path = $1', [comic.path]);
+  if (results.length === 0) {
+    throw new Error(`Failed to retrieve comic ID after upsert for path: ${comic.path}`);
+  }
+  return results[0].id;
 };
 
 export const deleteComic = async (id: number): Promise<void> => {

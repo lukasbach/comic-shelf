@@ -19,12 +19,13 @@ const mockComic: Comic = {
 };
 
 const TestComponent = () => {
-  const { tabs, activeTabId, openTab, closeTab, nextTab, prevTab } = useTabs();
+  const { tabs, activeTabId, openTab, openLibraryTab, closeTab, nextTab, prevTab } = useTabs();
   return (
     <div>
       <div data-testid="tab-count">{tabs.length}</div>
       <div data-testid="active-tab-id">{activeTabId}</div>
       <button onClick={() => openTab(mockComic)}>Open Tab</button>
+      <button onClick={() => openLibraryTab('/library', 'Explorer')}>Open Library Tab</button>
       {tabs.map(tab => (
         <button key={tab.id} onClick={() => closeTab(tab.id)}>Close {tab.id}</button>
       ))}
@@ -35,20 +36,28 @@ const TestComponent = () => {
 };
 
 describe('tab-context', () => {
-  it('opens a new tab', async () => {
+  it('opens a new generic tab', async () => {
+    let capturedTabs: any[] = [];
+    const Inspector = () => {
+      const { tabs } = useTabs();
+      capturedTabs = tabs;
+      return null;
+    };
+
     render(
       <TabProvider>
         <TestComponent />
+        <Inspector />
       </TabProvider>
     );
 
-    const openButton = screen.getByText('Open Tab');
+    const openButton = screen.getByText('Open Library Tab');
     await act(async () => {
       openButton.click();
     });
 
     expect(screen.getByTestId('tab-count').textContent).toBe('1');
-    expect(screen.getByTestId('active-tab-id').textContent).not.toBe('');
+    expect(capturedTabs[0].type).toBe('library');
   });
 
   it('does not open duplicate tabs for same comic', async () => {

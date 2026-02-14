@@ -21,10 +21,10 @@ export function BreadcrumbBar() {
     else if (path.endsWith('/favorites')) segments.push({ label: 'Favorites', to: '/library/favorites' })
     else if (path.endsWith('/search')) segments.push({ label: 'Search', to: '/library/search' })
     else if (path === '/library' || path === '/library/') segments.push({ label: 'Explorer', to: '/library' })
-  } else if (isViewer && activeTab) {
+  } else if (isViewer && activeTab && activeTab.type === 'comic') {
     // Basic segments for now, will be expanded when we have comic metadata
     segments.push({ label: activeTab.title, to: `/viewer/${activeTab.comicId}` })
-    segments.push({ label: `Page ${activeTab.currentPage + 1}`, to: location.pathname })
+    segments.push({ label: `Page ${(activeTab.currentPage ?? 0) + 1}`, to: location.pathname })
   } else if (isSettings) {
     segments.push({ label: 'Settings', to: '/settings' })
   }

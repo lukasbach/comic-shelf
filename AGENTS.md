@@ -34,5 +34,5 @@
   - `/viewer/$comicId` renders the comic viewer.
   - `/settings` renders the settings page.
 - **App Shell**: The `RootLayout` in `__root.tsx` wraps the app with `SettingsProvider` and `TabProvider`. It displays the `TopBar` (with breadcrumbs and settings) and the `TabBar` (when tabs are open).
-- **Navigation**: Breadcrumbs are dynamic and reflect the current route and active comic tab. The sidebar provides navigation between different library views.
+- **Navigation**: Breadcrumbs are dynamic and reflect the current route and active comic tab. The sidebar provides navigation between different library views. Sidebar items can be middle-clicked to open the view in a new application tab.
 - **Icons**: The application uses the Radix icon set from `react-icons/rx` for all UI elements.

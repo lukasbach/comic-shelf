@@ -6,6 +6,7 @@ interface TabContextType {
   tabs: Tab[];
   activeTabId: string | null;
   openTab: (comic: Comic) => void;
+  openLibraryTab: (path: string, title: string) => void;
   closeTab: (tabId: string) => void;
   setActiveTabId: (tabId: string) => void;
   updateTab: (tabId: string, updates: Partial<Tab>) => void;
@@ -21,7 +22,7 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const openTab = useCallback((comic: Comic) => {
     setTabs((prevTabs) => {
-      const existingTab = prevTabs.find((t) => t.comicId === comic.id);
+      const existingTab = prevTabs.find((t) => t.type === 'comic' && t.comicId === comic.id);
       if (existingTab) {
         setActiveTabId(existingTab.id);
         return prevTabs;
@@ -29,11 +30,33 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
       const newTab: Tab = {
         id: crypto.randomUUID(),
+        type: 'comic',
         comicId: comic.id,
         title: comic.title,
+        path: `/viewer/${comic.id}`,
         currentPage: 0,
         viewMode: 'single',
         zoomLevel: 100,
+      };
+
+      setActiveTabId(newTab.id);
+      return [...prevTabs, newTab];
+    });
+  }, []);
+
+  const openLibraryTab = useCallback((path: string, title: string) => {
+    setTabs((prevTabs) => {
+      const existingTab = prevTabs.find((t) => t.type === 'library' && t.path === path);
+      if (existingTab) {
+        setActiveTabId(existingTab.id);
+        return prevTabs;
+      }
+
+      const newTab: Tab = {
+        id: crypto.randomUUID(),
+        type: 'library',
+        title: title,
+        path: path,
       };
 
       setActiveTabId(newTab.id);
@@ -91,6 +114,7 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     tabs,
     activeTabId,
     openTab,
+    openLibraryTab,
     closeTab,
     setActiveTabId,
     updateTab,

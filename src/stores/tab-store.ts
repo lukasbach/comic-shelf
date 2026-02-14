@@ -1,8 +1,10 @@
 export type Tab = {
   id: string;           // unique ID
-  comicId: number;      // database comic ID
   title: string;        // display name
-  currentPage: number;  // last viewed page
-  viewMode: 'overview' | 'single' | 'scroll';
-  zoomLevel: number;
+  type: 'comic' | 'library';
+  comicId?: number;      // database comic ID (if type === 'comic')
+  path: string;          // route path
+  currentPage?: number;  // last viewed page
+  viewMode?: 'overview' | 'single' | 'scroll';
+  zoomLevel?: number;
 };

@@ -22,8 +22,7 @@ export function TabBar() {
             }`}
           >
             <Link
-              to="/viewer/$comicId"
-              params={{ comicId: String(tab.comicId) }}
+              to={tab.path as any}
               className={`flex-1 px-3 py-2 text-sm truncate ${
                 isActive ? 'font-medium text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'
               }`}

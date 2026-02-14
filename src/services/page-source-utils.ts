@@ -101,7 +101,11 @@ const renderPdfPage = async (pdfPath: string, pageNumber: number): Promise<strin
   });
 };
 
-export const renderPdfPagesToPngBytes = async (pdfPath: string, pageNumbers: number[]): Promise<Map<number, Uint8Array>> => {
+export const renderPdfPagesToPngBytes = async (
+  pdfPath: string,
+  pageNumbers: number[],
+  onPage?: (pageNumber: number, bytes: Uint8Array) => Promise<void>
+): Promise<Map<number, Uint8Array>> => {
   const output = new Map<number, Uint8Array>();
   if (pageNumbers.length === 0) {
     return output;
@@ -115,7 +119,13 @@ export const renderPdfPagesToPngBytes = async (pdfPath: string, pageNumbers: num
   try {
     for (const pageNumber of pageNumbers) {
       const page = await pdf.getPage(pageNumber);
-      const viewport = page.getViewport({ scale: 1.0 });
+      
+      // Target a maximum dimension of 300px for thumbnails to save memory and IPC bandwidth
+      const viewport1 = page.getViewport({ scale: 1.0 });
+      const targetDim = 300;
+      const scale = Math.min(targetDim / viewport1.width, targetDim / viewport1.height);
+      const viewport = page.getViewport({ scale });
+      
       const canvas = document.createElement('canvas');
       canvas.width = viewport.width;
       canvas.height = viewport.height;
@@ -127,14 +137,24 @@ export const renderPdfPagesToPngBytes = async (pdfPath: string, pageNumbers: num
       try {
         await page.render({ canvasContext: context, viewport }).promise;
         const blob = await new Promise<Blob | null>((resolve) => {
-          canvas.toBlob((nextBlob) => resolve(nextBlob), 'image/png');
+          // Use image/jpeg for smaller payload size if possible, or stick to png for quality
+          canvas.toBlob((nextBlob) => resolve(nextBlob), 'image/jpeg', 0.8);
         });
 
         if (!blob) {
           throw new Error('Failed to render PDF page to blob');
         }
 
-        output.set(pageNumber, new Uint8Array(await blob.arrayBuffer()));
+        const pageBytes = new Uint8Array(await blob.arrayBuffer());
+        if (onPage) {
+          try {
+            await onPage(pageNumber, pageBytes);
+          } catch (err) {
+            console.error(`[PageSourceUtils] onPage callback failed for page ${pageNumber}`, err);
+          }
+        } else {
+          output.set(pageNumber, pageBytes);
+        }
       } finally {
         context.clearRect(0, 0, canvas.width, canvas.height);
         canvas.width = 0;

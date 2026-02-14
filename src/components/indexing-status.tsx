@@ -54,11 +54,14 @@ export const IndexingStatus: React.FC = () => {
                         <span className="truncate max-w-30">{progress.currentPath || 'Scanning...'}</span>
                         <span>{progress.current}/{progress.total}</span>
                     </div>
+                    <div className="text-[10px] text-gray-500 truncate" title={progress.currentTask || ''}>
+                        {progress.currentTask || 'Working...'}
+                    </div>
                     <div className="h-1 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                         <div 
                             className="h-full bg-blue-500 transition-all duration-300"
                             style={{ 
-                                width: `${progress.total ? (progress.current! / progress.total * 100) : 0}%` 
+                                width: `${progress.percentage ?? (progress.total ? (progress.current! / progress.total * 100) : 0)}%` 
                             }}
                         />
                     </div>

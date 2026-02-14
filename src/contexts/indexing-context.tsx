@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
-import { GlobalIndexingProgress, reindexAll } from '../services/reindex-service';
-import { IndexingError } from '../services/indexing-service';
+import { GlobalIndexingProgress, IndexingError, reindexAll } from '../services/indexing-service';
 
 type IndexingContextType = {
   isIndexing: boolean;

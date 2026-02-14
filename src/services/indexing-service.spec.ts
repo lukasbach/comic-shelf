@@ -2,11 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as indexingService from './indexing-service';
 
 vi.mock('./source-file-service', () => ({
-  scanComicCandidates: vi.fn(),
-  listImagePages: vi.fn(),
-  listArchiveImageEntries: vi.fn(),
-  readArchiveImageEntriesBatch: vi.fn(),
-  countPdfPages: vi.fn(),
+  buildIndexPayloadForPath: vi.fn(),
+  listenToRustIndexingProgress: vi.fn().mockResolvedValue(() => {}),
+  cleanupIndexedThumbnails: vi.fn(),
 }));
 
 vi.mock('./page-source-utils', () => ({
@@ -25,10 +23,7 @@ vi.mock('./comic-page-service', () => ({
 }));
 
 vi.mock('./thumbnail-service', () => ({
-  generateThumbnail: vi.fn().mockResolvedValue('thumb/path.jpg'),
   generateThumbnailFromBytes: vi.fn().mockResolvedValue('thumb/path.jpg'),
-  cleanupOrphans: vi.fn(),
-  deleteThumbnailsForComic: vi.fn(),
 }));
 
 describe('indexing-service', () => {
@@ -56,24 +51,102 @@ describe('indexing-service', () => {
     const pageSourceUtils = await import('./page-source-utils');
     const comicService = await import('./comic-service');
 
-    vi.mocked(sourceFileService.scanComicCandidates).mockResolvedValue([
-      { path: 'base/FolderComic', title: 'FolderComic', sourceType: 'image' },
-      { path: 'base/Book.pdf', title: 'Book', sourceType: 'pdf' },
-      { path: 'base/Pack.cbz', title: 'Pack', sourceType: 'archive' },
-    ] as any);
+    vi.mocked(sourceFileService.buildIndexPayloadForPath).mockResolvedValue({
+      comics: [
+        {
+          path: 'base/FolderComic',
+          title: 'FolderComic',
+          sourceType: 'image',
+          artist: null,
+          series: 'FolderComic',
+          issue: null,
+          coverImagePath: 'base/FolderComic/1.jpg',
+          pageCount: 1,
+          pages: [
+            {
+              pageNumber: 1,
+              filePath: 'base/FolderComic/1.jpg',
+              fileName: '1.jpg',
+              sourceType: 'image',
+              sourcePath: 'base/FolderComic/1.jpg',
+              archiveEntryPath: null,
+              pdfPageNumber: null,
+              thumbnailPath: 'thumb/folder-1.jpg',
+            },
+          ],
+        },
+        {
+          path: 'base/Book.pdf',
+          title: 'Book',
+          sourceType: 'pdf',
+          artist: null,
+          series: 'Book',
+          issue: null,
+          coverImagePath: 'base/Book.pdf',
+          pageCount: 2,
+          pages: [
+            {
+              pageNumber: 1,
+              filePath: 'base/Book.pdf',
+              fileName: 'page-1.pdf',
+              sourceType: 'pdf',
+              sourcePath: 'base/Book.pdf',
+              archiveEntryPath: null,
+              pdfPageNumber: 1,
+              thumbnailPath: null,
+            },
+            {
+              pageNumber: 2,
+              filePath: 'base/Book.pdf',
+              fileName: 'page-2.pdf',
+              sourceType: 'pdf',
+              sourcePath: 'base/Book.pdf',
+              archiveEntryPath: null,
+              pdfPageNumber: 2,
+              thumbnailPath: null,
+            },
+          ],
+        },
+        {
+          path: 'base/Pack.cbz',
+          title: 'Pack',
+          sourceType: 'archive',
+          artist: null,
+          series: 'Pack',
+          issue: null,
+          coverImagePath: 'base/Pack.cbz',
+          pageCount: 1,
+          pages: [
+            {
+              pageNumber: 1,
+              filePath: 'base/Pack.cbz',
+              fileName: '1.jpg',
+              sourceType: 'archive',
+              sourcePath: 'base/Pack.cbz',
+              archiveEntryPath: '1.jpg',
+              pdfPageNumber: null,
+              thumbnailPath: 'thumb/pack-1.jpg',
+            },
+          ],
+        },
+      ],
+      activeComicPaths: ['base/FolderComic', 'base/Book.pdf', 'base/Pack.cbz'],
+      errors: [],
+    } as any);
 
-    vi.mocked(sourceFileService.listImagePages).mockResolvedValue([
-      { filePath: 'base/FolderComic/1.jpg', fileName: '1.jpg', pageNumber: 1 },
-    ] as any);
-
-    vi.mocked(sourceFileService.countPdfPages).mockResolvedValue(2);
-    vi.mocked(sourceFileService.listArchiveImageEntries).mockResolvedValue(['1.jpg'] as any);
-    vi.mocked(sourceFileService.readArchiveImageEntriesBatch).mockResolvedValue([new Uint8Array([1, 2, 3])] as any);
-    vi.mocked(pageSourceUtils.renderPdfPagesToPngBytes).mockResolvedValue(
-      new Map([
-        [1, new Uint8Array([1])],
-        [2, new Uint8Array([2])],
-      ]) as any
+    vi.mocked(pageSourceUtils.renderPdfPagesToPngBytes).mockImplementation(
+      async (_path, pageNumbers, onPage) => {
+        const map = new Map();
+        for (const num of pageNumbers) {
+          const bytes = new Uint8Array([num]);
+          if (onPage) {
+            await onPage(num, bytes);
+          } else {
+            map.set(num, bytes);
+          }
+        }
+        return map;
+      }
     );
 
     const seen = await indexingService.indexComics('base', '{series}');
@@ -82,5 +155,6 @@ describe('indexing-service', () => {
     expect(seen.has('base/Book.pdf')).toBe(true);
     expect(seen.has('base/Pack.cbz')).toBe(true);
     expect(comicService.upsertComic).toHaveBeenCalledTimes(3);
+    expect(pageSourceUtils.renderPdfPagesToPngBytes).toHaveBeenCalledTimes(1);
   });
 });

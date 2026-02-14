@@ -8,20 +8,20 @@ import * as indexPathService from '../../services/index-path-service';
 import { HotkeyInput } from '../../components/settings/hotkey-input';
 import { AppSettings, DEFAULT_SETTINGS } from '../../services/settings-service';
 import {
-    RxSymbol,
-    RxReload,
-    RxCheck,
-    RxPlus,
-    RxTrash,
-    RxDesktop,
-    RxMoon,
-    RxSun,
-    RxViewHorizontal,
-    RxViewVertical,
-    RxGrid,
-    RxTimer,
-    RxKeyboard,
-    RxArchive
+  RxSymbol,
+  RxReload,
+  RxCheck,
+  RxPlus,
+  RxTrash,
+  RxDesktop,
+  RxMoon,
+  RxSun,
+  RxViewHorizontal,
+  RxViewVertical,
+  RxGrid,
+  RxTimer,
+  RxKeyboard,
+  RxArchive
 } from 'react-icons/rx';
 import { open } from '@tauri-apps/plugin-dialog';
 
@@ -372,10 +372,13 @@ function SettingsPage() {
                       <span>{progress.status === 'scanning' ? 'Scanning...' : 'Indexing...'}</span>
                       <span>{(progress.current ?? 0)} / {(progress.total ?? 0)}</span>
                     </div>
+                    <div className="text-[10px] text-slate-400 truncate" title={progress.currentTask || ''}>
+                      {progress.currentTask || 'Working...'}
+                    </div>
                     <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                       <div 
                         className="bg-green-500 h-full transition-all duration-300"
-                        style={{ width: `${((progress.current ?? 0) / (progress.total ?? 1)) * 100}%` }}
+                        style={{ width: `${progress.percentage ?? (((progress.current ?? 0) / (progress.total ?? 1)) * 100)}%` }}
                       />
                     </div>
                   </div>

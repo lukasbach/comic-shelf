@@ -1,29 +1,18 @@
 import * as comicService from './comic-service';
 import * as pageService from './comic-page-service';
-import * as thumbnailService from './thumbnail-service';
+import { getAllIndexPaths } from './index-path-service';
 import {
-  countPdfPages,
-  listArchiveImageEntries,
-  listImagePages,
-  readArchiveImageEntriesBatch,
-  scanComicCandidates,
+  buildIndexPayloadForPath,
+  cleanupIndexedThumbnails,
+  listenToRustIndexingProgress,
+  type IndexedComicPayload,
+  type IndexedPagePayload,
 } from './source-file-service';
+import * as thumbnailService from './thumbnail-service';
 import { renderPdfPagesToPngBytes } from './page-source-utils';
 import { isSubPath, normalizePath } from '../utils/image-utils';
-import type { ComicPage } from '../types/comic';
 
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
-
-const getRelativePath = (from: string, to: string): string => {
-  const fromNorm = normalizePath(from);
-  const toNorm = normalizePath(to);
-  if (toNorm.startsWith(fromNorm)) {
-    let rel = toNorm.slice(fromNorm.length);
-    if (rel.startsWith('/')) rel = rel.slice(1);
-    return rel;
-  }
-  return toNorm;
-};
 
 export type IndexingError = {
   path: string;
@@ -34,6 +23,20 @@ export type IndexingProgress = {
   current: number;
   total: number;
   currentPath: string;
+  percentage?: number;
+  currentTask?: string;
+  errors: IndexingError[];
+};
+
+export type GlobalIndexingProgress = {
+  status: 'scanning' | 'indexing' | 'cleanup';
+  currentPathIndex: number;
+  totalPaths: number;
+  current?: number;
+  total?: number;
+  currentPath?: string;
+  percentage?: number;
+  currentTask?: string;
   errors: IndexingError[];
 };
 
@@ -67,166 +70,81 @@ export const extractMetadata = (relativePath: string, pattern: string): Record<s
   return metadata;
 };
 
-const buildImagePages = async (comicPath: string): Promise<ComicPage[]> => {
-  const entries = await listImagePages(comicPath);
-  return entries.map((entry) => ({
-    id: 0,
-    comic_id: 0,
-    page_number: entry.pageNumber,
-    file_path: normalizePath(entry.filePath),
-    file_name: entry.fileName,
-    source_type: 'image',
-    source_path: normalizePath(entry.filePath),
-    archive_entry_path: null,
-    pdf_page_number: null,
-    thumbnail_path: null,
-    is_favorite: 0,
-    is_viewed: 0,
-    view_count: 0,
-    last_opened_at: null,
-  }));
-};
-
-const buildPdfPages = async (comicPath: string): Promise<ComicPage[]> => {
-  const count = await countPdfPages(comicPath);
-  return Array.from({ length: count }).map((_, index) => ({
-    id: 0,
-    comic_id: 0,
-    page_number: index + 1,
-    file_path: normalizePath(comicPath),
-    file_name: `page-${index + 1}.pdf`,
-    source_type: 'pdf',
-    source_path: normalizePath(comicPath),
-    archive_entry_path: null,
-    pdf_page_number: index + 1,
-    thumbnail_path: null,
-    is_favorite: 0,
-    is_viewed: 0,
-    view_count: 0,
-    last_opened_at: null,
-  }));
-};
-
-const buildArchivePages = async (comicPath: string): Promise<ComicPage[]> => {
-  const entries = await listArchiveImageEntries(comicPath);
-  return entries.map((entryPath, index) => {
-    const fileName = entryPath.split('/').pop() ?? entryPath;
-    return {
-      id: 0,
-      comic_id: 0,
-      page_number: index + 1,
-      file_path: normalizePath(comicPath),
-      file_name: fileName,
-      source_type: 'archive',
-      source_path: normalizePath(comicPath),
-      archive_entry_path: entryPath,
-      pdf_page_number: null,
-      thumbnail_path: null,
-      is_favorite: 0,
-      is_viewed: 0,
-      view_count: 0,
-      last_opened_at: null,
-    } satisfies ComicPage;
-  });
-};
-
-const buildPagesForComic = async (comicPath: string, sourceType: 'image' | 'pdf' | 'archive'): Promise<ComicPage[]> => {
-  if (sourceType === 'image') {
-    return await buildImagePages(comicPath);
-  }
-  if (sourceType === 'pdf') {
-    return await buildPdfPages(comicPath);
-  }
-  return await buildArchivePages(comicPath);
-};
-
-const generateThumbnailsForComicPages = async (
-  pages: ComicPage[],
+const generatePdfFallbackThumbnails = async (
+  pages: IndexedPagePayload[],
   comicId: number,
-  existingThumbnailByPageNumber: Map<number, string>
+  existingThumbnailByPageNumber: Map<number, string>,
+  onProgress?: (current: number, total: number) => void
 ): Promise<Map<number, string | null>> => {
   const output = new Map<number, string | null>();
-  if (pages.length === 0) {
+  if (pages.length === 0 || pages[0]?.sourceType !== 'pdf') {
     return output;
   }
 
   pages.forEach((page) => {
-    const existingThumb = existingThumbnailByPageNumber.get(page.page_number);
+    const existingThumb = existingThumbnailByPageNumber.get(page.pageNumber);
     if (existingThumb) {
-      output.set(page.page_number, normalizePath(existingThumb));
-      console.info(`[Indexing] [Thumbnail] Reusing existing thumbnail for comic ${comicId}, page ${page.page_number}`);
+      output.set(page.pageNumber, normalizePath(existingThumb));
     }
   });
 
-  const pagesToGenerate = pages.filter((page) => !output.has(page.page_number));
+  const pagesToGenerate = pages.filter((page) => !output.has(page.pageNumber));
   if (pagesToGenerate.length === 0) {
     return output;
   }
 
-  const sourceType = pagesToGenerate[0].source_type ?? 'image';
+  const sourcePath = normalizePath(pagesToGenerate[0].sourcePath || pagesToGenerate[0].filePath);
+  const pageNumbers = pagesToGenerate.map((page) => page.pdfPageNumber ?? page.pageNumber);
+  
+  // Create a map for fast lookup of pages by their PDF page number
+  const pageByPdfPageNumber = new Map<number, IndexedPagePayload>();
+  pagesToGenerate.forEach(p => {
+    pageByPdfPageNumber.set(p.pdfPageNumber ?? p.pageNumber, p);
+  });
+  
+  let current = 0;
+  const total = pagesToGenerate.length;
 
-  if (sourceType === 'image') {
-    for (const page of pagesToGenerate) {
-      console.info(`[Indexing] [Thumbnail] Creating image thumbnail for comic ${comicId}, page ${page.page_number}`);
-      const thumb = await thumbnailService.generateThumbnail(page.file_path, comicId, page.page_number);
-      output.set(page.page_number, normalizePath(thumb));
-      console.info(`[Indexing] [Thumbnail] Created image thumbnail for comic ${comicId}, page ${page.page_number}`);
-    }
-    return output;
-  }
+  await renderPdfPagesToPngBytes(sourcePath, pageNumbers, async (pageNumber, bytes) => {
+    current++;
+    onProgress?.(current, total);
 
-  if (sourceType === 'pdf') {
-    const sourcePath = pagesToGenerate[0].source_path ?? pagesToGenerate[0].file_path;
-    const pageNumbers = pagesToGenerate.map((page) => page.pdf_page_number ?? page.page_number);
-    const pngBytesByPageNumber = await renderPdfPagesToPngBytes(sourcePath, pageNumbers);
-
-    for (const page of pagesToGenerate) {
-      const key = page.pdf_page_number ?? page.page_number;
-      const bytes = pngBytesByPageNumber.get(key);
-      if (!bytes) {
-        console.warn(`[Indexing] [Thumbnail] Missing rendered PDF bytes for comic ${comicId}, page ${page.page_number}`);
-        output.set(page.page_number, null);
-        continue;
+    const page = pageByPdfPageNumber.get(pageNumber);
+    if (page) {
+      try {
+        const thumb = await thumbnailService.generateThumbnailFromBytes(bytes, comicId, page.pageNumber);
+        if (thumb) {
+          output.set(page.pageNumber, normalizePath(thumb));
+        } else {
+          console.warn(`[Indexing] thumbnailService returned empty path for PDF page ${pageNumber}`);
+          output.set(page.pageNumber, null);
+        }
+      } catch (err) {
+        console.error(`[Indexing] Failed to generate thumbnail for PDF page ${pageNumber}`, err);
+        output.set(page.pageNumber, null);
       }
-      console.info(`[Indexing] [Thumbnail] Creating PDF thumbnail for comic ${comicId}, page ${page.page_number}`);
-      const thumb = await thumbnailService.generateThumbnailFromBytes(bytes, comicId, page.page_number);
-      output.set(page.page_number, normalizePath(thumb));
+    } else {
+      console.warn(`[Indexing] Could not find page payload mapping for PDF page ${pageNumber}`);
     }
-    return output;
-  }
-
-  const sourcePath = pagesToGenerate[0].source_path ?? pagesToGenerate[0].file_path;
-  const entryPaths = pagesToGenerate
-    .map((page) => page.archive_entry_path)
-    .filter((entryPath): entryPath is string => Boolean(entryPath));
-
-  const bytesBatch = await readArchiveImageEntriesBatch(sourcePath, entryPaths);
-  const bytesByEntry = new Map<string, Uint8Array>();
-  entryPaths.forEach((entryPath, index) => {
-    bytesByEntry.set(entryPath, bytesBatch[index]);
   });
 
-  for (const page of pagesToGenerate) {
-    const entryPath = page.archive_entry_path;
-    if (!entryPath) {
-      console.warn(`[Indexing] [Thumbnail] Missing archive entry path for comic ${comicId}, page ${page.page_number}`);
-      output.set(page.page_number, null);
-      continue;
-    }
-    const bytes = bytesByEntry.get(entryPath);
-    if (!bytes) {
-      console.warn(`[Indexing] [Thumbnail] Missing archive bytes for comic ${comicId}, page ${page.page_number} (${entryPath})`);
-      output.set(page.page_number, null);
-      continue;
-    }
-
-    console.info(`[Indexing] [Thumbnail] Creating archive thumbnail for comic ${comicId}, page ${page.page_number} (${entryPath})`);
-    const thumb = await thumbnailService.generateThumbnailFromBytes(bytes, comicId, page.page_number);
-    output.set(page.page_number, normalizePath(thumb));
-    console.info(`[Indexing] [Thumbnail] Created archive thumbnail for comic ${comicId}, page ${page.page_number} (${entryPath})`);
-  }
-
   return output;
+};
+
+const insertIndexedComic = async (comic: IndexedComicPayload, comicId: number): Promise<void> => {
+  await pageService.insertPages(
+    comicId,
+    comic.pages.map((page) => ({
+      page_number: page.pageNumber,
+      file_path: normalizePath(page.filePath),
+      file_name: page.fileName,
+      source_type: page.sourceType,
+      source_path: normalizePath(page.sourcePath ?? page.filePath),
+      archive_entry_path: page.archiveEntryPath,
+      pdf_page_number: page.pdfPageNumber,
+      thumbnail_path: page.thumbnailPath ? normalizePath(page.thumbnailPath) : null,
+    }))
+  );
 };
 
 export const indexComics = async (
@@ -235,46 +153,66 @@ export const indexComics = async (
   onProgress?: (progress: IndexingProgress) => void
 ): Promise<Set<string>> => {
   console.info(`[Indexing] Starting index for base path: ${normalizePath(basePath)} (pattern: ${pattern})`);
-  const errors: IndexingError[] = [];
+  const normalizedBasePath = normalizePath(basePath);
+  const unlistenRustProgress = await listenToRustIndexingProgress((event) => {
+    if (normalizePath(event.basePath) !== normalizedBasePath) {
+      return;
+    }
+
+    onProgress?.({
+      current: event.currentComic,
+      total: event.totalComics,
+      currentPath: normalizePath(event.currentPath),
+      percentage: event.percentage,
+      currentTask: event.currentTask,
+      errors: [],
+    });
+  });
+
+  let rustPayload;
+  try {
+    rustPayload = await buildIndexPayloadForPath(basePath, pattern);
+  } finally {
+    await unlistenRustProgress();
+  }
+
+  const errors: IndexingError[] = [...rustPayload.errors];
   const activeComicPaths = new Set<string>();
 
-  const candidates = await scanComicCandidates(basePath);
-  const total = candidates.length;
+  const total = rustPayload.comics.length;
   console.info(`[Indexing] Found ${total} candidate comics in ${normalizePath(basePath)}`);
 
   for (let i = 0; i < total; i++) {
-    const candidate = candidates[i];
-    const comicPath = normalizePath(candidate.path);
-    console.info(`[Indexing] [${i + 1}/${total}] Processing ${comicPath} (type: ${candidate.sourceType})`);
+    const comic = rustPayload.comics[i];
+    const comicPath = normalizePath(comic.path);
+    console.info(`[Indexing] [${i + 1}/${total}] Processing ${comicPath} (type: ${comic.sourceType})`);
 
     onProgress?.({
       current: i + 1,
       total,
       currentPath: comicPath,
+      percentage: total === 0 ? 0 : ((i + 1) / total) * 100,
+      currentTask: 'Persisting comic to database',
       errors: [...errors],
     });
 
     try {
-      console.info(`[Indexing] [${i + 1}/${total}] Extracting metadata and pages for ${comicPath}`);
-      const relPath = getRelativePath(basePath, comicPath);
-      const metadata = extractMetadata(relPath, pattern);
-      const pages = await buildPagesForComic(comicPath, candidate.sourceType);
-      if (pages.length === 0) {
+      if (comic.pages.length === 0) {
         console.warn(`[Indexing] [${i + 1}/${total}] Skipping ${comicPath} (no pages found)`);
         continue;
       }
-      console.info(`[Indexing] [${i + 1}/${total}] Found ${pages.length} pages for ${comicPath}`);
+      console.info(`[Indexing] [${i + 1}/${total}] Found ${comic.pages.length} pages for ${comicPath}`);
 
       console.info(`[Indexing] [${i + 1}/${total}] Upserting comic record for ${comicPath}`);
       const comicId = await comicService.upsertComic({
         path: comicPath,
-        source_type: candidate.sourceType,
-        title: candidate.title,
-        artist: metadata.artist || null,
-        series: metadata.series || null,
-        issue: metadata.issue || null,
-        cover_image_path: pages[0].file_path,
-        page_count: pages.length,
+        source_type: comic.sourceType,
+        title: comic.title,
+        artist: comic.artist,
+        series: comic.series,
+        issue: comic.issue,
+        cover_image_path: comic.coverImagePath ? normalizePath(comic.coverImagePath) : null,
+        page_count: comic.pageCount,
         is_favorite: 0,
         view_count: 0,
       });
@@ -288,31 +226,37 @@ export const indexComics = async (
         }
       });
 
-      console.info(`[Indexing] [${i + 1}/${total}] Generating thumbnails for ${pages.length} pages (${comicPath})`);
-      const thumbnailByPageNumber = await generateThumbnailsForComicPages(
-        pages,
+      const thumbnailByPageNumber = await generatePdfFallbackThumbnails(
+        comic.pages,
         comicId,
-        existingThumbnailByPageNumber
+        existingThumbnailByPageNumber,
+        (current, totalPages) => {
+          onProgress?.({
+            current: i + 1,
+            total,
+            currentPath: comicPath,
+            percentage: total === 0 ? 0 : ((i + 1) / total) * 100,
+            currentTask: `Generating PDF thumbnails (${current}/${totalPages})`,
+            errors: [...errors],
+          });
+        }
       );
-      const pagesWithThumbs = pages.map((page) => ({
-        ...page,
-        thumbnail_path: thumbnailByPageNumber.get(page.page_number) ?? null,
-      }));
+
+      if (thumbnailByPageNumber.size > 0) {
+        comic.pages = comic.pages.map((page) => {
+          const fallbackThumb = thumbnailByPageNumber.get(page.pageNumber);
+          if (!fallbackThumb) {
+            return page;
+          }
+          return {
+            ...page,
+            thumbnailPath: fallbackThumb,
+          };
+        });
+      }
 
       console.info(`[Indexing] [${i + 1}/${total}] Writing page records to database for comic id ${comicId}`);
-      await pageService.insertPages(
-        comicId,
-        pagesWithThumbs.map((p) => ({
-          page_number: p.page_number,
-          file_path: p.file_path,
-          file_name: p.file_name,
-          source_type: p.source_type,
-          source_path: p.source_path,
-          archive_entry_path: p.archive_entry_path,
-          pdf_page_number: p.pdf_page_number,
-          thumbnail_path: p.thumbnail_path,
-        }))
-      );
+      await insertIndexedComic(comic, comicId);
       console.info(`[Indexing] [${i + 1}/${total}] Completed ${comicPath}`);
 
       activeComicPaths.add(comicPath);
@@ -326,6 +270,8 @@ export const indexComics = async (
         current: i + 1,
         total,
         currentPath: comicPath,
+        percentage: total === 0 ? 0 : ((i + 1) / total) * 100,
+        currentTask: 'Failed processing comic',
         errors: [...errors],
       });
     }
@@ -337,17 +283,81 @@ export const indexComics = async (
     if (isSubPath(basePath, dbComic.path) && !activeComicPaths.has(dbComic.path)) {
       console.info(`[Indexing] Removing stale comic ${dbComic.path} (id: ${dbComic.id})`);
       await comicService.deleteComic(dbComic.id);
-      await thumbnailService.deleteThumbnailsForComic(dbComic.id);
     }
   }
-
-  console.info('[Indexing] Running orphan thumbnail cleanup');
-  const remainingComics = await comicService.getAllComics();
-  await thumbnailService.cleanupOrphans(remainingComics.map((c) => c.id));
 
   console.info(
     `[Indexing] Finished base path ${normalizePath(basePath)}. Indexed ${activeComicPaths.size}/${total} comics. Errors: ${errors.length}`
   );
 
   return activeComicPaths;
+};
+
+export const reindexAll = async (
+  onProgress?: (progress: GlobalIndexingProgress) => void
+): Promise<void> => {
+  const paths = await getAllIndexPaths();
+  const totalPaths = paths.length;
+  const allErrors: IndexingError[] = [];
+  const activeComicPaths = new Set<string>();
+
+  if (totalPaths === 0) return;
+
+  for (let i = 0; i < totalPaths; i++) {
+    const path = paths[i];
+    onProgress?.({
+      status: 'scanning',
+      currentPathIndex: i + 1,
+      totalPaths,
+      currentPath: path.path,
+      errors: [...allErrors],
+    });
+
+    const indexedPaths = await indexComics(path.path, path.pattern, (progress) => {
+      const newErrors = progress.errors.filter((error) => !allErrors.some((known) => known.path === error.path));
+      if (newErrors.length > 0) {
+        allErrors.push(...newErrors);
+      }
+
+      onProgress?.({
+        ...progress,
+        status: 'indexing',
+        currentPathIndex: i + 1,
+        totalPaths,
+        errors: [...allErrors],
+      });
+    });
+
+    indexedPaths.forEach((indexedPath) => {
+      activeComicPaths.add(indexedPath);
+    });
+  }
+
+  const allDbComics = await comicService.getAllComics();
+  for (const dbComic of allDbComics) {
+    const belongsToAnyPath = paths.some((path) => isSubPath(path.path, dbComic.path));
+    if (!belongsToAnyPath) {
+      await comicService.deleteComic(dbComic.id);
+    }
+  }
+
+  await cleanupIndexedThumbnails(Array.from(activeComicPaths));
+
+  onProgress?.({
+    status: 'cleanup',
+    currentPathIndex: totalPaths,
+    totalPaths,
+    errors: [...allErrors],
+  });
+};
+
+export const reindexPathById = async (
+  id: number,
+  onProgress?: (progress: IndexingProgress) => void
+): Promise<void> => {
+  const paths = await getAllIndexPaths();
+  const path = paths.find((currentPath) => currentPath.id === id);
+  if (!path) throw new Error(`Index path with ID ${id} not found`);
+
+  await indexComics(path.path, path.pattern, onProgress);
 };

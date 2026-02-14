@@ -30,4 +30,6 @@ image = { version = "0.25", default-features = true, features = ["jpeg", "png", 
 lopdf = "0.35"
 zip = "2"
 unrar = "0.5"
+rayon = "1.11.0"
+num_cpus = "1.17.0"
 

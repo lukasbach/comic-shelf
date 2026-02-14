@@ -26,4 +26,8 @@ tauri-plugin-sql = { version = "2", features = ["sqlite"] }
 tauri-plugin-store = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
+image = { version = "0.25", default-features = true, features = ["jpeg", "png", "gif", "webp", "bmp"] }
+lopdf = "0.35"
+zip = "2"
+unrar = "0.5"
 

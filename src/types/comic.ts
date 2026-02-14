@@ -1,6 +1,7 @@
 export type Comic = {
   id: number;
   path: string;
+  source_type?: 'image' | 'pdf' | 'archive';
   title: string;
   artist: string | null;
   series: string | null;
@@ -22,6 +23,10 @@ export type ComicPage = {
   page_number: number;
   file_path: string;
   file_name: string;
+  source_type?: 'image' | 'pdf' | 'archive';
+  source_path?: string | null;
+  archive_entry_path?: string | null;
+  pdf_page_number?: number | null;
   thumbnail_path: string | null;
   is_favorite: number;
   is_viewed: number;

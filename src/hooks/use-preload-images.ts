@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { ComicPage } from '../types/comic';
-import { getImageUrl } from '../utils/image-utils';
+import { resolvePageImageUrl } from '../services/page-source-utils';
 
 /**
  * Hook to preload adjacent page images for smoother navigation in the viewer.
@@ -17,9 +17,15 @@ export const usePreloadImages = (pages: ComicPage[], currentPage: number, preloa
     const end = Math.min(pages.length, currentPage + preloadCount + 1);
     const pagesToPreload = pages.slice(start, end).filter((_, i) => (start + i) !== currentPage);
     
-    pagesToPreload.forEach(page => {
-      const img = new Image();
-      img.src = getImageUrl(page.file_path);
+    pagesToPreload.forEach((page) => {
+      resolvePageImageUrl(page)
+        .then((src) => {
+          const img = new Image();
+          img.src = src;
+        })
+        .catch((error) => {
+          console.error('Failed to preload page image', error);
+        });
     });
   }, [pages, currentPage, preloadCount]);
 };

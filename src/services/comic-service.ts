@@ -48,9 +48,10 @@ export const searchComics = async (query: string): Promise<Comic[]> => {
 export const upsertComic = async (comic: Omit<Comic, 'id' | 'created_at' | 'updated_at' | 'is_viewed' | 'last_opened_at'>): Promise<number> => {
   const db = await getDb();
   await db.execute(
-    `INSERT INTO comics (path, title, artist, series, issue, cover_image_path, page_count, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, datetime('now'))
+    `INSERT INTO comics (path, source_type, title, artist, series, issue, cover_image_path, page_count, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, datetime('now'))
      ON CONFLICT(path) DO UPDATE SET
+       source_type = excluded.source_type,
        title = excluded.title,
        artist = excluded.artist,
        series = excluded.series,
@@ -58,7 +59,7 @@ export const upsertComic = async (comic: Omit<Comic, 'id' | 'created_at' | 'upda
        cover_image_path = excluded.cover_image_path,
        page_count = excluded.page_count,
        updated_at = datetime('now')`,
-    [comic.path, comic.title, comic.artist, comic.series, comic.issue, comic.cover_image_path, comic.page_count]
+    [comic.path, comic.source_type ?? 'image', comic.title, comic.artist, comic.series, comic.issue, comic.cover_image_path, comic.page_count]
   );
 
   const results = await db.select<{ id: number }[]>('SELECT id FROM comics WHERE path = $1', [comic.path]);

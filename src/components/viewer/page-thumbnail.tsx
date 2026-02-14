@@ -1,9 +1,9 @@
 import React from 'react';
 import { ComicPage } from '../../types/comic';
-import { getImageUrl } from '../../utils/image-utils';
 import { FavoriteButton } from '../favorite-button';
 import { ViewCounter } from '../view-counter';
 import { ComicContextMenu } from '../comic-context-menu';
+import { RenderedPageImage } from './rendered-page-image';
 
 type PageThumbnailProps = {
   page: ComicPage;
@@ -22,8 +22,6 @@ export const PageThumbnail: React.FC<PageThumbnailProps> = ({
   onIncrementViewCount,
   onDecrementViewCount
 }) => {
-  const imageUrl = getImageUrl(page.thumbnail_path || page.file_path);
-
   return (
     <ComicContextMenu 
       page={page} 
@@ -39,11 +37,11 @@ export const PageThumbnail: React.FC<PageThumbnailProps> = ({
         }`}
         onClick={onClick}
       >
-        <img
-          src={imageUrl}
+        <RenderedPageImage
+          page={page}
           alt={`Page ${page.page_number}`}
           className="w-full h-auto object-contain aspect-3/4 bg-gray-100 dark:bg-gray-800"
-          loading="lazy"
+          preferThumbnail
         />
         
         {/* Page number badge */}

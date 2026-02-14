@@ -1,6 +1,6 @@
 import React, { RefObject } from 'react';
 import { ComicPage } from '../../types/comic';
-import { getImageUrl } from '../../utils/image-utils';
+import { RenderedPageImage } from './rendered-page-image';
 
 type PageImageProps = {
   page: ComicPage;
@@ -16,8 +16,8 @@ export const PageImage: React.FC<PageImageProps> = ({ page, zoomLevel, container
       ref={containerRef}
       className={`relative w-full h-full overflow-auto flex justify-center ${isFitWidth ? 'items-start' : ''}`}
     >
-      <img
-        src={getImageUrl(page.file_path)}
+      <RenderedPageImage
+        page={page}
         alt={`Page ${page.page_number}`}
         className="max-sm:w-full"
         style={{

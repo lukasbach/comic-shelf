@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ComicPage } from '../../types/comic';
-import { getImageUrl } from '../../utils/image-utils';
 import { FavoriteButton } from '../favorite-button';
 import { RxStarFilled } from 'react-icons/rx';
 import { ComicContextMenu } from '../comic-context-menu';
+import { RenderedPageImage } from './rendered-page-image';
 
 type LazyPageProps = {
   page: ComicPage;
@@ -93,8 +93,8 @@ export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.Ref
           )}
           
           {isVisible && (
-            <img
-              src={getImageUrl(page.file_path)}
+            <RenderedPageImage
+              page={page}
               alt={`Page ${page.page_number}`}
               className="block"
               style={{

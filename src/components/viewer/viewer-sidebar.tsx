@@ -1,12 +1,12 @@
 import React from 'react';
 import { ComicPage } from '../../types/comic';
-import { getImageUrl } from '../../utils/image-utils';
 import {
     RxGrid, RxFile, RxRows,
     RxChevronLeft, RxChevronRight,
     RxDoubleArrowLeft, RxDoubleArrowRight,
     RxStarFilled
 } from 'react-icons/rx';
+import { RenderedPageImage } from './rendered-page-image';
 
 type ViewerSidebarProps = {
   pages: ComicPage[];
@@ -181,10 +181,11 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
                   className="group relative aspect-3/4 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-800 hover:ring-2 hover:ring-blue-500 transition-all shadow-sm"
                   title={`Page ${page.page_number + 1}`}
                 >
-                  <img
-                    src={getImageUrl(page.thumbnail_path || page.file_path)}
+                  <RenderedPageImage
+                    page={page}
                     alt={`Page ${page.page_number}`}
                     className="w-full h-full object-cover transition-all"
+                    preferThumbnail
                   />
                   <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white py-0.5 text-[10px] font-bold text-center">
                     {page.page_number + 1}

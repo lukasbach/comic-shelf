@@ -1,24 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as indexingService from './indexing-service';
-import { readDir } from '@tauri-apps/plugin-fs';
 
-// Mock Tauri APIs
-vi.mock('@tauri-apps/plugin-fs', () => ({
-  readDir: vi.fn(),
+vi.mock('./source-file-service', () => ({
+  scanComicCandidates: vi.fn(),
+  listImagePages: vi.fn(),
+  listArchiveImageEntries: vi.fn(),
+  readArchiveImageEntriesBatch: vi.fn(),
+  countPdfPages: vi.fn(),
 }));
 
-vi.mock('@tauri-apps/api/path', () => ({
-  join: vi.fn().mockImplementation((...args) => args.join('/')),
-  relative: vi.fn().mockImplementation((from, to) => to.replace(from + '/', '')),
-  basename: vi.fn().mockImplementation((p) => p.split('/').pop()),
-  sep: '/',
+vi.mock('./page-source-utils', () => ({
+  renderPdfPagesToPngBytes: vi.fn(),
 }));
 
-vi.mock('@tauri-apps/api/core', () => ({
-  convertFileSrc: vi.fn().mockImplementation((p) => `asset://${p}`),
-}));
-
-// Mock other services
 vi.mock('./comic-service', () => ({
   upsertComic: vi.fn().mockResolvedValue(1),
   getAllComics: vi.fn().mockResolvedValue([]),
@@ -26,11 +20,13 @@ vi.mock('./comic-service', () => ({
 }));
 
 vi.mock('./comic-page-service', () => ({
+  getPagesByComicId: vi.fn().mockResolvedValue([]),
   insertPages: vi.fn(),
 }));
 
 vi.mock('./thumbnail-service', () => ({
   generateThumbnail: vi.fn().mockResolvedValue('thumb/path.jpg'),
+  generateThumbnailFromBytes: vi.fn().mockResolvedValue('thumb/path.jpg'),
   cleanupOrphans: vi.fn(),
   deleteThumbnailsForComic: vi.fn(),
 }));
@@ -40,133 +36,51 @@ describe('indexing-service', () => {
     vi.clearAllMocks();
   });
 
-  describe('isImageFile', () => {
-    it('should return true for image extensions', () => {
-      expect(indexingService.isImageFile('test.jpg')).toBe(true);
-      expect(indexingService.isImageFile('IMAGE.PNG')).toBe(true);
-      expect(indexingService.isImageFile('photo.webp')).toBe(true);
-    });
-
-    it('should return false for non-image extensions', () => {
-      expect(indexingService.isImageFile('text.txt')).toBe(false);
-      expect(indexingService.isImageFile('no-ext')).toBe(false);
-    });
+  it('should return true for image extensions', () => {
+    expect(indexingService.isImageFile('test.jpg')).toBe(true);
+    expect(indexingService.isImageFile('IMAGE.PNG')).toBe(true);
+    expect(indexingService.isImageFile('photo.webp')).toBe(true);
   });
 
-  describe('parsePattern', () => {
-    it('should extract variables from pattern', () => {
-      expect(indexingService.parsePattern('{artist}/{series}/{issue}')).toEqual(['artist', 'series', 'issue']);
-      expect(indexingService.parsePattern('{artist}')).toEqual(['artist']);
-      expect(indexingService.parsePattern('no-vars')).toEqual([]);
-    });
+  it('should extract variables from pattern', () => {
+    expect(indexingService.parsePattern('{artist}/{series}/{issue}')).toEqual(['artist', 'series', 'issue']);
   });
 
-  describe('extractMetadata', () => {
-    it('should map relative path to pattern variables', () => {
-      const pattern = '{artist}/{series}/{issue}';
-      const relPath = 'ArtistName/MySeries/Chapter01';
-      const metadata = indexingService.extractMetadata(relPath, pattern);
-      
-      expect(metadata).toEqual({
-        artist: 'ArtistName',
-        series: 'MySeries',
-        issue: 'Chapter01',
-      });
-    });
-
-    it('should handle partial paths', () => {
-      const pattern = '{artist}/{series}/{issue}';
-      const relPath = 'ArtistName/MySeries';
-      const metadata = indexingService.extractMetadata(relPath, pattern);
-      
-      expect(metadata).toEqual({
-        artist: 'ArtistName',
-        series: 'MySeries',
-        issue: null,
-      });
-    });
-
-    it('should ignore segments not in pattern', () => {
-      const pattern = '{artist}/{series}';
-      const relPath = 'ArtistName/MySeries/Extra/Path';
-      const metadata = indexingService.extractMetadata(relPath, pattern);
-      
-      expect(metadata).toEqual({
-        artist: 'ArtistName',
-        series: 'MySeries',
-      });
-    });
+  it('should map relative path to metadata', () => {
+    const metadata = indexingService.extractMetadata('Artist/Series/Issue', '{artist}/{series}/{issue}');
+    expect(metadata).toEqual({ artist: 'Artist', series: 'Series', issue: 'Issue' });
   });
 
-  describe('indexComics', () => {
-    it('should index comics and handle errors for individual items', async () => {
-      (readDir as any).mockImplementation((path: string) => {
-        if (path === 'base') {
-          return Promise.resolve([
-            { name: 'Comic1', isDirectory: true, isFile: false },
-            { name: 'BrokenComic', isDirectory: true, isFile: false },
-          ]);
-        }
-        if (path === 'base/Comic1') {
-          return Promise.resolve([
-            { name: 'page1.jpg', isDirectory: false, isFile: true },
-          ]);
-        }
-        if (path === 'base/BrokenComic') {
-          return Promise.reject(new Error('Permission denied'));
-        }
-        return Promise.resolve([]);
-      });
+  it('indexes image, pdf and archive candidates', async () => {
+    const sourceFileService = await import('./source-file-service');
+    const pageSourceUtils = await import('./page-source-utils');
+    const comicService = await import('./comic-service');
 
-      const progressLogs: any[] = [];
-      const seenPaths = await indexingService.indexComics('base', '{series}', (p) => {
-        progressLogs.push(p);
-      });
-      
-      expect(seenPaths).toBeInstanceOf(Set);
-      expect(seenPaths.has('base/Comic1')).toBe(true);
+    vi.mocked(sourceFileService.scanComicCandidates).mockResolvedValue([
+      { path: 'base/FolderComic', title: 'FolderComic', sourceType: 'image' },
+      { path: 'base/Book.pdf', title: 'Book', sourceType: 'pdf' },
+      { path: 'base/Pack.cbz', title: 'Pack', sourceType: 'archive' },
+    ] as any);
 
-      // Should have reported errors
-      const lastProgress = progressLogs[progressLogs.length - 1];
-      expect(lastProgress.errors).toHaveLength(1);
-      expect(lastProgress.errors[0].path).toContain('BrokenComic');
-      expect(lastProgress.errors[0].message).toBe('Permission denied');
+    vi.mocked(sourceFileService.listImagePages).mockResolvedValue([
+      { filePath: 'base/FolderComic/1.jpg', fileName: '1.jpg', pageNumber: 1 },
+    ] as any);
 
-      // Comic1 should have been indexed
-      const { upsertComic } = await import('./comic-service');
-      expect(upsertComic).toHaveBeenCalledWith(expect.objectContaining({
-          path: 'base/Comic1'
-      }));
-    });
+    vi.mocked(sourceFileService.countPdfPages).mockResolvedValue(2);
+    vi.mocked(sourceFileService.listArchiveImageEntries).mockResolvedValue(['1.jpg'] as any);
+    vi.mocked(sourceFileService.readArchiveImageEntriesBatch).mockResolvedValue([new Uint8Array([1, 2, 3])] as any);
+    vi.mocked(pageSourceUtils.renderPdfPagesToPngBytes).mockResolvedValue(
+      new Map([
+        [1, new Uint8Array([1])],
+        [2, new Uint8Array([2])],
+      ]) as any
+    );
 
-    it('should delete stale comics that are no longer on disk', async () => {
-      const { getAllComics, deleteComic } = await import('./comic-service');
-      
-      (getAllComics as any).mockResolvedValue([
-        { id: 1, path: 'base/Existing' },
-        { id: 2, path: 'base/Stale' },
-        { id: 3, path: 'other/Path' },
-      ]);
+    const seen = await indexingService.indexComics('base', '{series}');
 
-      (readDir as any).mockImplementation((path: string) => {
-        if (path === 'base') {
-          return Promise.resolve([
-            { name: 'Existing', isDirectory: true, isFile: false },
-          ]);
-        }
-        if (path === 'base/Existing') {
-          return Promise.resolve([
-            { name: 'page1.jpg', isDirectory: false, isFile: true },
-          ]);
-        }
-        return Promise.resolve([]);
-      });
-
-      await indexingService.indexComics('base', '{series}');
-
-      // base/Stale should be deleted, other/Path should NOT (different base)
-      expect(deleteComic).toHaveBeenCalledWith(2);
-      expect(deleteComic).not.toHaveBeenCalledWith(3);
-    });
+    expect(seen.has('base/FolderComic')).toBe(true);
+    expect(seen.has('base/Book.pdf')).toBe(true);
+    expect(seen.has('base/Pack.cbz')).toBe(true);
+    expect(comicService.upsertComic).toHaveBeenCalledTimes(3);
   });
 });

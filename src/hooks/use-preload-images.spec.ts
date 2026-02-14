@@ -1,0 +1,42 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { renderHook } from '@testing-library/react';
+import { usePreloadImages } from './use-preload-images';
+import { ComicPage } from '../types/comic';
+
+// Mock getImageUrl
+vi.mock('../utils/image-utils', () => ({
+  getImageUrl: (path: string) => `asset://${path}`,
+}));
+
+// Mock Image
+class MockImage {
+  src = '';
+}
+
+describe('usePreloadImages', () => {
+  const mockPages: ComicPage[] = [
+    { id: 1, comic_id: 1, page_number: 1, file_path: '/path/1.jpg', file_name: '1.jpg', thumbnail_path: null, is_favorite: 0, view_count: 0 },
+    { id: 2, comic_id: 1, page_number: 2, file_path: '/path/2.jpg', file_name: '2.jpg', thumbnail_path: null, is_favorite: 0, view_count: 0 },
+    { id: 3, comic_id: 1, page_number: 3, file_path: '/path/3.jpg', file_name: '3.jpg', thumbnail_path: null, is_favorite: 0, view_count: 0 },
+    { id: 4, comic_id: 1, page_number: 4, file_path: '/path/4.jpg', file_name: '4.jpg', thumbnail_path: null, is_favorite: 0, view_count: 0 },
+    { id: 5, comic_id: 1, page_number: 5, file_path: '/path/5.jpg', file_name: '5.jpg', thumbnail_path: null, is_favorite: 0, view_count: 0 },
+  ];
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubGlobal('Image', MockImage);
+  });
+
+  it('should not do anything if pages are empty', () => {
+    renderHook(() => usePreloadImages([], 0));
+    // No crash
+  });
+
+  it('should preload next bunch of images', () => {
+    const spy = vi.spyOn(window, 'Image' as any);
+    renderHook(() => usePreloadImages(mockPages, 1, 2));
+    
+    // Should preload page index 0, 2, 3 (currentPage-1, currentPage+1, currentPage+2)
+    expect(spy).toHaveBeenCalledTimes(3);
+  });
+});

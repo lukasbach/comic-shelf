@@ -41,6 +41,7 @@ describe('comic-service', () => {
 
   it('upsertComic should call execute with correct parameters', async () => {
     mockDb.execute.mockResolvedValue({ lastInsertId: 123 });
+    mockDb.select.mockResolvedValue([{ id: 123 }]);
     
     const comic = {
       path: '/path/to/comic',
@@ -57,6 +58,7 @@ describe('comic-service', () => {
     const id = await comicService.upsertComic(comic);
 
     expect(mockDb.execute).toHaveBeenCalled();
+    expect(mockDb.select).toHaveBeenCalledWith(expect.stringContaining('SELECT id FROM comics WHERE path = $1'), [comic.path]);
     expect(id).toBe(123);
   });
 });

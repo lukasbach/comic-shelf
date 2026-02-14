@@ -99,3 +99,20 @@
 - **Viewer Header**: A dedicated toolbar below the main top bar allows switching between `overview`, `single`, and `scroll` modes. It also displays the comic title and page count.
 - **State Management**: The viewer relies on the `TabProvider` (`useTabs` hook) to persist and manage the current mode and page per tab.
 - **Placeholders**: While Task 6 focuses on Overview mode, placeholders for `SinglePageMode` and `ScrollMode` have been added to ensure a functional mode-switching UI.
+
+## Task 7: Comic Viewer — Single Page Mode
+- [x] Implement `usePreloadImages` hook for preloading adjacent pages
+- [x] Create `PageImage` component with zoom and fit-width logic
+- [x] Create `PageNavigation` component for manual page switching and jumps
+- [x] Create `ViewerSidebar` with thumbnails, zoom slider, and display controls
+- [x] Implement `SinglePageMode` layout and state integration
+- [x] Update tab management and viewer route to support single page mode
+- [x] Verify implementation with unit tests
+
+### Implementation Details
+- **Single Page Mode**: Implemented the single page mode with navigation, zoom, and sidebar thumbnails.
+- **Preloading**: Added `usePreloadImages` hook to preload the next few pages for smoother navigation.
+- **Zoom**: Supported zoom levels from 50% to 300%, with "Fit Width" as the default (100%).
+- **Sidebar**: Added a collapsible sidebar with view mode switching, zoom controls, and upcoming page thumbnails.
+- **Navigation**: Integrated with the tab system to persist current page and zoom level per tab. Added jump-to-page functionality by clicking the page number.
+- **Inconsistencies Fixed**: Standardized `currentPage` to be 0-indexed across the viewer components to simplify array access.

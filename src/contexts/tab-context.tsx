@@ -75,8 +75,9 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       title: comic.title,
       path: `/viewer/${comic.id}`,
       currentPage: 0,
-      viewMode: 'single',
+      viewMode: 'overview',
       zoomLevel: 100,
+      sidebarCollapsed: false,
     };
 
     setTabs(prevTabs => [...prevTabs, newTab]);

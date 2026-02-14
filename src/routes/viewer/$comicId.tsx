@@ -1,3 +1,4 @@
+import React from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useComicData } from '../../hooks/use-comic-data';
 import { useTabs } from '../../contexts/tab-context';
@@ -5,6 +6,7 @@ import { LoadingSpinner } from '../../components/viewer/loading-spinner';
 import { NotFound } from '../../components/viewer/not-found';
 import { ViewerHeader } from '../../components/viewer/viewer-header';
 import { OverviewMode } from '../../components/viewer/overview-mode';
+import { SinglePageMode } from '../../components/viewer/single-page-mode';
 import { Tab } from '../../stores/tab-store';
 
 type ComicViewerSearch = {
@@ -22,6 +24,7 @@ export const Route = createFileRoute('/viewer/$comicId')({
 
 function ComicViewerPage() {
   const { comicId } = Route.useParams();
+  const search = Route.useSearch();
   const { tabs, activeTabId, updateTab } = useTabs();
   const activeTab = tabs.find((t: Tab) => t.id === activeTabId);
   
@@ -29,6 +32,19 @@ function ComicViewerPage() {
   const viewMode = activeTab?.viewMode ?? 'overview';
 
   const { comic, pages, loading, error } = useComicData(Number(comicId));
+
+  // Sync search param page to tab state
+  React.useEffect(() => {
+    if (search.page !== undefined && activeTabId && pages.length > 0) {
+      const pageIndex = search.page - 1;
+      if (pageIndex >= 0 && pageIndex < pages.length && activeTab?.currentPage !== pageIndex) {
+        updateTab(activeTabId, { 
+          currentPage: pageIndex,
+          viewMode: 'single'
+        });
+      }
+    }
+  }, [search.page, activeTabId, pages.length]);
 
   const handleModeChange = (mode: 'overview' | 'single' | 'scroll') => {
     if (activeTabId) {
@@ -49,21 +65,7 @@ function ComicViewerPage() {
       case 'overview':
         return <OverviewMode comic={comic} pages={pages} />;
       case 'single':
-        return (
-          <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800">
-            <div className="text-center p-8 bg-white dark:bg-gray-900 rounded-lg shadow-md">
-              <h3 className="text-xl font-bold mb-2 text-black dark:text-white">Single Page Mode</h3>
-              <p className="text-gray-600 dark:text-gray-400">Coming soon in Task 7</p>
-              <p className="mt-4 text-sm font-mono text-blue-500">Viewing page {activeTab?.currentPage ?? 1}</p>
-              <button 
-                onClick={() => handleModeChange('overview')}
-                className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-              >
-                Back to Overview
-              </button>
-            </div>
-          </div>
-        );
+        return <SinglePageMode comic={comic} pages={pages} />;
       case 'scroll':
         return (
           <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800">

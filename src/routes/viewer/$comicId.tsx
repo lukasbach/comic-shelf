@@ -44,8 +44,8 @@ function ComicViewerPage() {
       if (nextPageIndex < pages.length) {
         updateTab(activeTabId, { currentPage: nextPageIndex });
       } else {
-        // We can't easily call slideshow.stop() here due to circular dependency in definition
-        // but we can just let nothing happen or the hooks will handle it.
+        // Loop back to start if at the end
+        updateTab(activeTabId, { currentPage: 0 });
       }
     }
   }, [activeTabId, activeTab, pages.length]);
@@ -56,16 +56,6 @@ function ComicViewerPage() {
     useInternalTimer: false, // Scrollers handle timing
     enabled: viewMode !== 'overview',
   });
-
-  // Stop slideshow if we reached the end
-  React.useEffect(() => {
-    if (slideshow.isActive && activeTab && activeTab.currentPage >= pages.length - 1 && viewMode === 'single') {
-      // In single page mode, stop at the last page
-      // Unless we want to loop, but requirements say "At the last page, stop (or optionally loop)"
-      // Let's settle for stop for now.
-      // We need a timeout to let the last page be seen if we were scrolling.
-    }
-  }, [activeTab?.currentPage, pages.length, slideshow.isActive, viewMode]);
 
   // Stop slideshow if mode changes to overview
   React.useEffect(() => {

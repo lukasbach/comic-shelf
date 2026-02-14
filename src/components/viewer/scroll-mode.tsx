@@ -6,14 +6,21 @@ import { useScrollPageTracker } from '../../hooks/use-scroll-page-tracker';
 import { LazyPage } from './lazy-page';
 import { ScrollPageIndicator } from './scroll-page-indicator';
 import { ViewerSidebar } from './viewer-sidebar';
+import { useAutoScroll } from '../../hooks/use-auto-scroll';
+import { useSettings } from '../../contexts/settings-context';
 
 type ScrollModeProps = {
   comic: Comic;
   pages: ComicPage[];
+  slideshowActive?: boolean;
 };
 
-export const ScrollMode: React.FC<ScrollModeProps> = ({ pages }) => {
+export const ScrollMode: React.FC<ScrollModeProps> = ({ 
+  pages, 
+  slideshowActive = false 
+}) => {
   const { tabs, activeTabId, updateTab } = useTabs();
+  const { settings } = useSettings();
   const activeTab = tabs.find((t: Tab) => t.id === activeTabId);
   
   const currentPage = activeTab?.currentPage ?? 0;
@@ -30,6 +37,15 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({ pages }) => {
   useEffect(() => {
     pageRefs.current = pageRefs.current.slice(0, pages.length);
   }, [pages.length]);
+
+  // Slideshow auto-scroll logic
+  useAutoScroll({
+    containerRef,
+    isActive: slideshowActive,
+    delay: settings.slideshowDelay,
+    totalPages: pages.length,
+    autoScrollEnabled: settings.slideshowAutoScroll,
+  });
 
   // Track scrolling state for indicator
   const handleScroll = () => {

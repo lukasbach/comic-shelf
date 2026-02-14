@@ -17,6 +17,7 @@ export type AppSettings = {
   defaultZoomLevel: number;       // percentage, e.g. 100
   defaultViewMode: 'single' | 'scroll' | 'overview';
   slideshowDelay: number;         // milliseconds
+  slideshowAutoScroll: boolean;
   theme: 'light' | 'dark';
 };
 
@@ -37,6 +38,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   defaultZoomLevel: 100,
   defaultViewMode: 'single',
   slideshowDelay: 5000,
+  slideshowAutoScroll: true,
   theme: 'dark',
 };
 

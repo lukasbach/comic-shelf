@@ -9,6 +9,14 @@ vi.mock('../../contexts/tab-context', () => ({
   useTabs: vi.fn(),
 }));
 
+vi.mock('../../contexts/settings-context', () => ({
+  useSettings: () => ({
+    settings: { slideshowDelay: 5000 },
+    updateSettings: vi.fn(),
+    isLoading: false,
+  }),
+}));
+
 vi.mock('../../utils/image-utils', () => ({
   getImageUrl: (path: string) => `asset://${path}`,
 }));

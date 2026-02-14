@@ -126,6 +126,23 @@
 - [x] Implement `ScrollMode` layout and integration
 - [x] Verify implementation with unit tests
 
+## Task 9: Slideshow Mode
+- [x] Implement `useSlideshow` state management hook
+- [x] Implement `useSlideshowScroll` for single-page auto-scroll
+- [x] Implement `useAutoScroll` for scroll-mode continuous scrolling
+- [x] Create `SlideshowIndicator` floating UI
+- [x] Integrate slideshow into `SinglePageMode`, `ScrollMode`, and `ViewerHeader`
+- [x] Verify implementation with unit tests
+
+### Implementation Details
+- **Slideshow Logic**: The slideshow system is split into multiple hooks. `useSlideshow` manages the high-level state (active, paused, progress) and is used in the main viewer route.
+- **Single Page Mode**: When the slideshow is active in single-page mode, `useSlideshowScroll` handles the timing. If a page is zoomed in and taller than the viewport, it performs a linear auto-scroll to the bottom (taking up 90% of the delay) before advancing. If the page fits, it simply waits the full delay duration.
+- **Scroll Mode**: In scroll mode, `useAutoScroll` calculates a constant scroll speed based on the number of pages and the slideshow delay. It continuously scrolls the entire comic and automatically resets to the top with a 1-second pause whenreaching the end.
+- **UI Integration**: A "Slideshow" button was added to the `ViewerHeader`. When active, a floating `SlideshowIndicator` appears in the bottom-left corner with a progress bar (for single-page mode), status, and control buttons (Pause/Stop).
+- **Smoothness**: All animations use `requestAnimationFrame` for high-performance, smooth linear motion.
+- **Settings**: The system respects the `slideshowDelay` from the app settings.
+- **Auto-Stop**: Slideshow automatically stops when switching to "Overview" mode.
+
 ### Implementation Details
 - **Scroll Mode**: Implemented a continuous vertical scroll view for comics. All pages are stacked with a small gap, allowing for a seamless reading experience.
 - **Efficient Rendering**: Used `IntersectionObserver` in the `LazyPage` component to only render images when they are near the viewport. This significantly improves performance for long comics and reduces memory usage.

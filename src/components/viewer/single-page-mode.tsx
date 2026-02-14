@@ -6,14 +6,23 @@ import { ViewerSidebar } from './viewer-sidebar';
 import { useTabs } from '../../contexts/tab-context';
 import { Tab } from '../../stores/tab-store';
 import { usePreloadImages } from '../../hooks/use-preload-images';
+import { useSlideshowScroll } from '../../hooks/use-slideshow-scroll';
+import { useSettings } from '../../contexts/settings-context';
 
 type SinglePageModeProps = {
   comic: Comic;
   pages: ComicPage[];
+  slideshowActive?: boolean;
+  onSlideshowComplete?: () => void;
 };
 
-export const SinglePageMode: React.FC<SinglePageModeProps> = ({ pages }) => {
+export const SinglePageMode: React.FC<SinglePageModeProps> = ({ 
+  pages, 
+  slideshowActive = false,
+  onSlideshowComplete 
+}) => {
   const { tabs, activeTabId, updateTab } = useTabs();
+  const { settings } = useSettings();
   const activeTab = tabs.find((t: Tab) => t.id === activeTabId);
   
   const currentPage = activeTab?.currentPage ?? 0;
@@ -25,6 +34,16 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({ pages }) => {
 
   // Preload adjacent images
   usePreloadImages(pages, currentPage);
+
+  // Slideshow scroll logic
+  useSlideshowScroll({
+    containerRef,
+    isActive: slideshowActive,
+    delay: settings.slideshowDelay,
+    zoomLevel,
+    autoScrollEnabled: settings.slideshowAutoScroll,
+    onScrollComplete: () => onSlideshowComplete?.(),
+  });
 
   const currentPageData = pages[currentPage];
 

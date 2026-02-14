@@ -12,6 +12,14 @@ vi.mock('../../contexts/tab-context', () => ({
   }),
 }));
 
+vi.mock('../../contexts/settings-context', () => ({
+  useSettings: () => ({
+    settings: { slideshowDelay: 5000 },
+    updateSettings: vi.fn(),
+    isLoading: false,
+  }),
+}));
+
 // Mock components that might be complex to render
 vi.mock('./viewer-sidebar', () => ({
   ViewerSidebar: () => <div data-testid="viewer-sidebar" />,

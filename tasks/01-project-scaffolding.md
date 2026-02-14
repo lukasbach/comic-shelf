@@ -11,7 +11,7 @@ Create and configure a Tauri v2 desktop application with React, TypeScript, Tail
 Run the following command and select the options: TypeScript, React, pnpm.
 
 ```powershell
-pnpm create tauri-app comic-viewer
+pnpm create tauri-app comic-shelf
 ```
 
 Choose:
@@ -19,7 +19,7 @@ Choose:
 - UI template: **React**
 - UI flavor: **TypeScript**
 
-Since we're already in the `comic-viewer` directory, move project files from the nested folder to the root if needed.
+Since we're already in the `comic-shelf` directory, move project files from the nested folder to the root if needed.
 
 ### 2. Install Frontend Dependencies
 

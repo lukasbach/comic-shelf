@@ -119,7 +119,7 @@ Register migrations in the builder:
 ```rust
 .plugin(
     SqlBuilder::default()
-        .add_migrations("sqlite:comic-viewer.db", get_migrations())
+        .add_migrations("sqlite:comic-shelf.db", get_migrations())
         .build(),
 )
 ```
@@ -129,7 +129,7 @@ Also preload the database in `tauri.conf.json`:
 {
   "plugins": {
     "sql": {
-      "preload": ["sqlite:comic-viewer.db"]
+      "preload": ["sqlite:comic-shelf.db"]
     }
   }
 }
@@ -146,7 +146,7 @@ let db: Database | null = null;
 
 const getDb = async (): Promise<Database> => {
   if (!db) {
-    db = await Database.load('sqlite:comic-viewer.db');
+    db = await Database.load('sqlite:comic-shelf.db');
   }
   return db;
 };

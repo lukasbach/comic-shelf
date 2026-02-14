@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "comic-viewer",
+  "productName": "comic-shelf",
   "version": "0.1.3",
-  "identifier": "comic-viewer",
+  "identifier": "comic-shelf",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Comic Viewer",
+        "title": "Comic Shelf",
         "width": 800,
         "height": 600,
         "decorations": false
@@ -45,7 +45,7 @@
   "plugins": {
     "sql": {
       "preload": [
-        "sqlite:comic-viewer.db"
+        "sqlite:comic-shelf.db"
       ]
     }
   }

@@ -1145,7 +1145,7 @@ pub fn run() {
         ])
         .plugin(
             SqlBuilder::default()
-                .add_migrations("sqlite:comic-viewer.db", get_migrations())
+                .add_migrations("sqlite:comic-shelf.db", get_migrations())
                 .build(),
         )
         .run(tauri::generate_context!())

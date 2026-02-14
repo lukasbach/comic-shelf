@@ -1,0 +1,51 @@
+import { getDb } from './database';
+import type { ComicPage } from '../types/comic';
+
+export const getPagesByComicId = async (comicId: number): Promise<ComicPage[]> => {
+  const db = await getDb();
+  return await db.select<ComicPage[]>(
+    'SELECT * FROM comic_pages WHERE comic_id = $1 ORDER BY page_number ASC',
+    [comicId]
+  );
+};
+
+export const insertPages = async (
+  comicId: number,
+  pages: Omit<ComicPage, 'id' | 'comic_id' | 'is_favorite' | 'view_count'>[]
+): Promise<void> => {
+  const db = await getDb();
+  // We can't do bulk insert easily with parameters in tauri-plugin-sql without constructing a large query
+  // or doing multiple executes. For simplicity and safety, we'll do them in a loop, 
+  // though a transaction would be better if supported.
+  for (const page of pages) {
+    await db.execute(
+      `INSERT INTO comic_pages (comic_id, page_number, file_path, file_name, thumbnail_path)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT(comic_id, page_number) DO UPDATE SET
+         file_path = excluded.file_path,
+         file_name = excluded.file_name,
+         thumbnail_path = COALESCE(excluded.thumbnail_path, comic_pages.thumbnail_path)`,
+      [comicId, page.page_number, page.file_path, page.file_name, page.thumbnail_path]
+    );
+  }
+};
+
+export const updateThumbnailPath = async (id: number, thumbnailPath: string): Promise<void> => {
+  const db = await getDb();
+  await db.execute('UPDATE comic_pages SET thumbnail_path = $1 WHERE id = $2', [thumbnailPath, id]);
+};
+
+export const togglePageFavorite = async (id: number): Promise<void> => {
+  const db = await getDb();
+  await db.execute('UPDATE comic_pages SET is_favorite = NOT is_favorite WHERE id = $1', [id]);
+};
+
+export const incrementPageViewCount = async (id: number): Promise<void> => {
+  const db = await getDb();
+  await db.execute('UPDATE comic_pages SET view_count = view_count + 1 WHERE id = $1', [id]);
+};
+
+export const getFavoritePages = async (): Promise<ComicPage[]> => {
+  const db = await getDb();
+  return await db.select<ComicPage[]>('SELECT * FROM comic_pages WHERE is_favorite = 1');
+};

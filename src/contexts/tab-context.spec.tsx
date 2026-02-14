@@ -29,12 +29,14 @@ const mockComic: Comic = {
 };
 
 const TestComponent = () => {
-  const { tabs, activeTabId, openTab, closeTab } = useTabs();
+  const { tabs, activeTabId, openTab, closeTab, reorderTabs } = useTabs();
   return (
     <div>
       <div data-testid="tab-count">{tabs.length}</div>
       <div data-testid="active-tab-id">{activeTabId ?? ''}</div>
+      <div data-testid="tab-ids">{tabs.map(t => t.id).join(',')}</div>
       <button onClick={() => openTab(mockComic)}>Open Tab</button>
+      <button onClick={() => reorderTabs(0, 1)}>Reorder 0 to 1</button>
       {tabs.map(tab => (
         <button key={tab.id} onClick={() => closeTab(tab.id)}>Close {tab.id}</button>
       ))}
@@ -97,5 +99,34 @@ describe('tab-context', () => {
 
     // Should have initial tab + 2 comic tabs (openTab always creates new tabs)
     expect(screen.getByTestId('tab-count').textContent).toBe('3');
+  });
+
+  it('reorders tabs', async () => {
+    render(
+      <TabProvider>
+        <TestComponent />
+      </TabProvider>
+    );
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 10));
+    });
+
+    const openButton = screen.getByText('Open Tab');
+    await act(async () => {
+      openButton.click();
+    });
+
+    const initialOrder = screen.getByTestId('tab-ids').textContent?.split(',') || [];
+    expect(initialOrder.length).toBe(2);
+
+    const reorderButton = screen.getByText('Reorder 0 to 1');
+    await act(async () => {
+      reorderButton.click();
+    });
+
+    const newOrder = screen.getByTestId('tab-ids').textContent?.split(',') || [];
+    expect(newOrder[0]).toBe(initialOrder[1]);
+    expect(newOrder[1]).toBe(initialOrder[0]);
   });
 });

@@ -11,6 +11,7 @@ interface TabContextType {
   closeTab: (tabId: string) => void;
   setActiveTabId: (tabId: string) => void;
   updateTab: (tabId: string, updates: Partial<Tab>) => void;
+  reorderTabs: (oldIndex: number, newIndex: number) => void;
   nextTab: () => void;
   prevTab: () => void;
 }
@@ -125,6 +126,15 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     );
   }, []);
 
+  const reorderTabs = useCallback((oldIndex: number, newIndex: number) => {
+    setTabs((prevTabs) => {
+      const newTabs = [...prevTabs];
+      const [removed] = newTabs.splice(oldIndex, 1);
+      newTabs.splice(newIndex, 0, removed);
+      return newTabs;
+    });
+  }, []);
+
   const nextTab = useCallback(() => {
     if (tabs.length <= 1) return;
     const currentIndex = tabs.findIndex((t) => t.id === activeTabId);
@@ -149,6 +159,7 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     closeTab,
     setActiveTabId,
     updateTab,
+    reorderTabs,
     nextTab,
     prevTab,
   };

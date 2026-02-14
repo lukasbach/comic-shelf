@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useRef, useEffect } from 'react';
-import { ComicGrid } from '../../components/comic-grid';
+import { LibraryGrid } from '../../components/library-grid';
+import { ComicCard } from '../../components/comic-card';
 import { useSearchComics } from '../../hooks/use-search-comics';
 import { useOpenComic } from '../../hooks/use-open-comic';
 import { RxSymbol, RxMagnifyingGlass } from 'react-icons/rx';
@@ -53,7 +54,11 @@ function LibrarySearch() {
         ) : (
           <div className="flex flex-col gap-4">
             <p className="text-sm font-medium text-muted-foreground">Found {comics.length} results</p>
-            <ComicGrid comics={comics} onOpenComic={openComic} />
+            <LibraryGrid>
+            {comics.map((comic) => (
+              <ComicCard key={comic.id} comic={comic} onOpen={openComic} />
+            ))}
+          </LibraryGrid>
           </div>
         )}
       </div>

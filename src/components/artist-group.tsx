@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { RxChevronDown, RxChevronRight } from 'react-icons/rx';
-import { ComicGrid } from './comic-grid';
+import { LibraryGrid } from './library-grid';
+import { ComicCard } from './comic-card';
 import type { Comic } from '../types/comic';
 
 type ArtistGroupProps = {
@@ -27,7 +28,11 @@ export const ArtistGroup: React.FC<ArtistGroupProps> = ({ artist, comics, onOpen
       
       {isExpanded && (
         <div className="pl-6">
-          <ComicGrid comics={comics} onOpenComic={onOpenComic} />
+          <LibraryGrid>
+            {comics.map((comic) => (
+              <ComicCard key={comic.id} comic={comic} onOpen={onOpenComic} />
+            ))}
+          </LibraryGrid>
         </div>
       )}
     </div>

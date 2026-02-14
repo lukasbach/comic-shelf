@@ -19,7 +19,6 @@ src/routes/
     list.tsx          → Flat list view
     artists.tsx       → Per-artist grouped view
     favorites.tsx     → Favorite comics and images
-    search.tsx        → Search results
   viewer/
     $comicId.tsx      → Comic viewer (handles overview/single/scroll modes)
   settings/
@@ -117,7 +116,6 @@ Create `src/components/library-sidebar.tsx`:
   - 📋 All Comics (flat list)
   - 👤 By Artist (grouped view)
   - ⭐ Favorites
-  - 🔍 Search
 - Active link is highlighted
 - Collapsible on smaller widths
 

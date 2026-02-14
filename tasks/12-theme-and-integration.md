@@ -105,7 +105,7 @@ Ensure the theme toggle in settings is a simple radio button group or toggle swi
 Verify these flows work correctly:
 
 1. **First Launch**: App opens → no comics → settings page → add index path → re-index → comics appear
-2. **Browse Library**: Navigate between explorer/list/artist/favorites/search views
+2. **Browse Library**: Navigate between explorer/list/artist/favorites views
 3. **Open Comic**: Click comic → tab opens → viewer loads → overview mode shows thumbnails
 4. **View Modes**: Switch between overview ↔ single ↔ scroll — current page preserved
 5. **Navigation**: Next/prev page buttons and hotkeys work in single page mode
@@ -117,8 +117,7 @@ Verify these flows work correctly:
 11. **Tabs**: Open multiple comics in tabs, switch between them, close tabs
 12. **Hotkeys**: All configured hotkeys work, can be reconfigured in settings
 13. **Theme**: Toggle light/dark, all components update correctly
-14. **Search**: Search finds comics by title/artist/series/issue
-15. **Breadcrumbs**: Show correct path in all views, segments are clickable
+14. **Breadcrumbs**: Show correct path in all views, segments are clickable
 
 ### 7. Responsive Layout
 

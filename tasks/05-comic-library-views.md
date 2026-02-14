@@ -3,7 +3,7 @@
 **Reference:** [requirements.md](../requirements.md)
 
 ## Objective
-Implement all library browsing views: file explorer (tree), flat list, per-artist grouped view, favorites view, and global search. Each view displays comic covers and metadata, and allows opening comics in the viewer.
+Implement all library browsing views: file explorer (tree), flat list, per-artist grouped view, and favorites view. Each view displays comic covers and metadata, and allows opening comics in the viewer.
 
 ## Shared Components
 
@@ -144,30 +144,6 @@ For favorite images, show:
 
 Create `src/components/favorite-image-card.tsx` for individual image cards.
 
-### 8. Search View (`src/routes/library/search.tsx`)
-
-Global search across comics.
-
-- Search input at the top (auto-focus on mount)
-- Searches by title, artist, series, issue
-- Uses `comicService.searchComics(query)` which performs a SQL `LIKE` search
-- Results displayed as `ComicGrid`
-- Debounced input (300ms) to avoid excessive queries
-- Shows "No results" message when empty
-- Shows result count
-
-Create `src/hooks/use-debounce.ts`:
-```typescript
-export const useDebounce = <T>(value: T, delay: number): T => {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-  useEffect(() => {
-    const handler = setTimeout(() => setDebouncedValue(value), delay);
-    return () => clearTimeout(handler);
-  }, [value, delay]);
-  return debouncedValue;
-};
-```
-
 ## Data Loading
 
 Each view should load data on mount. Use React `useEffect` + `useState` for data fetching (or a simple custom hook pattern):
@@ -190,21 +166,18 @@ Create reusable data hooks in `src/hooks/`:
 - `use-comics-by-artist.ts` — comics grouped by artist
 - `use-favorite-comics.ts` — favorite comics
 - `use-favorite-pages.ts` — favorite pages
-- `use-search-comics.ts` — search with debounce
 
 ## Empty States
 
 Each view should handle the empty state gracefully:
 - No comics indexed: "No comics found. Configure indexing paths in Settings."
 - No favorites: "No favorites yet. Star comics or images to see them here."
-- No search results: "No comics match your search."
 
 ## Acceptance Criteria
 - File explorer view shows comics in a tree structure matching the filesystem
 - List view shows all comics in a sortable grid
 - Per-artist view groups comics by artist with collapsible sections
 - Favorites view shows favorited comics and individual images
-- Search view allows searching by title/artist/series/issue with debounced input
 - Clicking a comic opens it in the viewer (via tab system)
 - All views show appropriate empty states
 - Comic cards display cover images, titles, and metadata

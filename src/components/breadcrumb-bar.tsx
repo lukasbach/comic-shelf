@@ -19,7 +19,6 @@ export function BreadcrumbBar() {
     if (path.endsWith('/list')) segments.push({ label: 'All Comics', to: '/library/list' })
     else if (path.endsWith('/artists')) segments.push({ label: 'By Artist', to: '/library/artists' })
     else if (path.endsWith('/favorites')) segments.push({ label: 'Favorites', to: '/library/favorites' })
-    else if (path.endsWith('/search')) segments.push({ label: 'Search', to: '/library/search' })
     else if (path === '/library' || path === '/library/') segments.push({ label: 'Explorer', to: '/library' })
   } else if (isViewer && activeTab && activeTab.type === 'comic') {
     // Basic segments for now, will be expanded when we have comic metadata

@@ -14,7 +14,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as LibraryIndexRouteImport } from './routes/library/index'
 import { Route as ViewerComicIdRouteImport } from './routes/viewer/$comicId'
-import { Route as LibrarySearchRouteImport } from './routes/library/search'
 import { Route as LibraryListRouteImport } from './routes/library/list'
 import { Route as LibraryFavoritesRouteImport } from './routes/library/favorites'
 import { Route as LibraryArtistsRouteImport } from './routes/library/artists'
@@ -45,11 +44,6 @@ const ViewerComicIdRoute = ViewerComicIdRouteImport.update({
   path: '/viewer/$comicId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LibrarySearchRoute = LibrarySearchRouteImport.update({
-  id: '/search',
-  path: '/search',
-  getParentRoute: () => LibraryRouteRoute,
-} as any)
 const LibraryListRoute = LibraryListRouteImport.update({
   id: '/list',
   path: '/list',
@@ -78,7 +72,6 @@ export interface FileRoutesByFullPath {
   '/library/artists': typeof LibraryArtistsRoute
   '/library/favorites': typeof LibraryFavoritesRoute
   '/library/list': typeof LibraryListRoute
-  '/library/search': typeof LibrarySearchRoute
   '/viewer/$comicId': typeof ViewerComicIdRoute
   '/library/': typeof LibraryIndexRoute
   '/settings/': typeof SettingsIndexRoute
@@ -89,7 +82,6 @@ export interface FileRoutesByTo {
   '/library/artists': typeof LibraryArtistsRoute
   '/library/favorites': typeof LibraryFavoritesRoute
   '/library/list': typeof LibraryListRoute
-  '/library/search': typeof LibrarySearchRoute
   '/viewer/$comicId': typeof ViewerComicIdRoute
   '/library': typeof LibraryIndexRoute
   '/settings': typeof SettingsIndexRoute
@@ -102,7 +94,6 @@ export interface FileRoutesById {
   '/library/artists': typeof LibraryArtistsRoute
   '/library/favorites': typeof LibraryFavoritesRoute
   '/library/list': typeof LibraryListRoute
-  '/library/search': typeof LibrarySearchRoute
   '/viewer/$comicId': typeof ViewerComicIdRoute
   '/library/': typeof LibraryIndexRoute
   '/settings/': typeof SettingsIndexRoute
@@ -116,7 +107,6 @@ export interface FileRouteTypes {
     | '/library/artists'
     | '/library/favorites'
     | '/library/list'
-    | '/library/search'
     | '/viewer/$comicId'
     | '/library/'
     | '/settings/'
@@ -127,7 +117,6 @@ export interface FileRouteTypes {
     | '/library/artists'
     | '/library/favorites'
     | '/library/list'
-    | '/library/search'
     | '/viewer/$comicId'
     | '/library'
     | '/settings'
@@ -139,7 +128,6 @@ export interface FileRouteTypes {
     | '/library/artists'
     | '/library/favorites'
     | '/library/list'
-    | '/library/search'
     | '/viewer/$comicId'
     | '/library/'
     | '/settings/'
@@ -189,13 +177,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ViewerComicIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/library/search': {
-      id: '/library/search'
-      path: '/search'
-      fullPath: '/library/search'
-      preLoaderRoute: typeof LibrarySearchRouteImport
-      parentRoute: typeof LibraryRouteRoute
-    }
     '/library/list': {
       id: '/library/list'
       path: '/list'
@@ -232,7 +213,6 @@ interface LibraryRouteRouteChildren {
   LibraryArtistsRoute: typeof LibraryArtistsRoute
   LibraryFavoritesRoute: typeof LibraryFavoritesRoute
   LibraryListRoute: typeof LibraryListRoute
-  LibrarySearchRoute: typeof LibrarySearchRoute
   LibraryIndexRoute: typeof LibraryIndexRoute
 }
 
@@ -241,7 +221,6 @@ const LibraryRouteRouteChildren: LibraryRouteRouteChildren = {
   LibraryArtistsRoute: LibraryArtistsRoute,
   LibraryFavoritesRoute: LibraryFavoritesRoute,
   LibraryListRoute: LibraryListRoute,
-  LibrarySearchRoute: LibrarySearchRoute,
   LibraryIndexRoute: LibraryIndexRoute,
 }
 

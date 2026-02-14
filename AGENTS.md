@@ -53,19 +53,18 @@
 ## Task 5: Comic Library Views
 - [x] Implement Comic Card and Comic Grid components
 - [x] Implement Comic Open Handler hook
-- [x] Implement data loading hooks (`useComics`, `useSearchComics`, etc.)
+- [x] Implement data loading hooks (`useComics`, etc.)
 - [x] Implement List View sorted by title, artist, date, etc.
 - [x] Implement Per-Artist View with collapsible sections
-- [x] Implement Search View with debounced input
 - [x] Implement Favorites View for comics and individual images
 - [x] Implement File Explorer View with tree structure
 - [x] Verify implementation with unit tests
 
 ### Implementation Details
 
-- **Comic Library Views**: All browsing views (Explorer, List, Artist, Favorites, Search) have been implemented using a shared `ComicGrid` and `ComicCard` component.
+- **Comic Library Views**: All browsing views (Explorer, List, Artist, Favorites) have been implemented using a shared `ComicGrid` and `ComicCard` component.
 - **Data Loading**: Custom hooks were created for each view to handle data fetching from the `comicService`. All hooks support loading states and error/empty states.
-- **Sorting & Search**: The List view supports sorting by title, artist, date added, and view count. The Search view uses a debounced input (300ms) to filter comics by title, artist, series, or issue.
+- **Sorting**: The List view supports sorting by title, artist, date added, and view count.
 - **Favorites**: The Favorites view displays both favorite comics and individual favorite pages. Clicking a favorite page opens the viewer at that specific page.
 - **File Explorer**: A recursive `FileTree` component builds a filesystem-like structure based on indexed paths.
 - **Performance**: The `Comic` type and `comicService` were updated to include a `thumbnail_path` from the first page of each comic, allowing for faster loading of covers in the library views without additional per-comic queries.
@@ -170,7 +169,6 @@
 - [x] Virtualize Comic Library Explorer view
 - [x] Virtualize All Comics (List) view
 - [x] Virtualize All Pages view
-- [x] Virtualize Search results view
 - [x] Virtualize Favorites view
 - [x] Virtualize Viewer Overview mode
 - [x] Verify implementation with responsive layout matching existing grids

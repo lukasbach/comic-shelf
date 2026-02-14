@@ -5,7 +5,6 @@ import {
   RxListBullet,
   RxPerson,
   RxStar,
-  RxMagnifyingGlass,
   RxFileText,
   RxCounterClockwiseClock
 } from 'react-icons/rx'
@@ -91,7 +90,6 @@ const navItems = [
   { name: 'All Pages', to: '/library/all-pages', icon: RxFileText },
   { name: 'By Artist', to: '/library/artists', icon: RxPerson },
   { name: 'Favorites', to: '/library/favorites', icon: RxStar },
-  { name: 'Search', to: '/library/search', icon: RxMagnifyingGlass },
 ]
 
 export function LibrarySidebar() {

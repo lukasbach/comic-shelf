@@ -158,7 +158,6 @@ Create dedicated service files for each entity:
 - `getAllComics(): Promise<Comic[]>`
 - `getComicById(id: number): Promise<Comic | null>`
 - `getComicsByArtist(artist: string): Promise<Comic[]>`
-- `searchComics(query: string): Promise<Comic[]>`
 - `upsertComic(comic: Omit<Comic, 'id'>): Promise<number>`
 - `deleteComic(id: number): Promise<void>`
 - `toggleFavorite(id: number): Promise<void>`

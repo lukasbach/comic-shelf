@@ -33,18 +33,6 @@ export const getComicsByArtist = async (artist: string): Promise<Comic[]> => {
   `, [artist]);
 };
 
-export const searchComics = async (query: string): Promise<Comic[]> => {
-  const db = await getDb();
-  const searchPattern = `%${query}%`;
-  return await db.select<Comic[]>(`
-    SELECT c.*, p.thumbnail_path 
-    FROM comics c 
-    LEFT JOIN comic_pages p ON c.id = p.comic_id AND p.page_number = 1
-    WHERE c.title LIKE $1 OR c.artist LIKE $1 OR c.series LIKE $1 
-    ORDER BY c.title ASC
-  `, [searchPattern]);
-};
-
 export const upsertComic = async (comic: Omit<Comic, 'id' | 'created_at' | 'updated_at' | 'is_viewed' | 'last_opened_at'>): Promise<number> => {
   const db = await getDb();
   await db.execute(

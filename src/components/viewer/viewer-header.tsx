@@ -1,6 +1,6 @@
 import React from 'react';
 import { Comic } from '../../types/comic';
-import { RxGrid, RxFile, RxRows, RxPlay, RxPause } from 'react-icons/rx';
+import { RxGrid, RxFile, RxRows, RxPlay, RxStop } from 'react-icons/rx';
 
 type ViewerHeaderProps = {
   comic: Comic;
@@ -8,7 +8,6 @@ type ViewerHeaderProps = {
   currentMode: 'overview' | 'single' | 'scroll';
   onModeChange: (mode: 'overview' | 'single' | 'scroll') => void;
   isSlideshowActive?: boolean;
-  isSlideshowPaused?: boolean;
   onToggleSlideshow?: () => void;
 };
 
@@ -18,7 +17,6 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
   currentMode,
   onModeChange,
   isSlideshowActive = false,
-  isSlideshowPaused = false,
   onToggleSlideshow,
 }) => {
   return (
@@ -41,9 +39,9 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
                 ? 'bg-blue-600 text-white shadow-sm'
                 : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700'
             }`}
-            title={isSlideshowActive ? (isSlideshowPaused ? 'Resume Slideshow' : 'Pause Slideshow') : 'Start Slideshow'}
+            title={isSlideshowActive ? 'Stop Slideshow' : 'Start Slideshow'}
           >
-            {isSlideshowActive && !isSlideshowPaused ? <RxPause className="w-3.5 h-3.5" /> : <RxPlay className="w-3.5 h-3.5" />}
+            {isSlideshowActive ? <RxStop className="w-3.5 h-3.5" /> : <RxPlay className="w-3.5 h-3.5" />}
             <span className="hidden sm:inline">Slideshow</span>
           </button>
         )}

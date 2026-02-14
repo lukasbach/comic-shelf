@@ -100,7 +100,7 @@ function ComicViewerPage() {
           <SinglePageMode 
             comic={comic} 
             pages={pages} 
-            slideshowActive={slideshow.isActive && !slideshow.isPaused}
+            slideshowActive={slideshow.isActive}
             onSlideshowComplete={nextPage}
           />
         );
@@ -109,7 +109,7 @@ function ComicViewerPage() {
           <ScrollMode 
             comic={comic} 
             pages={pages} 
-            slideshowActive={slideshow.isActive && !slideshow.isPaused}
+            slideshowActive={slideshow.isActive}
           />
         );
       default:
@@ -125,7 +125,6 @@ function ComicViewerPage() {
         currentMode={viewMode}
         onModeChange={handleModeChange}
         isSlideshowActive={slideshow.isActive}
-        isSlideshowPaused={slideshow.isPaused}
         onToggleSlideshow={slideshow.toggle}
       />
       <div className="flex-1 overflow-hidden">
@@ -134,9 +133,7 @@ function ComicViewerPage() {
 
       <SlideshowIndicator 
         isActive={slideshow.isActive}
-        isPaused={slideshow.isPaused}
         progress={slideshow.progress}
-        onTogglePause={slideshow.isPaused ? slideshow.resume : slideshow.pause}
         onStop={slideshow.stop}
         showProgress={viewMode === 'single'}
       />

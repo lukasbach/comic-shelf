@@ -1,21 +1,17 @@
 import React, { useState } from 'react';
-import { RxPlay, RxPause, RxStop, RxChevronUp, RxChevronDown } from 'react-icons/rx';
+import { RxStop, RxChevronUp, RxChevronDown } from 'react-icons/rx';
 import { useSettings } from '../../contexts/settings-context';
 
 type SlideshowIndicatorProps = {
   isActive: boolean;
-  isPaused: boolean;
   progress: number; // 0-1
-  onTogglePause: () => void;
   onStop: () => void;
   showProgress?: boolean;
 };
 
 export const SlideshowIndicator: React.FC<SlideshowIndicatorProps> = ({
   isActive,
-  isPaused,
   progress,
-  onTogglePause,
   onStop,
   showProgress = true,
 }) => {
@@ -28,14 +24,10 @@ export const SlideshowIndicator: React.FC<SlideshowIndicatorProps> = ({
     <div className="fixed bottom-4 left-4 z-50 flex flex-col gap-2 p-3 bg-black/80 backdrop-blur-lg rounded-lg border border-white/20 shadow-2xl min-w-[200px]">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          {isPaused ? (
-            <RxPause className="text-yellow-400 animate-pulse" />
-          ) : (
-            <div className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-            </div>
-          )}
+          <div className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+          </div>
           <span className="text-xs font-bold text-white uppercase tracking-wider">
             Slideshow
           </span>
@@ -48,13 +40,6 @@ export const SlideshowIndicator: React.FC<SlideshowIndicatorProps> = ({
             title={isExpanded ? "Show Less" : "Show Settings"}
           >
             {isExpanded ? <RxChevronDown size={18} /> : <RxChevronUp size={18} />}
-          </button>
-          <button
-            onClick={onTogglePause}
-            className="p-1 hover:bg-white/10 rounded-md transition-colors text-white"
-            title={isPaused ? "Resume" : "Pause"}
-          >
-            {isPaused ? <RxPlay size={18} /> : <RxPause size={18} />}
           </button>
           <button
             onClick={onStop}
@@ -95,7 +80,7 @@ export const SlideshowIndicator: React.FC<SlideshowIndicatorProps> = ({
         </div>
       )}
 
-      {showProgress && !isPaused && (
+      {showProgress && (
         <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mt-1">
           <div 
             className="h-full bg-blue-500 transition-all duration-100 ease-linear"

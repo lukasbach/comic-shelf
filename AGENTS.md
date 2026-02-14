@@ -1,4 +1,4 @@
-# Comic Viewer Development Progress
+﻿# Comic Viewer Development Progress
 
 ## Task 1: Project Scaffolding
 - [x] Initialize Tauri v2 project
@@ -23,11 +23,13 @@
 - [x] Create App Shell components (TopBar, TabBar, Breadcrumbs, LibrarySidebar)
 - [x] Update root layout with navigation and tab display
 - [x] Implement placeholder views for all routes
+- [x] Implement draggable tab reordering
 - [x] Verify implementation with unit tests
 
 ### Implementation Details
 
 - **Tab Management**: A React Context (`TabProvider`) manages an array of `Tab` objects. Normal navigation updates the active tab's path. Middle-clicking creates a new tab. The tab system automatically syncs with the current route - the active tab always reflects the current pathname.
+- **Tab Reordering**: Draggable tab reordering is implemented using `@dnd-kit`. Users can drag tabs to change their order, and this state is managed in the `TabProvider`. The `TabBar` uses `SortableContext` with a horizontal strategy.
 - **Routing**: TanStack Router is configured with file-based routing.
   - `/` redirects to `/library`.
   - `/library` contains a `LibrarySidebar` and an `Outlet` for sub-routes (`/`, `/list`, `/artists`, etc.).
@@ -81,7 +83,7 @@
 - **Progress Tracking**: The `IndexingProvider` exports `isIndexing`, `progress`, and `errors` state. A new `IndexingStatus` component in the sidebar provides real-time feedback and error reporting.
 - **Utilities**: `getImageUrl` in `src/utils/image-utils.ts` handles the conversion of native file paths to Tauri asset URLs.
 
-## Task 6: Comic Viewer — Overview Mode
+## Task 6: Comic Viewer â€” Overview Mode
 - [x] Implement `useComicData` hook for loading comic and pages
 - [x] Create Viewer UI components (Header, Grid, Page Thumbnail)
 - [x] Implement Overview Mode responsive grid
@@ -100,7 +102,7 @@
 - **State Management**: The viewer relies on the `TabProvider` (`useTabs` hook) to persist and manage the current mode and page per tab.
 - **Placeholders**: While Task 6 focuses on Overview mode, placeholders for `SinglePageMode` and `ScrollMode` have been added to ensure a functional mode-switching UI.
 
-## Task 7: Comic Viewer — Single Page Mode
+## Task 7: Comic Viewer â€” Single Page Mode
 - [x] Implement `usePreloadImages` hook for preloading adjacent pages
 - [x] Create `PageImage` component with zoom and fit-width logic
 - [x] Create `PageNavigation` component for manual page switching and jumps
@@ -116,3 +118,18 @@
 - **Sidebar**: Added a collapsible sidebar with view mode switching, zoom controls, and upcoming page thumbnails.
 - **Navigation**: Integrated with the tab system to persist current page and zoom level per tab. Added jump-to-page functionality by clicking the page number.
 - **Inconsistencies Fixed**: Standardized `currentPage` to be 0-indexed across the viewer components to simplify array access.
+
+## Task 8: Comic Viewer  Scroll Mode
+- [x] Implement `useScrollPageTracker` hook for scroll synchronization
+- [x] Create `LazyPage` component for efficient rendering
+- [x] Create `ScrollPageIndicator` floating element
+- [x] Implement `ScrollMode` layout and integration
+- [x] Verify implementation with unit tests
+
+### Implementation Details
+- **Scroll Mode**: Implemented a continuous vertical scroll view for comics. All pages are stacked with a small gap, allowing for a seamless reading experience.
+- **Efficient Rendering**: Used `IntersectionObserver` in the `LazyPage` component to only render images when they are near the viewport. This significantly improves performance for long comics and reduces memory usage.
+- **Scroll Synchronization**: The `useScrollPageTracker` hook uses `IntersectionObserver` on each page to detect the most visible page and sync it back to the tab's `currentPage` state. This ensures that switching between modes or viewing the breadcrumbs/sidebar always reflects the user's current position.
+- **Page Indicator**: A floating `ScrollPageIndicator` appears in the bottom-right corner during scrolling, showing "Page X / Y". It automatically fades out after 2 seconds of inactivity.
+- **Initial Positioning**: When switching to Scroll Mode, the viewer automatically scrolls to the `currentPage` stored in the tab state, ensuring a smooth transition from other view modes.
+- **Zoom Support**: Integrated with the existing zoom level from the tab state. Zoom levels > 100% enable horizontal scrolling within the viewer.

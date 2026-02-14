@@ -7,6 +7,7 @@ import { NotFound } from '../../components/viewer/not-found';
 import { ViewerHeader } from '../../components/viewer/viewer-header';
 import { OverviewMode } from '../../components/viewer/overview-mode';
 import { SinglePageMode } from '../../components/viewer/single-page-mode';
+import { ScrollMode } from '../../components/viewer/scroll-mode';
 import { Tab } from '../../stores/tab-store';
 
 type ComicViewerSearch = {
@@ -67,20 +68,7 @@ function ComicViewerPage() {
       case 'single':
         return <SinglePageMode comic={comic} pages={pages} />;
       case 'scroll':
-        return (
-          <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800">
-            <div className="text-center p-8 bg-white dark:bg-gray-900 rounded-lg shadow-md">
-              <h3 className="text-xl font-bold mb-2 text-black dark:text-white">Scroll Mode</h3>
-              <p className="text-gray-600 dark:text-gray-400">Coming soon in Task 8</p>
-              <button 
-                onClick={() => handleModeChange('overview')}
-                className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-              >
-                Back to Overview
-              </button>
-            </div>
-          </div>
-        );
+        return <ScrollMode comic={comic} pages={pages} />;
       default:
         return <OverviewMode comic={comic} pages={pages} />;
     }

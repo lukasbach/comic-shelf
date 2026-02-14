@@ -3,27 +3,46 @@ import type { Comic } from '../types/comic';
 
 export const getAllComics = async (): Promise<Comic[]> => {
   const db = await getDb();
-  return await db.select<Comic[]>('SELECT * FROM comics ORDER BY title ASC');
+  return await db.select<Comic[]>(`
+    SELECT c.*, p.thumbnail_path 
+    FROM comics c 
+    LEFT JOIN comic_pages p ON c.id = p.comic_id AND p.page_number = 1
+    ORDER BY c.title ASC
+  `);
 };
 
 export const getComicById = async (id: number): Promise<Comic | null> => {
   const db = await getDb();
-  const results = await db.select<Comic[]>('SELECT * FROM comics WHERE id = $1', [id]);
+  const results = await db.select<Comic[]>(`
+    SELECT c.*, p.thumbnail_path 
+    FROM comics c 
+    LEFT JOIN comic_pages p ON c.id = p.comic_id AND p.page_number = 1
+    WHERE c.id = $1
+  `, [id]);
   return results.length > 0 ? results[0] : null;
 };
 
 export const getComicsByArtist = async (artist: string): Promise<Comic[]> => {
   const db = await getDb();
-  return await db.select<Comic[]>('SELECT * FROM comics WHERE artist = $1 ORDER BY series ASC, issue ASC', [artist]);
+  return await db.select<Comic[]>(`
+    SELECT c.*, p.thumbnail_path 
+    FROM comics c 
+    LEFT JOIN comic_pages p ON c.id = p.comic_id AND p.page_number = 1
+    WHERE c.artist = $1 
+    ORDER BY c.series ASC, c.issue ASC
+  `, [artist]);
 };
 
 export const searchComics = async (query: string): Promise<Comic[]> => {
   const db = await getDb();
   const searchPattern = `%${query}%`;
-  return await db.select<Comic[]>(
-    'SELECT * FROM comics WHERE title LIKE $1 OR artist LIKE $1 OR series LIKE $1 ORDER BY title ASC',
-    [searchPattern]
-  );
+  return await db.select<Comic[]>(`
+    SELECT c.*, p.thumbnail_path 
+    FROM comics c 
+    LEFT JOIN comic_pages p ON c.id = p.comic_id AND p.page_number = 1
+    WHERE c.title LIKE $1 OR c.artist LIKE $1 OR c.series LIKE $1 
+    ORDER BY c.title ASC
+  `, [searchPattern]);
 };
 
 export const upsertComic = async (comic: Omit<Comic, 'id' | 'created_at' | 'updated_at'>): Promise<number> => {
@@ -61,5 +80,11 @@ export const incrementViewCount = async (id: number): Promise<void> => {
 
 export const getFavoriteComics = async (): Promise<Comic[]> => {
   const db = await getDb();
-  return await db.select<Comic[]>('SELECT * FROM comics WHERE is_favorite = 1 ORDER BY title ASC');
+  return await db.select<Comic[]>(`
+    SELECT c.*, p.thumbnail_path 
+    FROM comics c 
+    LEFT JOIN comic_pages p ON c.id = p.comic_id AND p.page_number = 1
+    WHERE c.is_favorite = 1 
+    ORDER BY c.title ASC
+  `);
 };

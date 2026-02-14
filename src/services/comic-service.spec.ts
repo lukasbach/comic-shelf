@@ -23,7 +23,8 @@ describe('comic-service', () => {
 
     const result = await comicService.getAllComics();
 
-    expect(mockDb.select).toHaveBeenCalledWith('SELECT * FROM comics ORDER BY title ASC');
+    expect(mockDb.select).toHaveBeenCalledWith(expect.stringContaining('SELECT c.*, p.thumbnail_path'));
+    expect(mockDb.select).toHaveBeenCalledWith(expect.stringContaining('LEFT JOIN comic_pages p'));
     expect(result).toEqual(mockComics);
   });
 
@@ -31,6 +32,7 @@ describe('comic-service', () => {
     mockDb.select.mockResolvedValue([{ id: 1, title: 'Comic 1' }]);
     const result = await comicService.getComicById(1);
     expect(result).toEqual({ id: 1, title: 'Comic 1' });
+    expect(mockDb.select).toHaveBeenCalledWith(expect.stringContaining('SELECT c.*, p.thumbnail_path'), [1]);
 
     mockDb.select.mockResolvedValue([]);
     const resultNull = await comicService.getComicById(2);

@@ -11,6 +11,7 @@ export type Comic = {
   view_count: number;
   created_at: string;
   updated_at: string;
+  thumbnail_path?: string | null;
 };
 
 export type ComicPage = {

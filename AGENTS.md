@@ -47,6 +47,27 @@
 - [x] Integrate automatic indexing trigger on app start
 - [x] Verify implementation with unit tests
 
+## Task 5: Comic Library Views
+- [x] Implement Comic Card and Comic Grid components
+- [x] Implement Comic Open Handler hook
+- [x] Implement data loading hooks (`useComics`, `useSearchComics`, etc.)
+- [x] Implement List View sorted by title, artist, date, etc.
+- [x] Implement Per-Artist View with collapsible sections
+- [x] Implement Search View with debounced input
+- [x] Implement Favorites View for comics and individual images
+- [x] Implement File Explorer View with tree structure
+- [x] Verify implementation with unit tests
+
+### Implementation Details
+
+- **Comic Library Views**: All browsing views (Explorer, List, Artist, Favorites, Search) have been implemented using a shared `ComicGrid` and `ComicCard` component.
+- **Data Loading**: Custom hooks were created for each view to handle data fetching from the `comicService`. All hooks support loading states and error/empty states.
+- **Sorting & Search**: The List view supports sorting by title, artist, date added, and view count. The Search view uses a debounced input (300ms) to filter comics by title, artist, series, or issue.
+- **Favorites**: The Favorites view displays both favorite comics and individual favorite pages. Clicking a favorite page opens the viewer at that specific page.
+- **File Explorer**: A recursive `FileTree` component builds a filesystem-like structure based on indexed paths.
+- **Performance**: The `Comic` type and `comicService` were updated to include a `thumbnail_path` from the first page of each comic, allowing for faster loading of covers in the library views without additional per-comic queries.
+- **Navigation**: The `useOpenComic` and `useOpenComicPage` hooks integrate with the existing tab system to ensure the active tab is updated or a new tab is opened when a comic is selected.
+
 ### Implementation Details
 
 - **Thumbnail Generation**: Thumbnails are generated using an off-screen `<canvas>` in the webview. They are saved as JPEG (80% quality) with a maximum dimension of 300px in the app data directory (`thumbnails/{comicId}/{pageNumber}.jpg`).

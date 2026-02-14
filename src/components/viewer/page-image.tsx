@@ -5,7 +5,7 @@ import { getImageUrl } from '../../utils/image-utils';
 type PageImageProps = {
   page: ComicPage;
   zoomLevel: number; // percentage: 100 = fit width, >100 = zoomed in
-  containerRef?: RefObject<HTMLDivElement>;
+  containerRef?: RefObject<HTMLDivElement | null>;
 };
 
 export const PageImage: React.FC<PageImageProps> = ({ page, zoomLevel, containerRef }) => {

@@ -25,16 +25,16 @@ export const useScrollPageTracker = (
       
       // We want to find the page that is taking up the "main" part of the screen.
       // Usually the one whose top is closest to the top of the container root.
-      entries.forEach(entry => {
+      for (const entry of entries) {
         if (entry.isIntersecting) {
           if (!bestEntry || entry.intersectionRatio > bestEntry.intersectionRatio) {
             bestEntry = entry;
           }
         }
-      });
+      }
 
       if (bestEntry) {
-        const index = pageRefs.current!.indexOf(bestEntry.target as HTMLDivElement);
+        const index = pageRefs.current!.indexOf((bestEntry as IntersectionObserverEntry).target as HTMLDivElement);
         if (index !== -1) {
           onPageChange(index);
         }

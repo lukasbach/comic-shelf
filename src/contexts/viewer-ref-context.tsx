@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useRef, RefObject } from 'react';
 
 type ViewerRefContextType = {
-  scrollContainerRef: RefObject<HTMLDivElement>;
+  scrollContainerRef: RefObject<HTMLDivElement | null>;
   scrollToPage: (pageIndex: number, behavior?: ScrollBehavior) => void;
   registerScrollToPage: (fn: (pageIndex: number, behavior?: ScrollBehavior) => void) => void;
 };

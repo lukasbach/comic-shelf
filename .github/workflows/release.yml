@@ -109,6 +109,12 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+        
+      - name: TSC
+        run: pnpm exec tsc
+
+      - name: Unit Tests
+        run: pnpm test
 
       - name: Build and Release
         uses: tauri-apps/tauri-action@v0

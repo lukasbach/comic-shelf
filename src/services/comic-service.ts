@@ -45,7 +45,7 @@ export const searchComics = async (query: string): Promise<Comic[]> => {
   `, [searchPattern]);
 };
 
-export const upsertComic = async (comic: Omit<Comic, 'id' | 'created_at' | 'updated_at'>): Promise<number> => {
+export const upsertComic = async (comic: Omit<Comic, 'id' | 'created_at' | 'updated_at' | 'is_viewed' | 'last_opened_at'>): Promise<number> => {
   const db = await getDb();
   await db.execute(
     `INSERT INTO comics (path, title, artist, series, issue, cover_image_path, page_count, updated_at)

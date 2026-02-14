@@ -1,7 +1,7 @@
 import { useRef, useEffect, useCallback } from 'react';
 
 type SlideshowScrollOptions = {
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
   isActive: boolean;
   delay: number; // total time for scroll + page display
   zoomLevel: number;

@@ -22,7 +22,7 @@ describe('favorites and view counter', () => {
     it('toggleFavorite should execute UPDATE', async () => {
       await comicService.toggleFavorite(1);
       expect(mockDb.execute).toHaveBeenCalledWith(
-        expect.stringContaining('UPDATE comics SET is_favorite = NOT is_favorite WHERE id = $1'),
+        expect.stringContaining("UPDATE comics SET is_favorite = NOT is_favorite, updated_at = datetime('now') WHERE id = $1"),
         [1]
       );
     });

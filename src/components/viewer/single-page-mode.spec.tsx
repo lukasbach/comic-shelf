@@ -45,15 +45,17 @@ const mockComic: Comic = {
   cover_image_path: null,
   page_count: 3,
   is_favorite: 0,
+  is_viewed: 0,
   view_count: 0,
+  last_opened_at: null,
   created_at: '',
   updated_at: '',
 };
 
 const mockPages: ComicPage[] = [
-  { id: 1, comic_id: 1, page_number: 1, file_path: '/p1.jpg', file_name: 'p1.jpg', thumbnail_path: null, is_favorite: 0, view_count: 0 },
-  { id: 2, comic_id: 1, page_number: 2, file_path: '/p2.jpg', file_name: 'p2.jpg', thumbnail_path: null, is_favorite: 1, view_count: 0 },
-  { id: 3, comic_id: 1, page_number: 3, file_path: '/p3.jpg', file_name: 'p3.jpg', thumbnail_path: null, is_favorite: 0, view_count: 0 },
+  { id: 1, comic_id: 1, page_number: 1, file_path: '/p1.jpg', file_name: 'p1.jpg', thumbnail_path: null, is_favorite: 0, is_viewed: 0, view_count: 0, last_opened_at: null },
+  { id: 2, comic_id: 1, page_number: 2, file_path: '/p2.jpg', file_name: 'p2.jpg', thumbnail_path: null, is_favorite: 1, is_viewed: 0, view_count: 0, last_opened_at: null },
+  { id: 3, comic_id: 1, page_number: 3, file_path: '/p3.jpg', file_name: 'p3.jpg', thumbnail_path: null, is_favorite: 0, is_viewed: 0, view_count: 0, last_opened_at: null },
 ];
 
 describe('SinglePageMode', () => {
@@ -74,7 +76,7 @@ describe('SinglePageMode', () => {
   it('renders current page image', () => {
     render(
       <ViewerRefProvider>
-        <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} />
+        <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} onDecrementPageViewCount={vi.fn()} />
       </ViewerRefProvider>
     );
     const img = screen.getByAltText('Page 1');
@@ -85,7 +87,7 @@ describe('SinglePageMode', () => {
   it('navigates to next page on click', () => {
     render(
       <ViewerRefProvider>
-        <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} />
+        <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} onDecrementPageViewCount={vi.fn()} />
       </ViewerRefProvider>
     );
     const nextButton = screen.getByLabelText('Next Page');
@@ -101,7 +103,7 @@ describe('SinglePageMode', () => {
     });
     render(
       <ViewerRefProvider>
-        <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} />
+        <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} onDecrementPageViewCount={vi.fn()} />
       </ViewerRefProvider>
     );
     const prevButton = screen.getByLabelText('Previous Page');
@@ -112,7 +114,7 @@ describe('SinglePageMode', () => {
   it('toggles sidebar', () => {
     render(
       <ViewerRefProvider>
-        <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} />
+        <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} onDecrementPageViewCount={vi.fn()} />
       </ViewerRefProvider>
     );
     const toggleButton = screen.getByTitle('Collapse Sidebar');

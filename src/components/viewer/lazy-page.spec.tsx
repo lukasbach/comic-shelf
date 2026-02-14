@@ -17,7 +17,9 @@ describe('LazyPage', () => {
     file_name: 'path.jpg',
     thumbnail_path: null,
     is_favorite: 0,
-    view_count: 0
+    is_viewed: 0,
+    view_count: 0,
+    last_opened_at: null
   };
 
   beforeEach(() => {

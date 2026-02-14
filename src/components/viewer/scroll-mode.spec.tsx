@@ -50,14 +50,16 @@ describe('ScrollMode', () => {
         updated_at: '2023-01-01',
         view_count: 0,
         is_favorite: 0,
+        is_viewed: 0,
+        last_opened_at: null,
         page_count: 2,
         cover_image_path: null,
         thumbnail_path: null,
     };
 
     const mockPages: ComicPage[] = [
-        { id: 1, comic_id: 1, page_number: 1, file_path: '/path/1.jpg', file_name: '1.jpg', thumbnail_path: null, is_favorite: 0, view_count: 0 },
-        { id: 2, comic_id: 1, page_number: 2, file_path: '/path/2.jpg', file_name: '2.jpg', thumbnail_path: null, is_favorite: 0, view_count: 0 },
+        { id: 1, comic_id: 1, page_number: 1, file_path: '/path/1.jpg', file_name: '1.jpg', thumbnail_path: null, is_favorite: 0, is_viewed: 0, view_count: 0, last_opened_at: null },
+        { id: 2, comic_id: 1, page_number: 2, file_path: '/path/2.jpg', file_name: '2.jpg', thumbnail_path: null, is_favorite: 0, is_viewed: 0, view_count: 0, last_opened_at: null },
     ];
 
     beforeEach(() => {
@@ -68,13 +70,25 @@ describe('ScrollMode', () => {
     });
 
     it('should render all pages', () => {
-        render(<ScrollMode comic={mockComic} pages={mockPages} />);
+        render(<ScrollMode 
+            comic={mockComic} 
+            pages={mockPages} 
+            onTogglePageFavorite={vi.fn()}
+            onIncrementPageViewCount={vi.fn()}
+            onDecrementPageViewCount={vi.fn()}
+        />);
         expect(screen.getByText('Page 1')).toBeDefined();
         expect(screen.getByText('Page 2')).toBeDefined();
     });
 
     it('should render sidebar', () => {
-        render(<ScrollMode comic={mockComic} pages={mockPages} />);
+        render(<ScrollMode 
+            comic={mockComic} 
+            pages={mockPages} 
+            onTogglePageFavorite={vi.fn()}
+            onIncrementPageViewCount={vi.fn()}
+            onDecrementPageViewCount={vi.fn()}
+        />);
         expect(screen.getByTestId('viewer-sidebar')).toBeDefined();
     });
 });

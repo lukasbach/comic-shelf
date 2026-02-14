@@ -11,7 +11,7 @@ export const getPagesByComicId = async (comicId: number): Promise<ComicPage[]> =
 
 export const insertPages = async (
   comicId: number,
-  pages: Omit<ComicPage, 'id' | 'comic_id' | 'is_favorite' | 'view_count'>[]
+  pages: Omit<ComicPage, 'id' | 'comic_id' | 'is_favorite' | 'view_count' | 'is_viewed' | 'last_opened_at'>[]
 ): Promise<void> => {
   const db = await getDb();
   // We can't do bulk insert easily with parameters in tauri-plugin-sql without constructing a large query

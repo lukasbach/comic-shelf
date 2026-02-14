@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
+import React, { useMemo } from 'react';
+import { useNavigate, createFileRoute } from '@tanstack/react-router';
 import { useComics } from '../../hooks/use-comics';
 import { useIndexPaths } from '../../hooks/use-index-paths';
 import { useOpenComic } from '../../hooks/use-open-comic';
-import { RxSymbol, RxHome, RxChevronRight } from 'react-icons/rx';
+import { RxSymbol } from 'react-icons/rx';
 import { VirtualizedGrid } from '../../components/virtualized-grid';
 import { ComicCard } from '../../components/comic-card';
 import { FolderCard } from '../../components/folder-card';
@@ -11,6 +11,11 @@ import { normalizePath, naturalSortComparator } from '../../utils/image-utils';
 import type { Comic } from '../../types/comic';
 
 export const Route = createFileRoute('/library/')({
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      path: (search.path as string) || '',
+    }
+  },
   component: LibraryExplorer,
 });
 
@@ -25,10 +30,18 @@ type ExplorerFolder = {
 type ExplorerItem = (Comic & { type: 'comic' }) | ExplorerFolder;
 
 function LibraryExplorer() {
+  const { path: currentPath = '' } = Route.useSearch();
+  const navigate = useNavigate();
   const { comics, loading: loadingComics } = useComics();
   const { indexPaths, loading: loadingPaths } = useIndexPaths();
   const openComic = useOpenComic();
-  const [currentPath, setCurrentPath] = useState<string>('');
+
+  const setCurrentPath = (path: string) => {
+    navigate({
+      to: '/library/',
+      search: { path },
+    });
+  };
 
   const currentItems = useMemo(() => {
     if (loadingComics || loadingPaths) return [];
@@ -102,38 +115,6 @@ function LibraryExplorer() {
     });
   }, [currentPath, comics, indexPaths, loadingComics, loadingPaths]);
 
-  const breadcrumbs = useMemo(() => {
-    if (!currentPath) return [];
-    
-    const root = indexPaths.find(ip => {
-        const normIp = normalizePath(ip.path);
-        const normCurr = normalizePath(currentPath);
-        return normCurr === normIp || normCurr.startsWith(normIp + '/');
-    });
-    
-    if (!root) return [{ name: currentPath, path: normalizePath(currentPath) }];
-
-    const normRoot = normalizePath(root.path);
-    const normCurrent = normalizePath(currentPath);
-    
-    if (normRoot === normCurrent) {
-        return [{ name: root.path, path: normRoot }];
-    }
-
-    const relative = normCurrent.slice(normRoot.length).replace(/^\//, '');
-    const segments = relative.split('/');
-    
-    const crumbs = [{ name: root.path, path: normRoot }];
-    let currentBuild = normRoot;
-    
-    for (const segment of segments) {
-      currentBuild = currentBuild.endsWith('/') ? currentBuild + segment : currentBuild + '/' + segment;
-      crumbs.push({ name: segment, path: currentBuild });
-    }
-    
-    return crumbs;
-  }, [currentPath, indexPaths]);
-
   if (loadingComics || loadingPaths) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -153,30 +134,6 @@ function LibraryExplorer() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex items-center gap-2 p-4 border-b border-border bg-card/50">
-        <button 
-          onClick={() => setCurrentPath('')}
-          className="p-1 px-2 hover:bg-muted rounded flex items-center gap-1 text-sm font-medium transition-colors"
-        >
-          <RxHome size={16} />
-          <span>Library</span>
-        </button>
-        
-        {breadcrumbs.map((crumb, i) => (
-          <React.Fragment key={crumb.path}>
-            <RxChevronRight className="text-muted-foreground" />
-            <button 
-              onClick={() => setCurrentPath(crumb.path)}
-              className={`p-1 px-2 hover:bg-muted rounded text-sm transition-colors truncate max-w-50 ${
-                i === breadcrumbs.length - 1 ? 'font-bold' : 'font-medium'
-              }`}
-            >
-              {crumb.name}
-            </button>
-          </React.Fragment>
-        ))}
-      </div>
-
       <div className="flex-1 overflow-hidden">
         {currentItems.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground p-6">

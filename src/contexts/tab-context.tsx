@@ -72,6 +72,7 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       id: crypto.randomUUID(),
       type: 'comic',
       comicId: comic.id,
+      comicPath: comic.path,
       title: comic.title,
       path: `/viewer/${comic.id}`,
       currentPage: 0,

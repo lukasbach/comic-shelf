@@ -1,5 +1,6 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useTabs } from '../contexts/tab-context'
+import { RxCross2 } from 'react-icons/rx'
 
 export function TabBar() {
   const { tabs, activeTabId, closeTab } = useTabs()
@@ -37,9 +38,9 @@ export function TabBar() {
                   navigate({ to: '/library' })
                 }
               }}
-              className="px-2 py-1 mr-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="px-2 py-1 mr-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
             >
-              ×
+              <RxCross2 className="w-3.5 h-3.5" />
             </button>
           </div>
         )

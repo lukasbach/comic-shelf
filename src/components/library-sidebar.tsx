@@ -1,10 +1,18 @@
 import { Link } from '@tanstack/react-router'
+import { 
+  RxArchive, 
+  RxListBullet, 
+  RxPerson, 
+  RxStar, 
+  RxMagnifyingGlass 
+} from 'react-icons/rx'
+
 const navItems = [
-  { name: 'Explorer', to: '/library', icon: '📁' },
-  { name: 'All Comics', to: '/library/list', icon: '📋' },
-  { name: 'By Artist', to: '/library/artists', icon: '👤' },
-  { name: 'Favorites', to: '/library/favorites', icon: '⭐' },
-  { name: 'Search', to: '/library/search', icon: '🔍' },
+  { name: 'Explorer', to: '/library', icon: RxArchive },
+  { name: 'All Comics', to: '/library/list', icon: RxListBullet },
+  { name: 'By Artist', to: '/library/artists', icon: RxPerson },
+  { name: 'Favorites', to: '/library/favorites', icon: RxStar },
+  { name: 'Search', to: '/library/search', icon: RxMagnifyingGlass },
 ]
 
 export function LibrarySidebar() {
@@ -23,7 +31,7 @@ export function LibrarySidebar() {
             }}
             className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors"
           >
-            <span className="text-xl w-5 h-5 flex items-center justify-center">{item.icon}</span>
+            <item.icon className="w-5 h-5 flex-shrink-0" />
             {item.name}
           </Link>
         ))}

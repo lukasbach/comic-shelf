@@ -35,3 +35,4 @@
   - `/settings` renders the settings page.
 - **App Shell**: The `RootLayout` in `__root.tsx` wraps the app with `SettingsProvider` and `TabProvider`. It displays the `TopBar` (with breadcrumbs and settings) and the `TabBar` (when tabs are open).
 - **Navigation**: Breadcrumbs are dynamic and reflect the current route and active comic tab. The sidebar provides navigation between different library views.
+- **Icons**: The application uses the Radix icon set from `react-icons/rx` for all UI elements.

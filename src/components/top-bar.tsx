@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { BreadcrumbBar } from './breadcrumb-bar'
+import { RxGear } from 'react-icons/rx'
 
 export function TopBar() {
   return (
@@ -16,7 +17,7 @@ export function TopBar() {
           className="p-1.5 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400 transition-colors"
           title="Settings"
         >
-          <span className="text-xl">⚙️</span>
+          <RxGear className="w-5 h-5" />
         </Link>
       </div>
     </header>

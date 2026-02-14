@@ -27,12 +27,12 @@
 
 ### Implementation Details
 
-- **Tab Management**: A React Context (`TabProvider`) manages an array of `Tab` objects. It handles opening, closing, and switching between comics.
+- **Tab Management**: A React Context (`TabProvider`) manages an array of `Tab` objects. Normal navigation updates the active tab's path. Middle-clicking creates a new tab. The tab system automatically syncs with the current route - the active tab always reflects the current pathname.
 - **Routing**: TanStack Router is configured with file-based routing.
   - `/` redirects to `/library`.
   - `/library` contains a `LibrarySidebar` and an `Outlet` for sub-routes (`/`, `/list`, `/artists`, etc.).
   - `/viewer/$comicId` renders the comic viewer.
   - `/settings` renders the settings page.
-- **App Shell**: The `RootLayout` in `__root.tsx` wraps the app with `SettingsProvider` and `TabProvider`. It displays the `TopBar` (with breadcrumbs and settings) and the `TabBar` (when tabs are open).
-- **Navigation**: Breadcrumbs are dynamic and reflect the current route and active comic tab. The sidebar provides navigation between different library views. Sidebar items can be middle-clicked to open the view in a new application tab.
+- **App Shell**: The `RootLayout` in `__root.tsx` wraps the app with `SettingsProvider` and `TabProvider`. It displays the `TopBar` (with breadcrumbs and settings) and the `TabBar` (when 2+ tabs are open).
+- **Navigation**: Regular navigation (clicking links) updates the current tab. Middle-clicking opens a new tab. Breadcrumbs are dynamic and reflect the current route. The sidebar provides navigation between different library views. The currently displayed page is always represented by a tab, and the tab bar is only visible when multiple tabs exist.
 - **Icons**: The application uses the Radix icon set from `react-icons/rx` for all UI elements.

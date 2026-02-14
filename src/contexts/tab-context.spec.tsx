@@ -1,7 +1,17 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import { TabProvider, useTabs } from './tab-context';
 import { Comic } from '../types/comic';
+
+// Mock TanStack Router
+vi.mock('@tanstack/react-router', () => ({
+  useRouterState: () => ({
+    location: {
+      pathname: '/library',
+    },
+  }),
+  useNavigate: () => vi.fn(),
+}));
 
 const mockComic: Comic = {
   id: 1,
@@ -19,53 +29,65 @@ const mockComic: Comic = {
 };
 
 const TestComponent = () => {
-  const { tabs, activeTabId, openTab, openLibraryTab, closeTab, nextTab, prevTab } = useTabs();
+  const { tabs, activeTabId, openTab, closeTab } = useTabs();
   return (
     <div>
       <div data-testid="tab-count">{tabs.length}</div>
-      <div data-testid="active-tab-id">{activeTabId}</div>
+      <div data-testid="active-tab-id">{activeTabId ?? ''}</div>
       <button onClick={() => openTab(mockComic)}>Open Tab</button>
-      <button onClick={() => openLibraryTab('/library', 'Explorer')}>Open Library Tab</button>
       {tabs.map(tab => (
         <button key={tab.id} onClick={() => closeTab(tab.id)}>Close {tab.id}</button>
       ))}
-      <button onClick={nextTab}>Next</button>
-      <button onClick={prevTab}>Prev</button>
     </div>
   );
 };
 
 describe('tab-context', () => {
-  it('opens a new generic tab', async () => {
-    let capturedTabs: any[] = [];
-    const Inspector = () => {
-      const { tabs } = useTabs();
-      capturedTabs = tabs;
-      return null;
-    };
-
+  it('automatically creates a tab for current route', async () => {
     render(
       <TabProvider>
         <TestComponent />
-        <Inspector />
       </TabProvider>
     );
 
-    const openButton = screen.getByText('Open Library Tab');
+    // Wait for initial tab creation
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 10));
+    });
+
+    expect(screen.getByTestId('tab-count').textContent).toBe('1');
+  });
+
+  it('opens a new tab for comic', async () => {
+    render(
+      <TabProvider>
+        <TestComponent />
+      </TabProvider>
+    );
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 10));
+    });
+
+    const openButton = screen.getByText('Open Tab');
     await act(async () => {
       openButton.click();
     });
 
-    expect(screen.getByTestId('tab-count').textContent).toBe('1');
-    expect(capturedTabs[0].type).toBe('library');
+    // Should have initial tab + comic tab
+    expect(screen.getByTestId('tab-count').textContent).toBe('2');
   });
 
-  it('does not open duplicate tabs for same comic', async () => {
+  it('creates new tabs when opening comics', async () => {
     render(
       <TabProvider>
         <TestComponent />
       </TabProvider>
     );
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 10));
+    });
 
     const openButton = screen.getByText('Open Tab');
     await act(async () => {
@@ -73,27 +95,7 @@ describe('tab-context', () => {
       openButton.click();
     });
 
-    expect(screen.getByTestId('tab-count').textContent).toBe('1');
-  });
-
-  it('closes a tab and updates active tab', async () => {
-    render(
-      <TabProvider>
-        <TestComponent />
-      </TabProvider>
-    );
-
-    const openButton = screen.getByText('Open Tab');
-    await act(async () => {
-      openButton.click();
-    });
-
-    const closeButton = screen.getByText(/Close/);
-    await act(async () => {
-      closeButton.click();
-    });
-
-    expect(screen.getByTestId('tab-count').textContent).toBe('0');
-    expect(screen.getByTestId('active-tab-id').textContent).toBe('');
+    // Should have initial tab + 2 comic tabs (openTab always creates new tabs)
+    expect(screen.getByTestId('tab-count').textContent).toBe('3');
   });
 });

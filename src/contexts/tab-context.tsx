@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
+import { useRouterState, useNavigate } from '@tanstack/react-router';
 import { Tab } from '../stores/tab-store';
 import { Comic } from '../types/comic';
 
@@ -16,73 +17,106 @@ interface TabContextType {
 
 const TabContext = createContext<TabContextType | undefined>(undefined);
 
+function getRouteTitle(path: string): string {
+  if (path === '/library' || path === '/library/') return 'Explorer';
+  if (path === '/library/list') return 'All Comics';
+  if (path === '/library/artists') return 'By Artist';
+  if (path === '/library/favorites') return 'Favorites';
+  if (path === '/library/search') return 'Search';
+  if (path === '/settings' || path === '/settings/') return 'Settings';
+  if (path.startsWith('/viewer/')) return 'Comic Viewer';
+  return 'Library';
+}
+
 export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
+  const { location } = useRouterState();
+  const navigate = useNavigate();
 
-  const openTab = useCallback((comic: Comic) => {
-    setTabs((prevTabs) => {
-      const existingTab = prevTabs.find((t) => t.type === 'comic' && t.comicId === comic.id);
-      if (existingTab) {
-        setActiveTabId(existingTab.id);
-        return prevTabs;
-      }
-
-      const newTab: Tab = {
-        id: crypto.randomUUID(),
-        type: 'comic',
-        comicId: comic.id,
-        title: comic.title,
-        path: `/viewer/${comic.id}`,
-        currentPage: 0,
-        viewMode: 'single',
-        zoomLevel: 100,
-      };
-
-      setActiveTabId(newTab.id);
-      return [...prevTabs, newTab];
-    });
-  }, []);
-
-  const openLibraryTab = useCallback((path: string, title: string) => {
-    setTabs((prevTabs) => {
-      const existingTab = prevTabs.find((t) => t.type === 'library' && t.path === path);
-      if (existingTab) {
-        setActiveTabId(existingTab.id);
-        return prevTabs;
-      }
-
+  // Sync current route with tabs
+  useEffect(() => {
+    const currentPath = location.pathname;
+    
+    if (tabs.length === 0) {
+      // Initial load - create first tab
       const newTab: Tab = {
         id: crypto.randomUUID(),
         type: 'library',
-        title: title,
-        path: path,
+        title: getRouteTitle(currentPath),
+        path: currentPath,
       };
-
+      
+      setTabs([newTab]);
       setActiveTabId(newTab.id);
-      return [...prevTabs, newTab];
-    });
+    } else if (activeTabId) {
+      const activeTab = tabs.find(t => t.id === activeTabId);
+      
+      // Only update if the current path is different from the active tab's path
+      // This prevents updating when we're switching tabs
+      if (activeTab && activeTab.path !== currentPath) {
+        setTabs(prevTabs => 
+          prevTabs.map(t => 
+            t.id === activeTabId 
+              ? { ...t, path: currentPath, title: getRouteTitle(currentPath) }
+              : t
+          )
+        );
+      }
+    }
+  }, [location.pathname, activeTabId, tabs]);
+
+  const openTab = useCallback((comic: Comic) => {
+    // Always create a new tab (for middle-click behavior)
+    const newTab: Tab = {
+      id: crypto.randomUUID(),
+      type: 'comic',
+      comicId: comic.id,
+      title: comic.title,
+      path: `/viewer/${comic.id}`,
+      currentPage: 0,
+      viewMode: 'single',
+      zoomLevel: 100,
+    };
+
+    setTabs(prevTabs => [...prevTabs, newTab]);
+    setActiveTabId(newTab.id);
+  }, []);
+
+  const openLibraryTab = useCallback((path: string, title: string) => {
+    // Always create a new tab (for middle-click behavior)
+    const newTab: Tab = {
+      id: crypto.randomUUID(),
+      type: 'library',
+      title: title,
+      path: path,
+    };
+
+    setTabs(prevTabs => [...prevTabs, newTab]);
+    setActiveTabId(newTab.id);
   }, []);
 
   const closeTab = useCallback((tabId: string) => {
-    setTabs((prevTabs) => {
-      const tabIndex = prevTabs.findIndex((t) => t.id === tabId);
-      if (tabIndex === -1) return prevTabs;
+    const tabToClose = tabs.find(t => t.id === tabId);
+    if (!tabToClose) return;
 
-      const newTabs = prevTabs.filter((t) => t.id !== tabId);
+    const tabIndex = tabs.findIndex((t) => t.id === tabId);
+    const newTabs = tabs.filter((t) => t.id !== tabId);
 
-      if (activeTabId === tabId) {
-        if (newTabs.length > 0) {
-          const nextIndex = Math.min(tabIndex, newTabs.length - 1);
-          setActiveTabId(newTabs[nextIndex].id);
-        } else {
-          setActiveTabId(null);
-        }
+    if (activeTabId === tabId) {
+      // Navigate to another tab
+      if (newTabs.length > 0) {
+        const nextIndex = Math.min(tabIndex, newTabs.length - 1);
+        const nextTab = newTabs[nextIndex];
+        navigate({ to: nextTab.path as any });
+      } else {
+        // No tabs left, navigate to library
+        navigate({ to: '/library' });
       }
+    }
 
-      return newTabs;
-    });
-  }, [activeTabId]);
+    setTabs(newTabs);
+  }, [tabs, activeTabId, navigate]);
 
   const updateTab = useCallback((tabId: string, updates: Partial<Tab>) => {
     setTabs((prevTabs) =>
@@ -91,24 +125,20 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, []);
 
   const nextTab = useCallback(() => {
-    setTabs((prevTabs) => {
-      if (prevTabs.length <= 1) return prevTabs;
-      const currentIndex = prevTabs.findIndex((t) => t.id === activeTabId);
-      const nextIndex = (currentIndex + 1) % prevTabs.length;
-      setActiveTabId(prevTabs[nextIndex].id);
-      return prevTabs;
-    });
-  }, [activeTabId]);
+    if (tabs.length <= 1) return;
+    const currentIndex = tabs.findIndex((t) => t.id === activeTabId);
+    const nextIndex = (currentIndex + 1) % tabs.length;
+    const nextTab = tabs[nextIndex];
+    navigate({ to: nextTab.path as any });
+  }, [tabs, activeTabId, navigate]);
 
   const prevTab = useCallback(() => {
-    setTabs((prevTabs) => {
-      if (prevTabs.length <= 1) return prevTabs;
-      const currentIndex = prevTabs.findIndex((t) => t.id === activeTabId);
-      const prevIndex = (currentIndex - 1 + prevTabs.length) % prevTabs.length;
-      setActiveTabId(prevTabs[prevIndex].id);
-      return prevTabs;
-    });
-  }, [activeTabId]);
+    if (tabs.length <= 1) return;
+    const currentIndex = tabs.findIndex((t) => t.id === activeTabId);
+    const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+    const prevTab = tabs[prevIndex];
+    navigate({ to: prevTab.path as any });
+  }, [tabs, activeTabId, navigate]);
 
   const value: TabContextType = {
     tabs,

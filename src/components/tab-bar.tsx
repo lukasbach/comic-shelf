@@ -1,12 +1,13 @@
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { useTabs } from '../contexts/tab-context'
 import { RxCross2 } from 'react-icons/rx'
 
 export function TabBar() {
-  const { tabs, activeTabId, closeTab } = useTabs()
+  const { tabs, activeTabId, closeTab, setActiveTabId } = useTabs()
   const navigate = useNavigate()
 
-  if (tabs.length === 0) return null
+  // Only show tab bar when there are 2+ tabs
+  if (tabs.length <= 1) return null
 
   return (
     <div className="flex bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 overflow-x-auto scrollbar-hide">
@@ -21,14 +22,19 @@ export function TabBar() {
                 : 'hover:bg-gray-200 dark:hover:bg-gray-700'
             }`}
           >
-            <Link
-              to={tab.path as any}
-              className={`flex-1 px-3 py-2 text-sm truncate ${
+            <button
+              onClick={() => {
+                if (!isActive) {
+                  setActiveTabId(tab.id)
+                  navigate({ to: tab.path as any })
+                }
+              }}
+              className={`flex-1 px-3 py-2 text-sm truncate text-left ${
                 isActive ? 'font-medium text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'
               }`}
             >
               {tab.title}
-            </Link>
+            </button>
             <button
               onClick={(e) => {
                 e.stopPropagation()

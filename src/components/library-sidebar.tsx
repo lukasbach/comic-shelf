@@ -37,6 +37,7 @@ export function LibrarySidebar() {
             onAuxClick={(e) => {
               if (e.button === 1) { // Middle click
                 e.preventDefault()
+                // Create new tab and navigate to it
                 openLibraryTab(item.to, item.name)
                 navigate({ to: item.to as any })
               }

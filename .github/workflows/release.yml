@@ -1,0 +1,122 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      version_increment:
+        description: 'Version increment (patch, minor, major)'
+        required: true
+        default: 'patch'
+        type: 'choice'
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.get_version.outputs.version }}
+      commit_sha: ${{ steps.bump.outputs.sha }}
+    steps:
+      - uses: actions/checkout:v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version
+        id: bump
+        run: |
+          pnpm version ${{ github.event.inputs.version_increment }} --no-git-tag-version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          
+          # Update tauri.conf.json and Cargo.toml
+          node -e "
+            const fs = require('fs');
+            const newVersion = '$NEW_VERSION';
+            
+            // tauri.conf.json
+            const config = JSON.parse(fs.readFileSync('./src-tauri/tauri.conf.json', 'utf8'));
+            config.version = newVersion;
+            fs.writeFileSync('./src-tauri/tauri.conf.json', JSON.stringify(config, null, 2));
+            
+            // Cargo.toml
+            let cargo = fs.readFileSync('./src-tauri/Cargo.toml', 'utf8');
+            cargo = cargo.replace(/^version = \".*\"/m, 'version = \"' + newVersion + '\"');
+            fs.writeFileSync('./src-tauri/Cargo.toml', cargo);
+          "
+          
+          git add package.json src-tauri/tauri.conf.json src-tauri/Cargo.toml
+          git commit -m "chore: bump version to $NEW_VERSION"
+          git push
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Get version
+        id: get_version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+  create-release:
+    needs: bump-version
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-latest, ubuntu-22.04, windows-latest]
+
+    steps:
+      - uses: actions/checkout:v4
+        with:
+          ref: ${{ needs.bump-version.outputs.commit_sha }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build and Release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__ # tauri-action will replace __VERSION__ with the version from tauri.conf.json
+          releaseName: "Release v__VERSION__"
+          releaseBody: "Automated release for version v__VERSION__"
+          releaseDraft: false
+          prerelease: false

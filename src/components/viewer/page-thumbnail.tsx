@@ -1,15 +1,24 @@
 import React from 'react';
 import { ComicPage } from '../../types/comic';
 import { getImageUrl } from '../../utils/image-utils';
-import { RxStarFilled } from 'react-icons/rx';
+import { FavoriteButton } from '../favorite-button';
+import { ViewCounter } from '../view-counter';
 
 type PageThumbnailProps = {
   page: ComicPage;
   isActive: boolean;
   onClick: () => void;
+  onToggleFavorite: () => void;
+  onIncrementViewCount: () => void;
 };
 
-export const PageThumbnail: React.FC<PageThumbnailProps> = ({ page, isActive, onClick }) => {
+export const PageThumbnail: React.FC<PageThumbnailProps> = ({ 
+  page, 
+  isActive, 
+  onClick,
+  onToggleFavorite,
+  onIncrementViewCount
+}) => {
   const imageUrl = getImageUrl(page.thumbnail_path || page.file_path);
 
   return (
@@ -31,15 +40,34 @@ export const PageThumbnail: React.FC<PageThumbnailProps> = ({ page, isActive, on
         {page.page_number}
       </div>
 
-      {/* Favorite indicator */}
-      {page.is_favorite === 1 && (
-        <div className="absolute top-1 left-1 drop-shadow-md">
-          <RxStarFilled className="text-yellow-400 w-4 h-4" />
+      {/* Favorite button */}
+      <div className={`absolute top-1 left-1 drop-shadow-md transition-opacity ${page.is_favorite === 1 ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+        <FavoriteButton 
+          isFavorite={page.is_favorite === 1} 
+          onToggle={(e) => { e.stopPropagation(); onToggleFavorite(); }} 
+          size="sm"
+          className="bg-black/40 backdrop-blur-sm p-1 rounded-full text-white"
+        />
+      </div>
+
+      {/* View counter */}
+      <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <ViewCounter 
+          count={page.view_count} 
+          onIncrement={(e) => { e.stopPropagation(); onIncrementViewCount(); }} 
+          size="sm"
+          className="bg-black/40 backdrop-blur-sm shadow-md"
+        />
+      </div>
+      
+      {page.view_count > 0 && (
+        <div className="absolute bottom-1 left-1 bg-black/60 text-white px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-mono group-hover:hidden">
+          {page.view_count}v
         </div>
       )}
 
       {/* Hover overlay hint */}
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ComicPage } from '../../types/comic';
 import { getImageUrl } from '../../utils/image-utils';
+import { FavoriteButton } from '../favorite-button';
 import { RxStarFilled } from 'react-icons/rx';
 
 type LazyPageProps = {
@@ -8,10 +9,11 @@ type LazyPageProps = {
   zoomLevel: number;
   onVisible?: (pageNumber: number) => void;
   isFavorite?: boolean;
+  onToggleFavorite?: () => void;
 };
 
 export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.RefAttributes<HTMLDivElement>> = React.forwardRef<HTMLDivElement, LazyPageProps>(
-  ({ page, zoomLevel, onVisible, isFavorite }, ref) => {
+  ({ page, zoomLevel, onVisible, isFavorite, onToggleFavorite }, ref) => {
     const [isVisible, setIsVisible] = useState(false);
     const internalRef = useRef<HTMLDivElement>(null);
     
@@ -60,13 +62,24 @@ export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.Ref
     return (
       <div
         ref={internalRef}
-        className="flex flex-col items-center w-full mb-2 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden"
+        className="group flex flex-col items-center w-full mb-2 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative"
         style={{ minHeight: !isVisible ? estimatedHeight : 'auto' }}
       >
         <div className="w-full flex justify-between items-center px-4 py-1 text-xs text-gray-500 bg-gray-200 dark:bg-gray-900">
           <span>Page {page.page_number}</span>
-          {isFavorite && <RxStarFilled className="text-yellow-500" />}
+          {isFavorite && <RxStarFilled className="group-hover:hidden text-yellow-500" />}
         </div>
+
+        {onToggleFavorite && (
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            <FavoriteButton 
+              isFavorite={isFavorite || false} 
+              onToggle={onToggleFavorite} 
+              size="sm"
+              className="bg-black/40 backdrop-blur-sm p-1.5 rounded-full text-white shadow-lg"
+            />
+          </div>
+        )}
         
         {isVisible && (
           <img

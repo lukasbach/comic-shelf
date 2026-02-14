@@ -31,10 +31,10 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
   isCollapsed,
   onToggleCollapse,
 }) => {
-  // Show next ~5 pages
+  // Show next ~6 pages
   const upcomingPages = pages.slice(
     currentPage + 1,
-    Math.min(pages.length, currentPage + 6)
+    Math.min(pages.length, currentPage + 7)
   );
 
   if (isCollapsed) {
@@ -173,27 +173,27 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
         {upcomingPages.length > 0 && (
           <section>
             <h4 className="text-xs font-bold mb-3 text-gray-400 uppercase">Up Next</h4>
-            <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-3 gap-2">
               {upcomingPages.map((page) => (
                 <button
                   key={page.id}
                   onClick={() => onPageSelect(page.page_number)}
-                  className="group relative flex gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+                  className="group relative aspect-[3/4] rounded-md overflow-hidden bg-gray-100 dark:bg-gray-800 hover:ring-2 hover:ring-blue-500 transition-all shadow-sm"
+                  title={`Page ${page.page_number + 1}`}
                 >
-                  <div className="w-16 h-20 bg-gray-200 dark:bg-gray-800 rounded overflow-hidden flex-shrink-0">
-                    <img
-                      src={getImageUrl(page.thumbnail_path || page.file_path)}
-                      alt={`Page ${page.page_number}`}
-                      className="w-full h-full object-cover"
-                    />
+                  <img
+                    src={getImageUrl(page.thumbnail_path || page.file_path)}
+                    alt={`Page ${page.page_number}`}
+                    className="w-full h-full object-cover transition-all"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white py-0.5 text-[10px] font-bold text-center">
+                    {page.page_number + 1}
                   </div>
-                  <div className="flex flex-col justify-center">
-                    <span className="text-xs font-bold">Page {page.page_number + 1}</span>
-                    <span className="text-[10px] text-gray-500">{page.file_name}</span>
-                    {page.is_favorite === 1 && (
-                      <RxStarFilled className="w-3 h-3 text-yellow-500 mt-1" />
-                    )}
-                  </div>
+                  {page.is_favorite === 1 && (
+                    <div className="absolute top-1 right-1">
+                      <RxStarFilled className="w-3 h-3 text-yellow-500 drop-shadow-sm" />
+                    </div>
+                  )}
                 </button>
               ))}
             </div>

@@ -14,12 +14,16 @@ type SinglePageModeProps = {
   pages: ComicPage[];
   slideshowActive?: boolean;
   onSlideshowComplete?: () => void;
+  onTogglePageFavorite: (pageId: number) => void;
+  onIncrementPageViewCount: (pageId: number) => void;
 };
 
 export const SinglePageMode: React.FC<SinglePageModeProps> = ({ 
   pages, 
   slideshowActive = false,
-  onSlideshowComplete 
+  onSlideshowComplete,
+  onTogglePageFavorite,
+  onIncrementPageViewCount
 }) => {
   const { tabs, activeTabId, updateTab } = useTabs();
   const { settings } = useSettings();
@@ -118,6 +122,10 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
           onPrevPage={handlePrevPage}
           onNextPage={handleNextPage}
           onGoToPage={handleGoToPage}
+          isFavorite={currentPageData.is_favorite === 1}
+          viewCount={currentPageData.view_count}
+          onToggleFavorite={() => onTogglePageFavorite(currentPageData.id)}
+          onIncrementViewCount={() => onIncrementPageViewCount(currentPageData.id)}
         />
       </div>
 

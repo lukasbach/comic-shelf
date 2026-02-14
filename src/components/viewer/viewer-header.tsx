@@ -1,6 +1,8 @@
 import React from 'react';
 import { Comic } from '../../types/comic';
 import { RxGrid, RxFile, RxRows, RxPlay, RxStop } from 'react-icons/rx';
+import { FavoriteButton } from '../favorite-button';
+import { ViewCounter } from '../view-counter';
 
 type ViewerHeaderProps = {
   comic: Comic;
@@ -9,6 +11,8 @@ type ViewerHeaderProps = {
   onModeChange: (mode: 'overview' | 'single' | 'scroll') => void;
   isSlideshowActive?: boolean;
   onToggleSlideshow?: () => void;
+  onToggleFavorite: () => void;
+  onIncrementViewCount: () => void;
 };
 
 export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
@@ -18,6 +22,8 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
   onModeChange,
   isSlideshowActive = false,
   onToggleSlideshow,
+  onToggleFavorite,
+  onIncrementViewCount,
 }) => {
   return (
     <div className="flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 h-12">
@@ -28,6 +34,18 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
         <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
           {pageCount} {pageCount === 1 ? 'page' : 'pages'}
         </span>
+        <div className="flex items-center gap-2 border-l border-gray-200 dark:border-gray-800 ml-2 pl-3">
+          <FavoriteButton 
+            isFavorite={comic.is_favorite === 1} 
+            onToggle={onToggleFavorite} 
+            size="sm"
+          />
+          <ViewCounter 
+            count={comic.view_count} 
+            onIncrement={onIncrementViewCount} 
+            size="sm"
+          />
+        </div>
       </div>
 
       <div className="flex items-center gap-2">

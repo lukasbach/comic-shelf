@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { RxChevronLeft, RxChevronRight } from 'react-icons/rx';
+import { FavoriteButton } from '../favorite-button';
+import { ViewCounter } from '../view-counter';
 
 type PageNavigationProps = {
   currentPage: number;
@@ -7,6 +9,10 @@ type PageNavigationProps = {
   onPrevPage: () => void;
   onNextPage: () => void;
   onGoToPage: (page: number) => void;
+  isFavorite?: boolean;
+  viewCount?: number;
+  onToggleFavorite?: () => void;
+  onIncrementViewCount?: () => void;
 };
 
 export const PageNavigation: React.FC<PageNavigationProps> = ({
@@ -15,6 +21,10 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
   onPrevPage,
   onNextPage,
   onGoToPage,
+  isFavorite = false,
+  viewCount = 0,
+  onToggleFavorite,
+  onIncrementViewCount,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(String(currentPage + 1));
@@ -90,6 +100,25 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
       >
         <RxChevronRight className="w-6 h-6" />
       </button>
+
+      {(onToggleFavorite || onIncrementViewCount) && (
+        <div className="flex items-center gap-4 ml-4 pl-4 border-l border-gray-200 dark:border-gray-800">
+          {onToggleFavorite && (
+            <FavoriteButton 
+              isFavorite={isFavorite} 
+              onToggle={onToggleFavorite} 
+              size="md"
+            />
+          )}
+          {onIncrementViewCount && (
+            <ViewCounter 
+              count={viewCount} 
+              onIncrement={onIncrementViewCount} 
+              size="md"
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -7,9 +7,15 @@ import { Tab } from '../../stores/tab-store';
 type OverviewModeProps = {
   comic: Comic;
   pages: ComicPage[];
+  onTogglePageFavorite: (pageId: number) => void;
+  onIncrementPageViewCount: (pageId: number) => void;
 };
 
-export const OverviewMode: React.FC<OverviewModeProps> = ({ pages }) => {
+export const OverviewMode: React.FC<OverviewModeProps> = ({ 
+  pages, 
+  onTogglePageFavorite, 
+  onIncrementPageViewCount 
+}) => {
   const { tabs, activeTabId, updateTab } = useTabs();
   const activeTab = tabs.find((t: Tab) => t.id === activeTabId);
   const currentPage = activeTab?.currentPage ?? 0;
@@ -32,6 +38,8 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({ pages }) => {
             page={page}
             isActive={index === currentPage}
             onClick={() => handlePageClick(index)}
+            onToggleFavorite={() => onTogglePageFavorite(page.id)}
+            onIncrementViewCount={() => onIncrementPageViewCount(page.id)}
           />
         ))}
       </div>

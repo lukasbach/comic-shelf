@@ -1,11 +1,14 @@
+import { useState, useEffect } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { ComicGrid } from '../../components/comic-grid';
+import { LibraryGrid } from '../../components/library-grid';
+import { ComicCard } from '../../components/comic-card';
 import { FavoriteImageCard } from '../../components/favorite-image-card';
 import { useFavoriteComics } from '../../hooks/use-favorite-comics';
 import { useFavoritePages } from '../../hooks/use-favorite-pages';
 import { useOpenComic } from '../../hooks/use-open-comic';
 import { useOpenComicPage } from '../../hooks/use-open-comic-page';
-import { RxSymbol, RxStarFilled } from 'react-icons/rx';
+import { RxSymbol, RxStarFilled, RxGrid, RxFile } from 'react-icons/rx';
+import { Tabs } from '../../components/tabs';
 
 export const Route = createFileRoute('/library/favorites')({
   component: LibraryFavorites,
@@ -16,6 +19,31 @@ function LibraryFavorites() {
   const { pages: favoritePages, loading: loadingPages } = useFavoritePages();
   const openComic = useOpenComic();
   const openComicPage = useOpenComicPage();
+
+  const [activeTab, setActiveTab] = useState('comics');
+
+  const tabItems = [
+    {
+      id: 'comics',
+      label: 'Comics',
+      count: favoriteComics.length,
+      icon: <RxGrid size={18} />,
+    },
+    {
+      id: 'pages',
+      label: 'Pages',
+      count: favoritePages.length,
+      icon: <RxFile size={18} />,
+    },
+  ];
+
+  useEffect(() => {
+    if (!loadingComics && !loadingPages) {
+      if (favoriteComics.length === 0 && favoritePages.length > 0) {
+        setActiveTab('pages');
+      }
+    }
+  }, [loadingComics, loadingPages, favoriteComics.length, favoritePages.length]);
 
   const loading = loadingComics || loadingPages;
   const hasFavorites = favoriteComics.length > 0 || favoritePages.length > 0;
@@ -33,46 +61,58 @@ function LibraryFavorites() {
       <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-4 text-center">
         <RxStarFilled size={48} className="opacity-20" />
         <p className="text-lg font-medium">No favorites yet.</p>
-        <p className="text-sm">Star comics or images to see them here.</p>
+        <p className="text-sm">Star comics or pages to see them here.</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full gap-8 p-6 overflow-auto">
-      <h1 className="text-2xl font-bold">Favorites</h1>
+    <div className="flex flex-col h-full gap-6 p-6 overflow-hidden">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Favorites</h1>
+      </div>
 
-      {favoriteComics.length > 0 && (
-        <section className="flex flex-col gap-4">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            Favorite Comics
-            <span className="text-sm font-normal text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-              {favoriteComics.length}
-            </span>
-          </h2>
-          <ComicGrid comics={favoriteComics} onOpenComic={openComic} />
-        </section>
-      )}
+      <Tabs 
+        items={tabItems} 
+        activeId={activeTab} 
+        onChange={(id) => setActiveTab(id)} 
+      />
 
-      {favoritePages.length > 0 && (
-        <section className="flex flex-col gap-4">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            Favorite Images
-            <span className="text-sm font-normal text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-              {favoritePages.length}
-            </span>
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
-            {favoritePages.map((page) => (
-              <FavoriteImageCard 
-                key={page.id} 
-                page={page} 
-                onOpen={openComicPage} 
-              />
-            ))}
-          </div>
-        </section>
-      )}
+      <div className="flex-1 overflow-auto">
+        {activeTab === 'comics' ? (
+          <section className="flex flex-col gap-4">
+            {favoriteComics.length > 0 ? (
+              <LibraryGrid>
+                {favoriteComics.map((comic) => (
+                  <ComicCard key={comic.id} comic={comic} onOpen={openComic} />
+                ))}
+              </LibraryGrid>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                <p>No favorite comics yet.</p>
+              </div>
+            )}
+          </section>
+        ) : (
+          <section className="flex flex-col gap-4">
+            {favoritePages.length > 0 ? (
+              <LibraryGrid>
+                {favoritePages.map((page) => (
+                  <FavoriteImageCard 
+                    key={page.id} 
+                    page={page} 
+                    onOpen={openComicPage} 
+                  />
+                ))}
+              </LibraryGrid>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                <p>No favorite pages yet.</p>
+              </div>
+            )}
+          </section>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { RxStarFilled, RxEyeOpen, RxFileText } from 'react-icons/rx';
+import { RxFileText, RxStarFilled } from 'react-icons/rx';
 import type { Comic } from '../types/comic';
 import { getImageUrl } from '../utils/image-utils';
 import * as comicService from '../services/comic-service';
+import { FavoriteButton } from './favorite-button';
+import { ViewCounter } from './view-counter';
 
 type ComicCardProps = {
   comic: Comic;
@@ -11,17 +13,32 @@ type ComicCardProps = {
 
 export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen }) => {
   const [isFavorite, setIsFavorite] = useState(comic.is_favorite === 1);
+  const [viewCount, setViewCount] = useState(comic.view_count);
 
   const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    await comicService.toggleFavorite(comic.id);
-    setIsFavorite(!isFavorite);
+    try {
+      // Optimistic update
+      setIsFavorite(!isFavorite);
+      await comicService.toggleFavorite(comic.id);
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error);
+      setIsFavorite(isFavorite); // Revert on error
+    }
   };
 
-  const handleContextMenu = (e: React.MouseEvent) => {
+  const handleIncrementViewCount = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     e.preventDefault();
-    handleToggleFavorite(e);
+    try {
+      // Optimistic update
+      setViewCount(viewCount + 1);
+      await comicService.incrementViewCount(comic.id);
+    } catch (error) {
+      console.error('Failed to increment view count:', error);
+      setViewCount(viewCount); // Revert on error
+    }
   };
 
   const coverUrl = comic.thumbnail_path 
@@ -30,9 +47,12 @@ export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen }) => {
 
   return (
     <div 
-      className="group flex flex-col bg-card rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all cursor-pointer"
+      className="group flex flex-col bg-card rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all cursor-pointer relative"
       onClick={() => onOpen(comic)}
-      onContextMenu={handleContextMenu}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        handleToggleFavorite(e);
+      }}
     >
       <div className="relative aspect-[3/4] overflow-hidden bg-muted">
         {coverUrl ? (
@@ -48,19 +68,29 @@ export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen }) => {
           </div>
         )}
         
-        <div className="absolute top-2 right-2 flex gap-1">
-          {isFavorite && (
-            <div className="bg-primary text-primary-foreground p-1 rounded-full shadow-md">
-              <RxStarFilled size={16} />
-            </div>
-          )}
-          {comic.view_count > 0 && (
-            <div className="bg-background/80 backdrop-blur-sm text-foreground px-1.5 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 shadow-sm">
-              <RxEyeOpen size={10} />
-              {comic.view_count}
-            </div>
-          )}
+        <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors pointer-events-none" />
+
+        <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+          <FavoriteButton 
+            isFavorite={isFavorite} 
+            onToggle={handleToggleFavorite} 
+            className="bg-black/40 backdrop-blur-sm p-1.5 rounded-full text-white shadow-lg"
+          />
         </div>
+
+        <div className="absolute bottom-2 left-2 flex gap-1 z-10">
+          <ViewCounter 
+            count={viewCount} 
+            onIncrement={handleIncrementViewCount} 
+            size="sm"
+          />
+        </div>
+
+        {isFavorite && (
+          <div className="absolute top-2 left-2 bg-yellow-400 text-yellow-950 p-1 rounded-full shadow-md z-10 group-hover:hidden flex items-center justify-center">
+            <RxStarFilled size={16} />
+          </div>
+        )}
       </div>
       
       <div className="p-3 flex flex-col gap-1 min-w-0">

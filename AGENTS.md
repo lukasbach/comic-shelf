@@ -134,6 +134,37 @@
 - [x] Integrate slideshow into `SinglePageMode`, `ScrollMode`, and `ViewerHeader`
 - [x] Verify implementation with unit tests
 
+## Task 10: Favorites & View Counter System
+- [x] Implement favorite toggle for comics and pages
+- [x] Implement manual view counter increment for comics and pages
+- [x] Create reusable `FavoriteButton` and `ViewCounter` components
+- [x] Integrate favorite/view count UI into library cards and viewer modes
+- [x] Update database services with toggle and increment operations
+- [x] Verify implementation with unit tests
+
+### Implementation Details
+
+- **Favorites System**: Users can now favorite both entire comics and individual pages. The state is persisted in the SQLite database (`is_favorite` column).
+- **View Counter**: Each comic and page has a `view_count` that increases only when the user manually clicks the view increment button ("eye + plus"). This allows users to track their reading history intentionally.
+- **UI Components**:
+  - `FavoriteButton`: A reusable animated star toggle.
+  - `ViewCounter`: A badge showing the current count with a plus button to increment it, featuring a brief numeric animation on click.
+- **Integration**:
+  - **Library**: `ComicCard` features an overlay with favorite toggle and view counter.
+  - **Viewer Header**: Displays comic-level favorites and view count.
+  - **Overview Mode**: Each page thumbnail shows its favorite status and view count on hover, allowing quick interactions.
+  - **Single Page Mode**: Navigation bar includes controls for the current page's favorite status and view count.
+  - **Scroll Mode**: Each page features a floating favorite toggle visible on hover.
+- **Optimistic UI**: All toggles and increments update the UI immediately and revert on service failure for a snappy user experience.
+- **Data Consistency**: `useComicData` hook was enhanced to provide unified state management and update handlers for both comic and page metadata within the viewer.
+- **Favorites View**: The existing Favorites view correctly aggregates all favorited comics and pages, with sorting by title and page number.
+
+## Task 11: Settings & Hotkeys
+- [ ] Implement settings page with user preferences
+- [ ] Implement global hotkeys for navigation and controls
+- [ ] Implement theme switching (light/dark/system)
+- [ ] Verify implementation with unit tests
+
 ### Implementation Details
 - **Slideshow Logic**: The slideshow system is split into multiple hooks. `useSlideshow` manages the high-level state (active, paused, progress) and is used in the main viewer route.
 - **Single Page Mode**: When the slideshow is active in single-page mode, `useSlideshowScroll` handles the timing. If a page is zoomed in and taller than the viewport, it performs a linear auto-scroll to the bottom (taking up 90% of the delay) before advancing. If the page fits, it simply waits the full delay duration.

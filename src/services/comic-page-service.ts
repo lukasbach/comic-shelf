@@ -52,5 +52,6 @@ export const getFavoritePages = async (): Promise<(ComicPage & { comic_title: st
     FROM comic_pages p 
     JOIN comics c ON p.comic_id = c.id 
     WHERE p.is_favorite = 1
+    ORDER BY c.title ASC, p.page_number ASC
   `);
 };

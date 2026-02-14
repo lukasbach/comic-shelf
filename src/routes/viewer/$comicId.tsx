@@ -36,7 +36,16 @@ function ComicViewerPage() {
   // Default to overview if no mode is set in tab
   const viewMode = activeTab?.viewMode ?? 'overview';
 
-  const { comic, pages, loading, error } = useComicData(Number(comicId));
+  const { 
+    comic, 
+    pages, 
+    loading, 
+    error, 
+    toggleComicFavorite, 
+    incrementComicViewCount,
+    togglePageFavorite,
+    incrementPageViewCount 
+  } = useComicData(Number(comicId));
 
   const nextPage = React.useCallback(() => {
     if (activeTabId && activeTab) {
@@ -94,7 +103,14 @@ function ComicViewerPage() {
   const renderContent = () => {
     switch (viewMode) {
       case 'overview':
-        return <OverviewMode comic={comic} pages={pages} />;
+        return (
+          <OverviewMode 
+            comic={comic} 
+            pages={pages} 
+            onTogglePageFavorite={togglePageFavorite}
+            onIncrementPageViewCount={incrementPageViewCount}
+          />
+        );
       case 'single':
         return (
           <SinglePageMode 
@@ -102,6 +118,8 @@ function ComicViewerPage() {
             pages={pages} 
             slideshowActive={slideshow.isActive}
             onSlideshowComplete={nextPage}
+            onTogglePageFavorite={togglePageFavorite}
+            onIncrementPageViewCount={incrementPageViewCount}
           />
         );
       case 'scroll':
@@ -110,10 +128,19 @@ function ComicViewerPage() {
             comic={comic} 
             pages={pages} 
             slideshowActive={slideshow.isActive}
+            onTogglePageFavorite={togglePageFavorite}
+            onIncrementPageViewCount={incrementPageViewCount}
           />
         );
       default:
-        return <OverviewMode comic={comic} pages={pages} />;
+        return (
+          <OverviewMode 
+            comic={comic} 
+            pages={pages} 
+            onTogglePageFavorite={togglePageFavorite}
+            onIncrementPageViewCount={incrementPageViewCount}
+          />
+        );
     }
   };
 
@@ -126,6 +153,8 @@ function ComicViewerPage() {
         onModeChange={handleModeChange}
         isSlideshowActive={slideshow.isActive}
         onToggleSlideshow={slideshow.toggle}
+        onToggleFavorite={toggleComicFavorite}
+        onIncrementViewCount={incrementComicViewCount}
       />
       <div className="flex-1 overflow-hidden">
         {renderContent()}

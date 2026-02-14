@@ -14,7 +14,7 @@ function RootLayout() {
     <SettingsProvider>
       <TabProvider>
         <IndexingProvider>
-          <div className="flex flex-col h-screen overflow-hidden bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+          <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground">
             <TopBar />
             <TabBar />
             <main className="flex-1 overflow-hidden relative">

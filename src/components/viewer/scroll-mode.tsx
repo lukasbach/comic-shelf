@@ -13,11 +13,15 @@ type ScrollModeProps = {
   comic: Comic;
   pages: ComicPage[];
   slideshowActive?: boolean;
+  onTogglePageFavorite: (pageId: number) => void;
+  onIncrementPageViewCount: (pageId: number) => void;
 };
 
 export const ScrollMode: React.FC<ScrollModeProps> = ({ 
   pages, 
-  slideshowActive = false 
+  slideshowActive = false,
+  onTogglePageFavorite,
+  onIncrementPageViewCount
 }) => {
   const { tabs, activeTabId, updateTab } = useTabs();
   const { settings } = useSettings();
@@ -132,6 +136,7 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
                 page={page}
                 zoomLevel={100} // Image should fill its LazyPage container (which is scaled by parent)
                 isFavorite={page.is_favorite === 1}
+                onToggleFavorite={() => onTogglePageFavorite(page.id)}
               />
             ))}
           </div>

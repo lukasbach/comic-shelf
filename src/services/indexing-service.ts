@@ -38,10 +38,16 @@ export type IndexedComic = {
   pages: IndexedPage[];
 };
 
+export type IndexingError = {
+  path: string;
+  message: string;
+};
+
 export type IndexingProgress = {
   current: number;
   total: number;
   currentPath: string;
+  errors: IndexingError[];
 };
 
 /**
@@ -87,7 +93,7 @@ export const extractMetadata = (relativePath: string, pattern: string): Record<s
 /**
  * Walks a directory recursively and returns all folders that contain images.
  */
-const walkDirectory = async (dirPath: string): Promise<string[]> => {
+const walkDirectory = async (dirPath: string, onError?: (path: string, error: any) => void): Promise<string[]> => {
   try {
     const entries = await readDir(dirPath);
     const comicDirs: string[] = [];
@@ -96,7 +102,7 @@ const walkDirectory = async (dirPath: string): Promise<string[]> => {
     for (const entry of entries) {
       const fullPath = await join(dirPath, entry.name);
       if (entry.isDirectory) {
-        const nestedComicDirs = await walkDirectory(fullPath);
+        const nestedComicDirs = await walkDirectory(fullPath, onError);
         comicDirs.push(...nestedComicDirs);
       } else if (entry.isFile && isImageFile(entry.name)) {
         containsImages = true;
@@ -110,58 +116,9 @@ const walkDirectory = async (dirPath: string): Promise<string[]> => {
     return comicDirs;
   } catch (error) {
     console.error(`Failed to read directory ${dirPath}:`, error);
+    onError?.(dirPath, error);
     return [];
   }
-};
-
-/**
- * Scans a base path and returns a list of indexed comics.
- */
-export const scanDirectory = async (basePath: string, pattern: string): Promise<IndexedComic[]> => {
-  const comicPaths = await walkDirectory(basePath);
-  if (comicPaths.length === 0) {
-    console.log(`No comic directories found in ${basePath}`);
-    return [];
-  }
-  
-  const indexedComics: IndexedComic[] = [];
-
-  for (const comicPath of comicPaths) {
-    const relPath = getRelativePath(basePath, comicPath);
-    const metadata = extractMetadata(relPath, pattern);
-    const entries = await readDir(comicPath);
-    
-    const imageFiles = entries
-      .filter((e) => e.isFile && isImageFile(e.name))
-      .map((e) => e.name)
-      .sort(naturalSortComparator);
-
-    if (imageFiles.length === 0) continue;
-
-    const pages: IndexedPage[] = [];
-    for (let i = 0; i < imageFiles.length; i++) {
-        const fileName = imageFiles[i];
-        const filePath = await join(comicPath, fileName);
-        pages.push({
-            filePath: normalizePath(filePath),
-            fileName,
-            pageNumber: i + 1,
-            thumbnailPath: '' // Will be filled during indexing
-        });
-    }
-
-    indexedComics.push({
-      path: normalizePath(comicPath),
-      title: await basename(comicPath),
-      artist: metadata.artist || null,
-      series: metadata.series || null,
-      issue: metadata.issue || null,
-      coverImagePath: pages[0].filePath,
-      pages,
-    });
-  }
-
-  return indexedComics;
 };
 
 /**
@@ -172,57 +129,118 @@ export const indexComics = async (
   pattern: string,
   onProgress?: (progress: IndexingProgress) => void
 ): Promise<void> => {
-  const comics = await scanDirectory(basePath, pattern);
-  const total = comics.length;
+  const errors: IndexingError[] = [];
+  
+  const comicPaths = await walkDirectory(basePath, (path, err) => {
+    errors.push({
+        path: normalizePath(path),
+        message: err instanceof Error ? err.message : String(err)
+    });
+    // Send progress update when a scan error occurs
+    onProgress?.({
+        current: 0,
+        total: 0,
+        currentPath: path,
+        errors: [...errors]
+    });
+  });
+
+  const total = comicPaths.length;
   const activeComicPaths = new Set<string>();
 
   for (let i = 0; i < total; i++) {
-    const indexedComic = comics[i];
+    const comicPath = comicPaths[i];
+    const normalizedComicPath = normalizePath(comicPath);
+    
     onProgress?.({
       current: i + 1,
       total,
-      currentPath: indexedComic.path,
+      currentPath: normalizedComicPath,
+      errors: [...errors],
     });
 
-    // 1. Upsert comic
-    const comicId = await comicService.upsertComic({
-      path: indexedComic.path,
-      title: indexedComic.title,
-      artist: indexedComic.artist,
-      series: indexedComic.series,
-      issue: indexedComic.issue,
-      cover_image_path: indexedComic.coverImagePath,
-      page_count: indexedComic.pages.length,
-      is_favorite: 0, // Ignored by upsert anyway
-      view_count: 0,  // Ignored by upsert anyway
-    });
+    try {
+      // 1. Scan individual comic directory
+      const relPath = getRelativePath(basePath, comicPath);
+      const metadata = extractMetadata(relPath, pattern);
+      const entries = await readDir(comicPath);
+      
+      const imageFiles = entries
+        .filter((e) => e.isFile && isImageFile(e.name))
+        .map((e) => e.name)
+        .sort(naturalSortComparator);
 
-    activeComicPaths.add(indexedComic.path);
+      if (imageFiles.length === 0) {
+          // Folder has no images, skip it but don't count as "error" necessarily 
+          // unless one was expected. walkDirectory already filters for folders with images though.
+          continue;
+      }
 
-    // 2. Generate thumbnails and update page paths
-    const pagesWithThumbs = [];
-    for (const page of indexedComic.pages) {
-      const thumbPath = await thumbnailService.generateThumbnail(
-        page.filePath,
-        comicId,
-        page.pageNumber
-      );
-      pagesWithThumbs.push({
-        ...page,
-        thumbnailPath: normalizePath(thumbPath),
+      const pages: IndexedPage[] = [];
+      for (let j = 0; j < imageFiles.length; j++) {
+          const fileName = imageFiles[j];
+          const filePath = await join(comicPath, fileName);
+          pages.push({
+              filePath: normalizePath(filePath),
+              fileName,
+              pageNumber: j + 1,
+              thumbnailPath: '' 
+          });
+      }
+
+      // 2. Upsert comic
+      const comicId = await comicService.upsertComic({
+        path: normalizedComicPath,
+        title: await basename(comicPath),
+        artist: metadata.artist || null,
+        series: metadata.series || null,
+        issue: metadata.issue || null,
+        cover_image_path: pages[0].filePath,
+        page_count: pages.length,
+        is_favorite: 0, 
+        view_count: 0,  
+      });
+
+      // 3. Generate thumbnails and update page paths
+      const pagesWithThumbs = [];
+      for (const page of pages) {
+        const thumbPath = await thumbnailService.generateThumbnail(
+          page.filePath,
+          comicId,
+          page.pageNumber
+        );
+        pagesWithThumbs.push({
+          ...page,
+          thumbnailPath: normalizePath(thumbPath),
+        });
+      }
+
+      // 4. Insert pages
+      await pageService.insertPages(comicId, pagesWithThumbs.map(p => ({
+        page_number: p.pageNumber,
+        file_path: p.filePath,
+        file_name: p.fileName,
+        thumbnail_path: p.thumbnailPath
+      })));
+
+      activeComicPaths.add(normalizedComicPath);
+    } catch (err) {
+      console.error(`Error indexing comic at ${comicPath}:`, err);
+      errors.push({
+        path: normalizedComicPath,
+        message: err instanceof Error ? err.message : String(err),
+      });
+      // Notify about the error immediately
+      onProgress?.({
+        current: i + 1,
+        total,
+        currentPath: normalizedComicPath,
+        errors: [...errors],
       });
     }
-
-    // 3. Insert pages
-    await pageService.insertPages(comicId, pagesWithThumbs.map(p => ({
-      page_number: p.pageNumber,
-      file_path: p.filePath,
-      file_name: p.fileName,
-      thumbnail_path: p.thumbnailPath
-    })));
   }
 
-  // 4. Cleanup removed comics (within this base path)
+  // 5. Cleanup removed comics (within this base path)
   const allDbComics = await comicService.getAllComics();
   const baseNormalized = normalizePath(basePath);
   

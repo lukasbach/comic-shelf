@@ -98,33 +98,42 @@ describe('indexing-service', () => {
     });
   });
 
-  describe('scanDirectory', () => {
-    it('should find comics in directories with images', async () => {
+  describe('indexComics', () => {
+    it('should index comics and handle errors for individual items', async () => {
       (readDir as any).mockImplementation((path: string) => {
         if (path === 'base') {
           return Promise.resolve([
             { name: 'Comic1', isDirectory: true, isFile: false },
-            { name: 'Other', isDirectory: true, isFile: false },
+            { name: 'BrokenComic', isDirectory: true, isFile: false },
           ]);
         }
         if (path === 'base/Comic1') {
           return Promise.resolve([
             { name: 'page1.jpg', isDirectory: false, isFile: true },
-            { name: 'page2.jpg', isDirectory: false, isFile: true },
           ]);
         }
-        if (path === 'base/Other') {
-          return Promise.resolve([]);
+        if (path === 'base/BrokenComic') {
+          return Promise.reject(new Error('Permission denied'));
         }
         return Promise.resolve([]);
       });
 
-      const comics = await indexingService.scanDirectory('base', '{series}');
+      const progressLogs: any[] = [];
+      await indexingService.indexComics('base', '{series}', (p) => {
+        progressLogs.push(p);
+      });
       
-      expect(comics).toHaveLength(1);
-      expect(comics[0].title).toBe('Comic1');
-      expect(comics[0].pages).toHaveLength(2);
-      expect(comics[0].series).toBe('Comic1');
+      // Should have reported errors
+      const lastProgress = progressLogs[progressLogs.length - 1];
+      expect(lastProgress.errors).toHaveLength(1);
+      expect(lastProgress.errors[0].path).toContain('BrokenComic');
+      expect(lastProgress.errors[0].message).toBe('Permission denied');
+
+      // Comic1 should have been indexed
+      const { upsertComic } = await import('./comic-service');
+      expect(upsertComic).toHaveBeenCalledWith(expect.objectContaining({
+          path: 'base/Comic1'
+      }));
     });
   });
 });

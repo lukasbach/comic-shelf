@@ -42,6 +42,7 @@
 - [x] Implement thumbnail generation and caching service
 - [x] Implement recursive directory scanning and pattern-based metadata extraction
 - [x] Implement indexing service for database synchronization
+- [x] Implement stale item removal and error handling during indexing
 - [x] Implement global re-index orchestration
 - [x] Create indexing context for state and progress tracking
 - [x] Integrate automatic indexing trigger on app start
@@ -73,9 +74,9 @@
 - **Thumbnail Generation**: Thumbnails are generated using an off-screen `<canvas>` in the webview. They are saved as JPEG (80% quality) with a maximum dimension of 300px in the app data directory (`thumbnails/{comicId}/{pageNumber}.jpg`).
 - **Caching**: The indexing engine checks the modification time (`mtime`) of source images and existing thumbnails. If the thumbnail is newer than the source image, generation is skipped.
 - **Indexing Logic**:
-  - `walkDirectory` recursively finds folders containing at least one image file.
+  - `walkDirectory` recursively finds folders containing at least one image file. It now captures and reports errors during scanning.
   - `extractMetadata` maps folder structure to pattern variables (e.g., `{artist}/{series}`).
-  - `indexComics` upserts comic data, generates thumbnails, and inserts page records.
+  - `indexComics` upserts comic data, generates thumbnails, and inserts page records. It handles per-item errors, skipping broken comics and logging them.
   - Stale comics (no longer on disk) and orphaned thumbnails are automatically removed during indexing.
-- **Progress Tracking**: The `IndexingProvider` exports `isIndexing` and `progress` state, which includes the current path being processed and overall counts across multiple index paths.
+- **Progress Tracking**: The `IndexingProvider` exports `isIndexing`, `progress`, and `errors` state. A new `IndexingStatus` component in the sidebar provides real-time feedback and error reporting.
 - **Utilities**: `getImageUrl` in `src/utils/image-utils.ts` handles the conversion of native file paths to Tauri asset URLs.

@@ -27,6 +27,7 @@ const blobToUint8Array = async (blob: Blob): Promise<Uint8Array> => {
 const generateThumbnailBlob = (sourceUrl: string, maxSize = THUMBNAIL_SIZE): Promise<Blob> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
+    img.crossOrigin = "anonymous";
     img.onload = () => {
       const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
       const width = Math.round(img.width * scale);

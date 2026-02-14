@@ -1,5 +1,5 @@
 import { getAllIndexPaths } from './index-path-service';
-import { indexComics, IndexingProgress } from './indexing-service';
+import { indexComics, IndexingError, IndexingProgress } from './indexing-service';
 
 export type GlobalIndexingProgress = {
   status: 'scanning' | 'indexing' | 'cleanup';
@@ -8,6 +8,7 @@ export type GlobalIndexingProgress = {
   current?: number;
   total?: number;
   currentPath?: string;
+  errors: IndexingError[];
 };
 
 /**
@@ -18,6 +19,7 @@ export const reindexAll = async (
 ): Promise<void> => {
   const paths = await getAllIndexPaths();
   const totalPaths = paths.length;
+  const allErrors: IndexingError[] = [];
 
   if (totalPaths === 0) return;
 
@@ -27,15 +29,23 @@ export const reindexAll = async (
       status: 'scanning',
       currentPathIndex: i + 1,
       totalPaths,
-      currentPath: path.path
+      currentPath: path.path,
+      errors: [...allErrors],
     });
 
     await indexComics(path.path, path.pattern, (p) => {
+      // Accumulate new errors from this path
+      const newErrors = p.errors.filter(e => !allErrors.some(ae => ae.path === e.path));
+      if (newErrors.length > 0) {
+        allErrors.push(...newErrors);
+      }
+      
       onProgress?.({
         ...p,
         status: 'indexing',
         currentPathIndex: i + 1,
         totalPaths,
+        errors: [...allErrors],
       });
     });
   }
@@ -43,7 +53,8 @@ export const reindexAll = async (
   onProgress?.({
     status: 'cleanup',
     currentPathIndex: totalPaths,
-    totalPaths
+    totalPaths,
+    errors: [...allErrors],
   });
 };
 

@@ -1,11 +1,14 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { GlobalIndexingProgress, reindexAll } from '../services/reindex-service';
+import { IndexingError } from '../services/indexing-service';
 
 type IndexingContextType = {
   isIndexing: boolean;
   progress: GlobalIndexingProgress | null;
   startIndexing: () => Promise<void>;
   lastIndexedAt: string | null;
+  errors: IndexingError[];
+  clearErrors: () => void;
 };
 
 const IndexingContext = createContext<IndexingContextType | undefined>(undefined);
@@ -14,20 +17,30 @@ export const IndexingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isIndexing, setIsIndexing] = useState(false);
   const [progress, setProgress] = useState<GlobalIndexingProgress | null>(null);
   const [lastIndexedAt, setLastIndexedAt] = useState<string | null>(null);
+  const [errors, setErrors] = useState<IndexingError[]>([]);
   const hasTriggeredInitial = useRef(false);
+
+  const clearErrors = useCallback(() => {
+    setErrors([]);
+  }, []);
 
   const startIndexing = useCallback(async () => {
     if (isIndexing) return;
     
     setIsIndexing(true);
     setProgress(null);
+    setErrors([]); // Clear old errors when starting new indexing
     try {
       await reindexAll((p) => {
         setProgress(p);
+        if (p.errors && p.errors.length > 0) {
+            setErrors(p.errors);
+        }
       });
       setLastIndexedAt(new Date().toISOString());
     } catch (error) {
       console.error('Indexing failed:', error);
+      setErrors(prev => [...prev, { path: 'Global', message: error instanceof Error ? error.message : String(error) }]);
     } finally {
       setIsIndexing(false);
       setProgress(null);
@@ -43,7 +56,7 @@ export const IndexingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [startIndexing]);
 
   return (
-    <IndexingContext.Provider value={{ isIndexing, progress, startIndexing, lastIndexedAt }}>
+    <IndexingContext.Provider value={{ isIndexing, progress, startIndexing, lastIndexedAt, errors, clearErrors }}>
       {children}
     </IndexingContext.Provider>
   );

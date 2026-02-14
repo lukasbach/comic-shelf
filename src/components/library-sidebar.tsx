@@ -7,6 +7,7 @@ import {
     RxMagnifyingGlass
 } from 'react-icons/rx'
 import { useTabs } from '../contexts/tab-context'
+import { IndexingStatus } from './indexing-status'
 
 const navItems = [
   { name: 'Explorer', to: '/library', icon: RxArchive },
@@ -49,6 +50,7 @@ export function LibrarySidebar() {
           </Link>
         ))}
       </nav>
+      <IndexingStatus />
     </div>
   )
 }

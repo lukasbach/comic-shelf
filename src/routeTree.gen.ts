@@ -9,38 +9,146 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LibraryRouteRouteImport } from './routes/library/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SettingsIndexRouteImport } from './routes/settings/index'
+import { Route as LibraryIndexRouteImport } from './routes/library/index'
+import { Route as ViewerComicIdRouteImport } from './routes/viewer/$comicId'
+import { Route as LibrarySearchRouteImport } from './routes/library/search'
+import { Route as LibraryListRouteImport } from './routes/library/list'
+import { Route as LibraryFavoritesRouteImport } from './routes/library/favorites'
+import { Route as LibraryArtistsRouteImport } from './routes/library/artists'
 
+const LibraryRouteRoute = LibraryRouteRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsIndexRoute = SettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryIndexRoute = LibraryIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LibraryRouteRoute,
+} as any)
+const ViewerComicIdRoute = ViewerComicIdRouteImport.update({
+  id: '/viewer/$comicId',
+  path: '/viewer/$comicId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibrarySearchRoute = LibrarySearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => LibraryRouteRoute,
+} as any)
+const LibraryListRoute = LibraryListRouteImport.update({
+  id: '/list',
+  path: '/list',
+  getParentRoute: () => LibraryRouteRoute,
+} as any)
+const LibraryFavoritesRoute = LibraryFavoritesRouteImport.update({
+  id: '/favorites',
+  path: '/favorites',
+  getParentRoute: () => LibraryRouteRoute,
+} as any)
+const LibraryArtistsRoute = LibraryArtistsRouteImport.update({
+  id: '/artists',
+  path: '/artists',
+  getParentRoute: () => LibraryRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/library': typeof LibraryRouteRouteWithChildren
+  '/library/artists': typeof LibraryArtistsRoute
+  '/library/favorites': typeof LibraryFavoritesRoute
+  '/library/list': typeof LibraryListRoute
+  '/library/search': typeof LibrarySearchRoute
+  '/viewer/$comicId': typeof ViewerComicIdRoute
+  '/library/': typeof LibraryIndexRoute
+  '/settings/': typeof SettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/library/artists': typeof LibraryArtistsRoute
+  '/library/favorites': typeof LibraryFavoritesRoute
+  '/library/list': typeof LibraryListRoute
+  '/library/search': typeof LibrarySearchRoute
+  '/viewer/$comicId': typeof ViewerComicIdRoute
+  '/library': typeof LibraryIndexRoute
+  '/settings': typeof SettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/library': typeof LibraryRouteRouteWithChildren
+  '/library/artists': typeof LibraryArtistsRoute
+  '/library/favorites': typeof LibraryFavoritesRoute
+  '/library/list': typeof LibraryListRoute
+  '/library/search': typeof LibrarySearchRoute
+  '/viewer/$comicId': typeof ViewerComicIdRoute
+  '/library/': typeof LibraryIndexRoute
+  '/settings/': typeof SettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/library'
+    | '/library/artists'
+    | '/library/favorites'
+    | '/library/list'
+    | '/library/search'
+    | '/viewer/$comicId'
+    | '/library/'
+    | '/settings/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/library/artists'
+    | '/library/favorites'
+    | '/library/list'
+    | '/library/search'
+    | '/viewer/$comicId'
+    | '/library'
+    | '/settings'
+  id:
+    | '__root__'
+    | '/'
+    | '/library'
+    | '/library/artists'
+    | '/library/favorites'
+    | '/library/list'
+    | '/library/search'
+    | '/viewer/$comicId'
+    | '/library/'
+    | '/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LibraryRouteRoute: typeof LibraryRouteRouteWithChildren
+  ViewerComicIdRoute: typeof ViewerComicIdRoute
+  SettingsIndexRoute: typeof SettingsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +156,83 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings/': {
+      id: '/settings/'
+      path: '/settings'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof SettingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library/': {
+      id: '/library/'
+      path: '/'
+      fullPath: '/library/'
+      preLoaderRoute: typeof LibraryIndexRouteImport
+      parentRoute: typeof LibraryRouteRoute
+    }
+    '/viewer/$comicId': {
+      id: '/viewer/$comicId'
+      path: '/viewer/$comicId'
+      fullPath: '/viewer/$comicId'
+      preLoaderRoute: typeof ViewerComicIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library/search': {
+      id: '/library/search'
+      path: '/search'
+      fullPath: '/library/search'
+      preLoaderRoute: typeof LibrarySearchRouteImport
+      parentRoute: typeof LibraryRouteRoute
+    }
+    '/library/list': {
+      id: '/library/list'
+      path: '/list'
+      fullPath: '/library/list'
+      preLoaderRoute: typeof LibraryListRouteImport
+      parentRoute: typeof LibraryRouteRoute
+    }
+    '/library/favorites': {
+      id: '/library/favorites'
+      path: '/favorites'
+      fullPath: '/library/favorites'
+      preLoaderRoute: typeof LibraryFavoritesRouteImport
+      parentRoute: typeof LibraryRouteRoute
+    }
+    '/library/artists': {
+      id: '/library/artists'
+      path: '/artists'
+      fullPath: '/library/artists'
+      preLoaderRoute: typeof LibraryArtistsRouteImport
+      parentRoute: typeof LibraryRouteRoute
+    }
   }
 }
 
+interface LibraryRouteRouteChildren {
+  LibraryArtistsRoute: typeof LibraryArtistsRoute
+  LibraryFavoritesRoute: typeof LibraryFavoritesRoute
+  LibraryListRoute: typeof LibraryListRoute
+  LibrarySearchRoute: typeof LibrarySearchRoute
+  LibraryIndexRoute: typeof LibraryIndexRoute
+}
+
+const LibraryRouteRouteChildren: LibraryRouteRouteChildren = {
+  LibraryArtistsRoute: LibraryArtistsRoute,
+  LibraryFavoritesRoute: LibraryFavoritesRoute,
+  LibraryListRoute: LibraryListRoute,
+  LibrarySearchRoute: LibrarySearchRoute,
+  LibraryIndexRoute: LibraryIndexRoute,
+}
+
+const LibraryRouteRouteWithChildren = LibraryRouteRoute._addFileChildren(
+  LibraryRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LibraryRouteRoute: LibraryRouteRouteWithChildren,
+  ViewerComicIdRoute: ViewerComicIdRoute,
+  SettingsIndexRoute: SettingsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

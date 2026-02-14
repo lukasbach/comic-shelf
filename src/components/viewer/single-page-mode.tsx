@@ -17,6 +17,7 @@ type SinglePageModeProps = {
   onSlideshowComplete?: () => void;
   onTogglePageFavorite: (pageId: number) => void;
   onIncrementPageViewCount: (pageId: number) => void;
+  onDecrementPageViewCount: (pageId: number) => void;
 };
 
 export const SinglePageMode: React.FC<SinglePageModeProps> = ({ 
@@ -24,7 +25,8 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
   slideshowActive = false,
   onSlideshowComplete,
   onTogglePageFavorite,
-  onIncrementPageViewCount
+  onIncrementPageViewCount,
+  onDecrementPageViewCount
 }) => {
   const { tabs, activeTabId, updateTab } = useTabs();
   const { settings } = useSettings();
@@ -114,6 +116,7 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
           />
         </div>
         <PageNavigation
+          page={currentPageData}
           currentPage={currentPage}
           totalPages={pages.length}
           onPrevPage={handlePrevPage}
@@ -123,6 +126,7 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
           viewCount={currentPageData.view_count}
           onToggleFavorite={() => onTogglePageFavorite(currentPageData.id)}
           onIncrementViewCount={() => onIncrementPageViewCount(currentPageData.id)}
+          onDecrementViewCount={() => onDecrementPageViewCount(currentPageData.id)}
         />
       </div>
 

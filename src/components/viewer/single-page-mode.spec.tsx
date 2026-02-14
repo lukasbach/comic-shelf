@@ -12,7 +12,11 @@ vi.mock('../../contexts/tab-context', () => ({
 
 vi.mock('../../contexts/viewer-ref-context', () => ({
   ViewerRefProvider: ({ children }: any) => children,
-  useViewerRef: vi.fn(),
+  useViewerRef: vi.fn(() => ({
+    scrollContainerRef: { current: null },
+    scrollToPage: vi.fn(),
+    registerScrollToPage: vi.fn(),
+  })),
 }));
 
 vi.mock('../../contexts/settings-context', () => ({

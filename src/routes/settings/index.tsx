@@ -36,40 +36,31 @@ function SettingsPage() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
 
   const form = useForm({
-    defaultValues: settings,
+    defaultValues: settings as AppSettings,
     onSubmit: async ({ value }) => {
       setSaveStatus('saving');
       await updateSettings(value);
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
     },
+    listeners: {
+      onChangeDebounceMs: 1000,
+      onChange: ({ formApi }) => {
+        if (formApi.state.isDirty) {
+          updateSettings(formApi.state.values as AppSettings);
+        }
+      }
+    }
   });
 
-  // Sync form values if settings load later
+  // Sync form values if settings load later (e.g. from disk)
   useEffect(() => {
     if (!loadingSettings) {
-      form.setFieldValue('hotkeys', settings.hotkeys);
-      form.setFieldValue('defaultZoomLevel', settings.defaultZoomLevel);
-      form.setFieldValue('defaultViewMode', settings.defaultViewMode);
-      form.setFieldValue('slideshowDelay', settings.slideshowDelay);
-      form.setFieldValue('theme', settings.theme);
-      form.setFieldValue('slideshowAutoScroll', settings.slideshowAutoScroll);
+      form.reset(settings);
     }
   }, [loadingSettings, settings, form]);
 
-  // Auto-save changes
-  useEffect(() => {
-    const unsub = form.subscribe((state) => {
-      // If dirty, trigger onSubmit logic via a direct update call
-      // We don't call form.handleSubmit() because it has side effects like validation
-      // and we want this to be semi-debounceable or at least efficient.
-      // For now, we'll just use a simple check.
-      if (state.isDirty) {
-        updateSettings(state.values as AppSettings);
-      }
-    });
-    return () => unsub();
-  }, [form, updateSettings]);
+  // handleRemovePath etc.
 
   const handleSelectFolder = async () => {
     try {
@@ -130,7 +121,7 @@ function SettingsPage() {
                 saveStatus === 'saved' 
                   ? 'bg-green-600 text-white' 
                   : 'bg-blue-600 hover:bg-blue-500 text-white'
-              } disabled:opacity-50 min-w-[140px] justify-center`}
+              } disabled:opacity-50 min-w-35 justify-center`}
             >
               {saveStatus === 'saving' ? (
                 <RxSymbol className="animate-spin" />
@@ -269,7 +260,7 @@ function SettingsPage() {
                           {ms / 1000}s
                         </button>
                       ))}
-                      <div className="flex-1 min-w-[200px] ml-auto">
+                      <div className="flex-1 min-w-50 ml-auto">
                         <input
                           type="range"
                           min="1000"
@@ -379,12 +370,12 @@ function SettingsPage() {
                   <div className="flex-1 max-w-md space-y-1">
                     <div className="flex justify-between text-[10px] text-slate-400 uppercase">
                       <span>{progress.status === 'scanning' ? 'Scanning...' : 'Indexing...'}</span>
-                      <span>{progress.current} / {progress.total}</span>
+                      <span>{(progress.current ?? 0)} / {(progress.total ?? 0)}</span>
                     </div>
                     <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                       <div 
                         className="bg-green-500 h-full transition-all duration-300"
-                        style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                        style={{ width: `${((progress.current ?? 0) / (progress.total ?? 1)) * 100}%` }}
                       />
                     </div>
                   </div>

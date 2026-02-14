@@ -57,7 +57,7 @@ export const HotkeyInput: React.FC<HotkeyInputProps> = ({ value, onChange, label
             ? 'bg-red-500/5 border-red-500/50'
             : 'bg-slate-800 border-slate-700 hover:border-slate-600'
       }`}>
-        <div className="flex-1 font-mono text-sm min-h-[1.5rem] flex items-center">
+        <div className="flex-1 font-mono text-sm min-h-6 flex items-center">
           {isRecording ? (
             <span className="text-blue-400 animate-pulse">Press a key...</span>
           ) : (

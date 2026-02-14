@@ -21,7 +21,7 @@ export const SlideshowIndicator: React.FC<SlideshowIndicatorProps> = ({
   if (!isActive) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 z-50 flex flex-col gap-2 p-3 bg-black/80 backdrop-blur-lg rounded-lg border border-white/20 shadow-2xl min-w-[200px]">
+    <div className="fixed bottom-4 left-4 z-50 flex flex-col gap-2 p-3 bg-black/80 backdrop-blur-lg rounded-lg border border-white/20 shadow-2xl min-w-50">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <div className="relative flex h-2 w-2">

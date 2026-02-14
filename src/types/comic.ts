@@ -11,6 +11,7 @@ export type Comic = {
   view_count: number;
   created_at: string;
   updated_at: string;
+  last_opened_at: string | null;
   thumbnail_path?: string | null;
 };
 
@@ -23,6 +24,7 @@ export type ComicPage = {
   thumbnail_path: string | null;
   is_favorite: number;
   view_count: number;
+  last_opened_at: string | null;
 };
 
 export type IndexPath = {

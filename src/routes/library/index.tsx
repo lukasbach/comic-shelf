@@ -167,7 +167,7 @@ function LibraryExplorer() {
             <RxChevronRight className="text-muted-foreground" />
             <button 
               onClick={() => setCurrentPath(crumb.path)}
-              className={`p-1 px-2 hover:bg-muted rounded text-sm transition-colors truncate max-w-[200px] ${
+              className={`p-1 px-2 hover:bg-muted rounded text-sm transition-colors truncate max-w-50 ${
                 i === breadcrumbs.length - 1 ? 'font-bold' : 'font-medium'
               }`}
             >

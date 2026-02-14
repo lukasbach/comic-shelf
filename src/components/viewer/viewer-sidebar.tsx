@@ -178,7 +178,7 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
                 <button
                   key={page.id}
                   onClick={() => onPageSelect(page.page_number)}
-                  className="group relative aspect-[3/4] rounded-md overflow-hidden bg-gray-100 dark:bg-gray-800 hover:ring-2 hover:ring-blue-500 transition-all shadow-sm"
+                  className="group relative aspect-3/4 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-800 hover:ring-2 hover:ring-blue-500 transition-all shadow-sm"
                   title={`Page ${page.page_number + 1}`}
                 >
                   <img

@@ -33,7 +33,7 @@ export function BreadcrumbBar() {
     <nav className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
       {segments.map((segment, index) => (
         <div key={segment.label} className="flex items-center">
-          {index > 0 && <RxChevronRight className="mx-2 text-gray-300 flex-shrink-0" />}
+          {index > 0 && <RxChevronRight className="mx-2 text-gray-300 shrink-0" />}
           <Link
             to={segment.to}
             className={`hover:text-blue-600 dark:hover:text-blue-400 transition-colors ${

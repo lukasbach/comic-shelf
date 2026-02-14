@@ -20,6 +20,14 @@ vi.mock('../../contexts/settings-context', () => ({
   }),
 }));
 
+vi.mock('../../contexts/viewer-ref-context', () => ({
+  useViewerRef: () => ({
+    scrollContainerRef: { current: null },
+    scrollToPage: vi.fn(),
+    registerScrollToPage: vi.fn(),
+  }),
+}));
+
 // Mock components that might be complex to render
 vi.mock('./viewer-sidebar', () => ({
   ViewerSidebar: () => <div data-testid="viewer-sidebar" />,

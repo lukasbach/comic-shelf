@@ -16,13 +16,15 @@ type ScrollModeProps = {
   slideshowActive?: boolean;
   onTogglePageFavorite: (pageId: number) => void;
   onIncrementPageViewCount: (pageId: number) => void;
+  onDecrementPageViewCount: (pageId: number) => void;
 };
 
 export const ScrollMode: React.FC<ScrollModeProps> = ({ 
   pages, 
   slideshowActive = false,
   onTogglePageFavorite,
-  onIncrementPageViewCount
+  onIncrementPageViewCount,
+  onDecrementPageViewCount
 }) => {
   const { tabs, activeTabId, updateTab } = useTabs();
   const { settings } = useSettings();
@@ -35,8 +37,18 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
   
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef<number | null>(null);
-  const { scrollContainerRef: containerRef } = useViewerRef();
+  const { scrollContainerRef: containerRef, registerScrollToPage } = useViewerRef();
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Register scroll jump function
+  useEffect(() => {
+    registerScrollToPage((pageIndex, behavior = 'smooth') => {
+      if (pageRefs.current[pageIndex]) {
+        pageRefs.current[pageIndex]?.scrollIntoView({ behavior, block: 'start' });
+      }
+    });
+    return () => registerScrollToPage(() => {});
+  }, [registerScrollToPage]);
 
   // Initialize pageRefs array
   useEffect(() => {
@@ -131,14 +143,16 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
             }}
           >
             {pages.map((page, index) => (
-              <LazyPage
-                key={page.id}
-                ref={(el) => { pageRefs.current[index] = el; }}
-                page={page}
-                zoomLevel={100} // Image should fill its LazyPage container (which is scaled by parent)
-                isFavorite={page.is_favorite === 1}
-                onToggleFavorite={() => onTogglePageFavorite(page.id)}
-              />
+            <LazyPage
+              key={page.id}
+              ref={(el: HTMLDivElement | null) => { pageRefs.current[index] = el; }}
+              page={page}
+              zoomLevel={100} // Image should fill its LazyPage container (which is scaled by parent)
+              isFavorite={page.is_favorite === 1}
+              onToggleFavorite={() => onTogglePageFavorite(page.id)}
+              onIncrementViewCount={() => onIncrementPageViewCount(page.id)}
+              onDecrementViewCount={() => onDecrementPageViewCount(page.id)}
+            />
             ))}
           </div>
         </div>

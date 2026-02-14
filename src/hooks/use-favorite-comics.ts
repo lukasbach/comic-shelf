@@ -6,9 +6,16 @@ export const useFavoriteComics = () => {
   const [comics, setComics] = useState<Comic[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchComics = () => {
+    setLoading(true);
+    comicService.getFavoriteComics()
+      .then(setComics)
+      .finally(() => setLoading(false));
+  };
+
   useEffect(() => {
-    comicService.getFavoriteComics().then(setComics).finally(() => setLoading(false));
+    fetchComics();
   }, []);
 
-  return { comics, loading };
+  return { comics, loading, refetch: fetchComics };
 };

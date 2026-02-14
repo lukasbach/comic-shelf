@@ -2,8 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { RxChevronLeft, RxChevronRight } from 'react-icons/rx';
 import { FavoriteButton } from '../favorite-button';
 import { ViewCounter } from '../view-counter';
+import { ComicContextMenu } from '../comic-context-menu';
+import { ComicPage } from '../../types/comic';
 
 type PageNavigationProps = {
+  page?: ComicPage;
   currentPage: number;
   totalPages: number;
   onPrevPage: () => void;
@@ -13,9 +16,11 @@ type PageNavigationProps = {
   viewCount?: number;
   onToggleFavorite?: () => void;
   onIncrementViewCount?: () => void;
+  onDecrementViewCount?: () => void;
 };
 
 export const PageNavigation: React.FC<PageNavigationProps> = ({
+  page,
   currentPage,
   totalPages,
   onPrevPage,
@@ -25,6 +30,7 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
   viewCount = 0,
   onToggleFavorite,
   onIncrementViewCount,
+  onDecrementViewCount,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(String(currentPage + 1));
@@ -68,7 +74,7 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
         <RxChevronLeft className="w-6 h-6" />
       </button>
 
-      <div className="min-w-[120px] text-center">
+      <div className="min-w-30 text-center">
         {isEditing ? (
           <div className="flex items-center justify-center gap-2">
             <input
@@ -102,22 +108,31 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
       </button>
 
       {(onToggleFavorite || onIncrementViewCount) && (
-        <div className="flex items-center gap-4 ml-4 pl-4 border-l border-gray-200 dark:border-gray-800">
-          {onToggleFavorite && (
-            <FavoriteButton 
-              isFavorite={isFavorite} 
-              onToggle={onToggleFavorite} 
-              size="md"
-            />
-          )}
-          {onIncrementViewCount && (
-            <ViewCounter 
-              count={viewCount} 
-              onIncrement={onIncrementViewCount} 
-              size="md"
-            />
-          )}
-        </div>
+        <ComicContextMenu
+          page={page}
+          isFavorite={isFavorite}
+          viewCount={viewCount}
+          onToggleFavorite={onToggleFavorite}
+          onIncrementViewCount={onIncrementViewCount}
+          onDecrementViewCount={onDecrementViewCount}
+        >
+          <div className="flex items-center gap-4 ml-4 pl-4 border-l border-gray-200 dark:border-gray-800">
+            {onToggleFavorite && (
+              <FavoriteButton 
+                isFavorite={isFavorite} 
+                onToggle={onToggleFavorite} 
+                size="md"
+              />
+            )}
+            {onIncrementViewCount && (
+              <ViewCounter 
+                count={viewCount} 
+                onIncrement={onIncrementViewCount} 
+                size="md"
+              />
+            )}
+          </div>
+        </ComicContextMenu>
       )}
     </div>
   );

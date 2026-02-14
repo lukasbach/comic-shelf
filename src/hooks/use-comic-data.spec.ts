@@ -8,12 +8,14 @@ vi.mock('../services/comic-service', () => ({
   getComicById: vi.fn(),
   toggleFavorite: vi.fn(),
   incrementViewCount: vi.fn(),
+  updateComicLastOpened: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('../services/comic-page-service', () => ({
   getPagesByComicId: vi.fn(),
   togglePageFavorite: vi.fn(),
   incrementPageViewCount: vi.fn(),
+  updatePageLastOpened: vi.fn().mockResolvedValue(undefined),
 }));
 
 describe('useComicData', () => {
@@ -106,6 +108,27 @@ describe('useComicData', () => {
 
     expect(result.current.pages[0].view_count).toBe(1);
     expect(comicPageService.incrementPageViewCount).toHaveBeenCalledWith(101);
+  });
+
+  it('should call updateComicLastOpened on load', async () => {
+    vi.mocked(comicService.getComicById).mockResolvedValue({ id: 1 } as any);
+    vi.mocked(comicPageService.getPagesByComicId).mockResolvedValue([]);
+    vi.mocked(comicService.updateComicLastOpened).mockResolvedValue(undefined);
+
+    renderHook(() => useComicData(1));
+    await waitFor(() => {
+      expect(comicService.updateComicLastOpened).toHaveBeenCalledWith(1);
+    });
+  });
+
+  it('markPageAsOpened should call service', async () => {
+    const { result } = renderHook(() => useComicData(1));
+    
+    await act(async () => {
+      await result.current.markPageAsOpened(101);
+    });
+
+    expect(comicPageService.updatePageLastOpened).toHaveBeenCalledWith(101);
   });
 
   it('should handle errors', async () => {

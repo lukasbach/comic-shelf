@@ -7,7 +7,7 @@ import { useViewerRef } from '../contexts/viewer-ref-context';
 export const useAppHotkeys = () => {
   const { settings } = useSettings();
   const { activeTabId, tabs, updateTab, closeTab, nextTab, prevTab } = useTabs();
-  const { scrollContainerRef } = useViewerRef();
+  const { scrollContainerRef, scrollToPage } = useViewerRef();
   const activeTab = tabs.find(t => t.id === activeTabId);
   
   const scrollIntervalRef = useRef<number | null>(null);
@@ -83,16 +83,27 @@ export const useAppHotkeys = () => {
 
       // Comic Viewer Hotkeys (only if active tab is a comic)
       else if (activeTab?.type === 'comic') {
+        const isScrollMode = activeTab.viewMode === 'scroll';
+
         // Navigation
         if (key === hotkeys.nextPage) {
           e.preventDefault();
           if (activeTab.currentPage !== undefined) {
-             updateTab(activeTab.id, { currentPage: activeTab.currentPage + 1 });
+            if (isScrollMode) {
+              scrollToPage(activeTab.currentPage + 1, 'smooth');
+            } else {
+              updateTab(activeTab.id, { currentPage: activeTab.currentPage + 1 });
+            }
           }
         } else if (key === hotkeys.prevPage) {
           e.preventDefault();
           if (activeTab.currentPage !== undefined) {
-             updateTab(activeTab.id, { currentPage: Math.max(0, activeTab.currentPage - 1) });
+             const prevPageIndex = Math.max(0, activeTab.currentPage - 1);
+             if (isScrollMode) {
+               scrollToPage(prevPageIndex, 'smooth');
+             } else {
+               updateTab(activeTab.id, { currentPage: prevPageIndex });
+             }
           }
         }
 

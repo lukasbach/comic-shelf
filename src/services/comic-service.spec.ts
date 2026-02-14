@@ -61,4 +61,12 @@ describe('comic-service', () => {
     expect(mockDb.select).toHaveBeenCalledWith(expect.stringContaining('SELECT id FROM comics WHERE path = $1'), [comic.path]);
     expect(id).toBe(123);
   });
+
+  it('updateComicLastOpened should call execute with CURRENT_TIMESTAMP', async () => {
+    await comicService.updateComicLastOpened(1);
+    expect(mockDb.execute).toHaveBeenCalledWith(
+      expect.stringContaining('UPDATE comics SET last_opened_at = datetime(\'now\') WHERE id = $1'),
+      [1]
+    );
+  });
 });

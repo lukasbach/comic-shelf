@@ -24,7 +24,7 @@ export const FolderCard: React.FC<FolderCardProps> = ({
       className="group flex flex-col bg-card rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all cursor-pointer relative"
       onClick={() => onClick(path)}
     >
-      <div className="relative aspect-[3/4] overflow-hidden bg-muted flex items-center justify-center">
+      <div className="relative aspect-3/4 overflow-hidden bg-muted flex items-center justify-center">
         {coverUrl ? (
           <img 
             src={coverUrl} 

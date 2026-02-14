@@ -45,12 +45,25 @@ function ComicViewerPage() {
     error, 
     toggleComicFavorite, 
     incrementComicViewCount,
+    decrementComicViewCount,
     togglePageFavorite,
-    incrementPageViewCount 
+    incrementPageViewCount,
+    decrementPageViewCount,
+    markPageAsOpened
   } = useComicData(Number(comicId));
 
+  // Update page last opened timestamp
+  useEffect(() => {
+    if (viewMode !== 'overview' && activeTab && pages.length > 0) {
+      const pageIndex = activeTab.currentPage;
+      if (pageIndex !== undefined && pageIndex >= 0 && pageIndex < pages.length) {
+        markPageAsOpened(pages[pageIndex].id);
+      }
+    }
+  }, [viewMode, activeTab?.currentPage, pages, markPageAsOpened]);
+
   const nextPage = React.useCallback(() => {
-    if (activeTabId && activeTab) {
+    if (activeTabId && activeTab && activeTab.currentPage !== undefined) {
       const nextPageIndex = activeTab.currentPage + 1;
       if (nextPageIndex < pages.length) {
         updateTab(activeTabId, { currentPage: nextPageIndex });
@@ -126,6 +139,7 @@ function ComicViewerPage() {
             pages={pages} 
             onTogglePageFavorite={togglePageFavorite}
             onIncrementPageViewCount={incrementPageViewCount}
+            onDecrementPageViewCount={decrementPageViewCount}
           />
         );
       case 'single':
@@ -137,6 +151,7 @@ function ComicViewerPage() {
             onSlideshowComplete={nextPage}
             onTogglePageFavorite={togglePageFavorite}
             onIncrementPageViewCount={incrementPageViewCount}
+            onDecrementPageViewCount={decrementPageViewCount}
           />
         );
       case 'scroll':
@@ -147,6 +162,7 @@ function ComicViewerPage() {
             slideshowActive={slideshow.isActive}
             onTogglePageFavorite={togglePageFavorite}
             onIncrementPageViewCount={incrementPageViewCount}
+            onDecrementPageViewCount={decrementPageViewCount}
           />
         );
       default:
@@ -156,6 +172,7 @@ function ComicViewerPage() {
             pages={pages} 
             onTogglePageFavorite={togglePageFavorite}
             onIncrementPageViewCount={incrementPageViewCount}
+            onDecrementPageViewCount={decrementPageViewCount}
           />
         );
     }
@@ -172,6 +189,7 @@ function ComicViewerPage() {
         onToggleSlideshow={toggleSlideshow}
         onToggleFavorite={toggleComicFavorite}
         onIncrementViewCount={incrementComicViewCount}
+        onDecrementViewCount={decrementComicViewCount}
       />
       <div className="flex-1 overflow-hidden" ref={scrollContainerRef}>
         {renderContent()}

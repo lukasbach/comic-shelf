@@ -10,12 +10,14 @@ type OverviewModeProps = {
   pages: ComicPage[];
   onTogglePageFavorite: (pageId: number) => void;
   onIncrementPageViewCount: (pageId: number) => void;
+  onDecrementPageViewCount: (pageId: number) => void;
 };
 
 export const OverviewMode: React.FC<OverviewModeProps> = ({ 
   pages, 
   onTogglePageFavorite, 
-  onIncrementPageViewCount 
+  onIncrementPageViewCount,
+  onDecrementPageViewCount
 }) => {
   const { tabs, activeTabId, updateTab } = useTabs();
   const activeTab = tabs.find((t: Tab) => t.id === activeTabId);
@@ -42,6 +44,7 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
             onClick={() => handlePageClick(index)}
             onToggleFavorite={() => onTogglePageFavorite(page.id)}
             onIncrementViewCount={() => onIncrementPageViewCount(page.id)}
+            onDecrementViewCount={() => onDecrementPageViewCount(page.id)}
           />
         ))}
       </div>

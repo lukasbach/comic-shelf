@@ -45,6 +45,16 @@ export const incrementPageViewCount = async (id: number): Promise<void> => {
   await db.execute('UPDATE comic_pages SET view_count = view_count + 1 WHERE id = $1', [id]);
 };
 
+export const decrementPageViewCount = async (id: number): Promise<void> => {
+  const db = await getDb();
+  await db.execute('UPDATE comic_pages SET view_count = MAX(0, view_count - 1) WHERE id = $1', [id]);
+};
+
+export const updatePageLastOpened = async (id: number): Promise<void> => {
+  const db = await getDb();
+  await db.execute('UPDATE comic_pages SET last_opened_at = datetime(\'now\') WHERE id = $1', [id]);
+};
+
 export const getFavoritePages = async (): Promise<(ComicPage & { comic_title: string })[]> => {
   const db = await getDb();
   return await db.select<(ComicPage & { comic_title: string })[]>(`

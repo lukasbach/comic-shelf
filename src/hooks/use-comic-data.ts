@@ -16,6 +16,7 @@ export const useComicData = (comicId: number) => {
     Promise.all([
       comicService.getComicById(comicId),
       comicPageService.getPagesByComicId(comicId),
+      comicService.updateComicLastOpened(comicId).catch(err => console.error('Failed to update comic last opened:', err))
     ])
       .then(([c, p]) => {
         if (isMounted) {
@@ -63,6 +64,17 @@ export const useComicData = (comicId: number) => {
     }
   }, [comic]);
 
+  const decrementComicViewCount = useCallback(async () => {
+    if (!comic) return;
+    try {
+      setComic(prev => prev ? { ...prev, view_count: Math.max(0, prev.view_count - 1) } : null);
+      await comicService.decrementViewCount(comic.id);
+    } catch (err) {
+      console.error('Failed to decrement comic view count:', err);
+      setComic(prev => prev ? { ...prev, view_count: prev.view_count } : null);
+    }
+  }, [comic]);
+
   const togglePageFavorite = useCallback(async (pageId: number) => {
     const pageIndex = pages.findIndex(p => p.id === pageId);
     if (pageIndex === -1) return;
@@ -90,6 +102,29 @@ export const useComicData = (comicId: number) => {
     }
   }, [pages]);
 
+  const decrementPageViewCount = useCallback(async (pageId: number) => {
+    const pageIndex = pages.findIndex(p => p.id === pageId);
+    if (pageIndex === -1) return;
+
+    try {
+      setPages(prev => prev.map(p => p.id === pageId ? { ...p, view_count: Math.max(0, p.view_count - 1) } : p));
+      await comicPageService.decrementPageViewCount(pageId);
+    } catch (err) {
+      console.error('Failed to decrement page view count:', err);
+      setPages(prev => prev.map(p => p.id === pageId ? { ...p, view_count: p.view_count } : p));
+    }
+  }, [pages]);
+
+  const markPageAsOpened = useCallback(async (pageId: number) => {
+    try {
+      await comicPageService.updatePageLastOpened(pageId);
+      // We don't necessarily need to update local state since it's not surfaced,
+      // but if we were to, we could update the pages array here.
+    } catch (err) {
+      console.error('Failed to mark page as opened:', err);
+    }
+  }, []);
+
   return { 
     comic, 
     pages, 
@@ -97,7 +132,10 @@ export const useComicData = (comicId: number) => {
     error, 
     toggleComicFavorite, 
     incrementComicViewCount,
+    decrementComicViewCount,
     togglePageFavorite,
-    incrementPageViewCount
+    incrementPageViewCount,
+    decrementPageViewCount,
+    markPageAsOpened
   };
 };

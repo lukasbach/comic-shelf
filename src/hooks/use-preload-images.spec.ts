@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { usePreloadImages } from './use-preload-images';
 import { ComicPage } from '../types/comic';
 
-// Mock getImageUrl
-vi.mock('../utils/image-utils', () => ({
-  getImageUrl: (path: string) => `asset://${path}`,
+// Mock resolvePageImageUrl
+vi.mock('../services/page-source-utils', () => ({
+  resolvePageImageUrl: vi.fn().mockImplementation((page: ComicPage) => Promise.resolve(`asset://${page.file_path}`)),
 }));
 
 // Mock Image
@@ -32,11 +32,13 @@ describe('usePreloadImages', () => {
     // No crash
   });
 
-  it('should preload next bunch of images', () => {
+  it('should preload next bunch of images', async () => {
     const spy = vi.spyOn(window, 'Image' as any);
     renderHook(() => usePreloadImages(mockPages, 1, 2));
     
     // Should preload page index 0, 2, 3 (currentPage-1, currentPage+1, currentPage+2)
-    expect(spy).toHaveBeenCalledTimes(3);
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledTimes(3);
+    });
   });
 });

@@ -3,9 +3,10 @@ import { render, screen } from '@testing-library/react';
 import { LazyPage } from './lazy-page';
 import { ComicPage } from '../../types/comic';
 
-// Mock getImageUrl
-vi.mock('../../utils/image-utils', () => ({
-  getImageUrl: (path: string) => `asset://${path}`,
+// Mock resolvePageImageUrl
+vi.mock('../../services/page-source-utils', () => ({
+  resolvePageImageUrl: vi.fn().mockImplementation((page: ComicPage) => Promise.resolve(`asset://${page.file_path}`)),
+  resolvePagePreviewUrl: vi.fn().mockImplementation((page: ComicPage) => Promise.resolve(`asset://${page.thumbnail_path ?? page.file_path}`)),
 }));
 
 describe('LazyPage', () => {
@@ -41,9 +42,9 @@ describe('LazyPage', () => {
     expect(screen.getByText('Page 1')).toBeDefined();
   });
 
-  it('should render image when visible', () => {
+  it('should render image when visible', async () => {
     render(<LazyPage page={mockPage} zoomLevel={100} />);
-    const img = screen.getByRole('img');
+    const img = await screen.findByRole('img');
     expect(img).toBeDefined();
     expect(img.getAttribute('src')).toBe('asset:///test/path.jpg');
   });

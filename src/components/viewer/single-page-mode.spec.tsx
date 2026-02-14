@@ -27,12 +27,10 @@ vi.mock('../../contexts/settings-context', () => ({
   }),
 }));
 
-vi.mock('../../utils/image-utils', () => ({
-  getImageUrl: (path: string) => `asset://${path}`,
-}));
-
-vi.mock('../../hooks/use-preload-images', () => ({
-  usePreloadImages: vi.fn(),
+// Mock resolvePageImageUrl
+vi.mock('../../services/page-source-utils', () => ({
+  resolvePageImageUrl: vi.fn().mockImplementation((page: ComicPage) => Promise.resolve(`asset://${page.file_path}`)),
+  resolvePagePreviewUrl: vi.fn().mockImplementation((page: ComicPage) => Promise.resolve(`asset://${page.thumbnail_path ?? page.file_path}`)),
 }));
 
 const mockComic: Comic = {
@@ -73,13 +71,13 @@ describe('SinglePageMode', () => {
     });
   });
 
-  it('renders current page image', () => {
+  it('renders current page image', async () => {
     render(
       <ViewerRefProvider>
         <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} onDecrementPageViewCount={vi.fn()} />
       </ViewerRefProvider>
     );
-    const img = screen.getByAltText('Page 1');
+    const img = await screen.findByAltText('Page 1');
     expect(img).toBeDefined();
     expect(img.getAttribute('src')).toBe('asset:///p1.jpg');
   });

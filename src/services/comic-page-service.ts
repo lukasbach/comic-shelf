@@ -28,6 +28,12 @@ export const insertPages = async (
       [comicId, page.page_number, page.file_path, page.file_name, page.thumbnail_path]
     );
   }
+
+  // Delete pages that are no longer present
+  await db.execute(
+    'DELETE FROM comic_pages WHERE comic_id = $1 AND page_number > $2',
+    [comicId, pages.length]
+  );
 };
 
 export const updateThumbnailPath = async (id: number, thumbnailPath: string): Promise<void> => {

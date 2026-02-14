@@ -1,5 +1,8 @@
 import { getAllIndexPaths } from './index-path-service';
 import { indexComics, IndexingError, IndexingProgress } from './indexing-service';
+import * as comicService from './comic-service';
+import * as thumbnailService from './thumbnail-service';
+import { isSubPath } from '../utils/image-utils';
 
 export type GlobalIndexingProgress = {
   status: 'scanning' | 'indexing' | 'cleanup';
@@ -48,6 +51,16 @@ export const reindexAll = async (
         errors: [...allErrors],
       });
     });
+  }
+
+  // Final cleanup for orphaned comics (belonging to index paths no longer configured)
+  const allDbComics = await comicService.getAllComics();
+  for (const dbComic of allDbComics) {
+    const belongsToAnyPath = paths.some((p) => isSubPath(p.path, dbComic.path));
+    if (!belongsToAnyPath) {
+      await comicService.deleteComic(dbComic.id);
+      await thumbnailService.deleteThumbnailsForComic(dbComic.id);
+    }
   }
 
   onProgress?.({

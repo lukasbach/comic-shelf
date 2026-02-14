@@ -1,6 +1,6 @@
 import { readDir } from '@tauri-apps/plugin-fs';
 import { join, basename } from '@tauri-apps/api/path';
-import { naturalSortComparator, normalizePath } from '../utils/image-utils';
+import { naturalSortComparator, normalizePath, isSubPath } from '../utils/image-utils';
 import * as comicService from './comic-service';
 import * as pageService from './comic-page-service';
 import * as thumbnailService from './thumbnail-service';
@@ -128,7 +128,7 @@ export const indexComics = async (
   basePath: string,
   pattern: string,
   onProgress?: (progress: IndexingProgress) => void
-): Promise<void> => {
+): Promise<Set<string>> => {
   const errors: IndexingError[] = [];
   
   const comicPaths = await walkDirectory(basePath, (path, err) => {
@@ -242,16 +242,17 @@ export const indexComics = async (
 
   // 5. Cleanup removed comics (within this base path)
   const allDbComics = await comicService.getAllComics();
-  const baseNormalized = normalizePath(basePath);
   
   for (const dbComic of allDbComics) {
-    if (dbComic.path.startsWith(baseNormalized) && !activeComicPaths.has(dbComic.path)) {
+    if (isSubPath(basePath, dbComic.path) && !activeComicPaths.has(dbComic.path)) {
       await comicService.deleteComic(dbComic.id);
       await thumbnailService.deleteThumbnailsForComic(dbComic.id);
     }
   }
 
-  // 5. Cleanup orphaned thumbnails globally
+  // 6. Cleanup orphaned thumbnails globally
   const remainingComics = await comicService.getAllComics();
   await thumbnailService.cleanupOrphans(remainingComics.map(c => c.id));
+
+  return activeComicPaths;
 };

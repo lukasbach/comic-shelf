@@ -119,10 +119,13 @@ describe('indexing-service', () => {
       });
 
       const progressLogs: any[] = [];
-      await indexingService.indexComics('base', '{series}', (p) => {
+      const seenPaths = await indexingService.indexComics('base', '{series}', (p) => {
         progressLogs.push(p);
       });
       
+      expect(seenPaths).toBeInstanceOf(Set);
+      expect(seenPaths.has('base/Comic1')).toBe(true);
+
       // Should have reported errors
       const lastProgress = progressLogs[progressLogs.length - 1];
       expect(lastProgress.errors).toHaveLength(1);
@@ -134,6 +137,36 @@ describe('indexing-service', () => {
       expect(upsertComic).toHaveBeenCalledWith(expect.objectContaining({
           path: 'base/Comic1'
       }));
+    });
+
+    it('should delete stale comics that are no longer on disk', async () => {
+      const { getAllComics, deleteComic } = await import('./comic-service');
+      
+      (getAllComics as any).mockResolvedValue([
+        { id: 1, path: 'base/Existing' },
+        { id: 2, path: 'base/Stale' },
+        { id: 3, path: 'other/Path' },
+      ]);
+
+      (readDir as any).mockImplementation((path: string) => {
+        if (path === 'base') {
+          return Promise.resolve([
+            { name: 'Existing', isDirectory: true, isFile: false },
+          ]);
+        }
+        if (path === 'base/Existing') {
+          return Promise.resolve([
+            { name: 'page1.jpg', isDirectory: false, isFile: true },
+          ]);
+        }
+        return Promise.resolve([]);
+      });
+
+      await indexingService.indexComics('base', '{series}');
+
+      // base/Stale should be deleted, other/Path should NOT (different base)
+      expect(deleteComic).toHaveBeenCalledWith(2);
+      expect(deleteComic).not.toHaveBeenCalledWith(3);
     });
   });
 });

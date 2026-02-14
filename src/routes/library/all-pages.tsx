@@ -5,14 +5,14 @@ import { PageCard } from '../../components/page-card';
 import { useAllPages } from '../../hooks/use-all-pages';
 import { useOpenComicPage } from '../../hooks/use-open-comic-page';
 import {
-    RxSymbol,
-    RxArrowDown,
-    RxArrowUp,
-    RxMagnifyingGlass,
-    RxEyeOpen,
-    RxEyeClosed,
-    RxStar,
-    RxStarFilled
+  RxSymbol,
+  RxArrowDown,
+  RxArrowUp,
+  RxMagnifyingGlass,
+  RxEyeOpen,
+  RxEyeClosed,
+  RxStar,
+  RxStarFilled
 } from 'react-icons/rx';
 
 export const Route = createFileRoute('/library/all-pages')({

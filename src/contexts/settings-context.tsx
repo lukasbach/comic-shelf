@@ -28,11 +28,27 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     initSettings();
   }, []);
 
-  const applyTheme = (theme: 'light' | 'dark') => {
+  const applyTheme = useCallback((theme: 'light' | 'dark' | 'system') => {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
-    root.classList.add(theme);
-  };
+
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.classList.add(systemTheme);
+    } else {
+      root.classList.add(theme);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (settings.theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = () => applyTheme('system');
+      
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+  }, [settings.theme, applyTheme]);
 
   const updateSettings = useCallback(async (newSettings: Partial<AppSettings>) => {
     setSettings((prev) => {

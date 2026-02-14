@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useComicData } from '../../hooks/use-comic-data';
 import { useTabs } from '../../contexts/tab-context';
@@ -12,6 +12,7 @@ import { SinglePageMode } from '../../components/viewer/single-page-mode';
 import { ScrollMode } from '../../components/viewer/scroll-mode';
 import { SlideshowIndicator } from '../../components/viewer/slideshow-indicator';
 import { Tab } from '../../stores/tab-store';
+import { useViewerRef } from '../../contexts/viewer-ref-context';
 
 type ComicViewerSearch = {
   page?: number;
@@ -31,6 +32,7 @@ function ComicViewerPage() {
   const search = Route.useSearch();
   const { tabs, activeTabId, updateTab } = useTabs();
   const { settings } = useSettings();
+  const { scrollContainerRef } = useViewerRef();
   const activeTab = tabs.find((t: Tab) => t.id === activeTabId);
   
   // Default to overview if no mode is set in tab
@@ -63,18 +65,27 @@ function ComicViewerPage() {
     delay: settings.slideshowDelay,
     onAdvance: nextPage,
     useInternalTimer: false, // Scrollers handle timing
-    enabled: viewMode !== 'overview',
+    enabled: viewMode !== 'overview' && !!activeTab?.slideshowActive,
   });
 
-  // Stop slideshow if mode changes to overview
-  React.useEffect(() => {
-    if (viewMode === 'overview' && slideshow.isActive) {
+  // Sync tab state to slideshow
+  useEffect(() => {
+    if (activeTab?.slideshowActive && !slideshow.isActive && viewMode !== 'overview') {
+      slideshow.start();
+    } else if ((!activeTab?.slideshowActive || viewMode === 'overview') && slideshow.isActive) {
       slideshow.stop();
     }
-  }, [viewMode, slideshow.isActive]);
+  }, [activeTab?.slideshowActive, slideshow.isActive, viewMode]);
+
+  // Sync slideshow state back to tab if it gets stopped internally
+  useEffect(() => {
+    if (activeTabId && activeTab && slideshow.isActive !== activeTab.slideshowActive) {
+      updateTab(activeTabId, { slideshowActive: slideshow.isActive });
+    }
+  }, [slideshow.isActive, activeTabId]);
 
   // Sync search param page to tab state
-  React.useEffect(() => {
+  useEffect(() => {
     if (search.page !== undefined && activeTabId && pages.length > 0) {
       const pageIndex = search.page - 1;
       if (pageIndex >= 0 && pageIndex < pages.length && activeTab?.currentPage !== pageIndex) {
@@ -89,6 +100,12 @@ function ComicViewerPage() {
   const handleModeChange = (mode: 'overview' | 'single' | 'scroll') => {
     if (activeTabId) {
       updateTab(activeTabId, { viewMode: mode });
+    }
+  };
+
+  const toggleSlideshow = () => {
+    if (activeTabId) {
+      updateTab(activeTabId, { slideshowActive: !activeTab?.slideshowActive });
     }
   };
 
@@ -152,18 +169,18 @@ function ComicViewerPage() {
         currentMode={viewMode}
         onModeChange={handleModeChange}
         isSlideshowActive={slideshow.isActive}
-        onToggleSlideshow={slideshow.toggle}
+        onToggleSlideshow={toggleSlideshow}
         onToggleFavorite={toggleComicFavorite}
         onIncrementViewCount={incrementComicViewCount}
       />
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden" ref={scrollContainerRef}>
         {renderContent()}
       </div>
 
       <SlideshowIndicator 
         isActive={slideshow.isActive}
         progress={slideshow.progress}
-        onStop={slideshow.stop}
+        onStop={() => updateTab(activeTabId!, { slideshowActive: false })}
         showProgress={viewMode === 'single'}
       />
     </div>

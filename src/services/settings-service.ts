@@ -18,7 +18,7 @@ export type AppSettings = {
   defaultViewMode: 'single' | 'scroll' | 'overview';
   slideshowDelay: number;         // milliseconds
   slideshowAutoScroll: boolean;
-  theme: 'light' | 'dark';
+  theme: 'light' | 'dark' | 'system';
 };
 
 export const DEFAULT_SETTINGS: AppSettings = {

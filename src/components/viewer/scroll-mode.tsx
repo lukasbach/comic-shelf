@@ -8,6 +8,7 @@ import { ScrollPageIndicator } from './scroll-page-indicator';
 import { ViewerSidebar } from './viewer-sidebar';
 import { useAutoScroll } from '../../hooks/use-auto-scroll';
 import { useSettings } from '../../contexts/settings-context';
+import { useViewerRef } from '../../contexts/viewer-ref-context';
 
 type ScrollModeProps = {
   comic: Comic;
@@ -34,7 +35,7 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
   
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef<number | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollContainerRef: containerRef } = useViewerRef();
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Initialize pageRefs array

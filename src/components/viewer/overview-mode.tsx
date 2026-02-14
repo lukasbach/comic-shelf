@@ -3,6 +3,7 @@ import { Comic, ComicPage } from '../../types/comic';
 import { PageThumbnail } from './page-thumbnail';
 import { useTabs } from '../../contexts/tab-context';
 import { Tab } from '../../stores/tab-store';
+import { useViewerRef } from '../../contexts/viewer-ref-context';
 
 type OverviewModeProps = {
   comic: Comic;
@@ -19,6 +20,7 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
   const { tabs, activeTabId, updateTab } = useTabs();
   const activeTab = tabs.find((t: Tab) => t.id === activeTabId);
   const currentPage = activeTab?.currentPage ?? 0;
+  const { scrollContainerRef } = useViewerRef();
 
   const handlePageClick = (index: number) => {
     if (activeTabId) {
@@ -30,7 +32,7 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
   };
 
   return (
-    <div className="h-full overflow-y-auto overflow-x-hidden">
+    <div ref={scrollContainerRef} className="h-full overflow-y-auto overflow-x-hidden">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 p-6">
         {pages.map((page, index) => (
           <PageThumbnail

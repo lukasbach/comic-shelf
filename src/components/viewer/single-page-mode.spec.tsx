@@ -3,10 +3,16 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { SinglePageMode } from './single-page-mode';
 import { Comic, ComicPage } from '../../types/comic';
 import { useTabs } from '../../contexts/tab-context';
+import { ViewerRefProvider, useViewerRef } from '../../contexts/viewer-ref-context';
 
 // Mock dependecies
 vi.mock('../../contexts/tab-context', () => ({
   useTabs: vi.fn(),
+}));
+
+vi.mock('../../contexts/viewer-ref-context', () => ({
+  ViewerRefProvider: ({ children }: any) => children,
+  useViewerRef: vi.fn(),
 }));
 
 vi.mock('../../contexts/settings-context', () => ({
@@ -56,17 +62,28 @@ describe('SinglePageMode', () => {
       activeTabId: 'tab1',
       updateTab,
     });
+    (useViewerRef as any).mockReturnValue({
+      scrollContainerRef: { current: { scrollTo: vi.fn() } }
+    });
   });
 
   it('renders current page image', () => {
-    render(<SinglePageMode comic={mockComic} pages={mockPages} />);
+    render(
+      <ViewerRefProvider>
+        <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} />
+      </ViewerRefProvider>
+    );
     const img = screen.getByAltText('Page 1');
     expect(img).toBeDefined();
     expect(img.getAttribute('src')).toBe('asset:///p1.jpg');
   });
 
   it('navigates to next page on click', () => {
-    render(<SinglePageMode comic={mockComic} pages={mockPages} />);
+    render(
+      <ViewerRefProvider>
+        <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} />
+      </ViewerRefProvider>
+    );
     const nextButton = screen.getByLabelText('Next Page');
     fireEvent.click(nextButton);
     expect(updateTab).toHaveBeenCalledWith('tab1', { currentPage: 1 });
@@ -78,14 +95,22 @@ describe('SinglePageMode', () => {
       activeTabId: 'tab1',
       updateTab,
     });
-    render(<SinglePageMode comic={mockComic} pages={mockPages} />);
+    render(
+      <ViewerRefProvider>
+        <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} />
+      </ViewerRefProvider>
+    );
     const prevButton = screen.getByLabelText('Previous Page');
     fireEvent.click(prevButton);
     expect(updateTab).toHaveBeenCalledWith('tab1', { currentPage: 0 });
   });
 
   it('toggles sidebar', () => {
-    render(<SinglePageMode comic={mockComic} pages={mockPages} />);
+    render(
+      <ViewerRefProvider>
+        <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} />
+      </ViewerRefProvider>
+    );
     const toggleButton = screen.getByTitle('Collapse Sidebar');
     fireEvent.click(toggleButton);
     expect(updateTab).toHaveBeenCalledWith('tab1', { sidebarCollapsed: true });

@@ -160,10 +160,21 @@
 - **Favorites View**: The existing Favorites view correctly aggregates all favorited comics and pages, with sorting by title and page number.
 
 ## Task 11: Settings & Hotkeys
-- [ ] Implement settings page with user preferences
-- [ ] Implement global hotkeys for navigation and controls
-- [ ] Implement theme switching (light/dark/system)
-- [ ] Verify implementation with unit tests
+- [x] Implement settings page with user preferences
+- [x] Implement global hotkeys for navigation and controls
+- [x] Implement theme switching (light/dark/system)
+- [x] Verify implementation with unit tests
+
+### Implementation Details
+- **Settings Page**: Built using `@tanstack/react-form` for centralized state management. It features sections for General (theme, view mode), Slideshow (delay, auto-scroll), Hotkeys (customizable navigation, zoom, and tab controls), and Library (index path management).
+- **Hotkey System**:
+  - **Normalization**: Standardized keyboard event handling in `src/utils/hotkey-utils.ts` to support cross-OS modifiers.
+  - **Recording**: Implemented a "Record" UI in `HotkeyInput` that captures and formats unique key combinations.
+  - **Global Listener**: A global `useAppHotkeys` hook in `RootLayout` listens for keyboard events and maps them to app actions (Next/Prev Page, Zoom, Slideshow Toggle) based on the user's settings.
+  - **Viewer Integration**: A `ViewerRefContext` provides a mechanism for the global hotkey hook to trigger scrolling within the dedicated viewer modes without deep prop drilling.
+- **Theme Switching**: Supports Light, Dark, and System modes with automatic system preference tracking.
+- **Persistence**: All settings are persisted to the filesystem using the Tauri Store plugin, with reactive updates across the application via `SettingsProvider`.
+- **Slideshow Sync**: Slideshow state was promoted to the global tab state to allow hotkeys and UI components to stay in sync.
 
 ### Implementation Details
 - **Slideshow Logic**: The slideshow system is split into multiple hooks. `useSlideshow` manages the high-level state (active, paused, progress) and is used in the main viewer route.

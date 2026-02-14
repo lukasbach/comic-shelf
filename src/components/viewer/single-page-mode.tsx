@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect } from 'react';
 import { Comic, ComicPage } from '../../types/comic';
 import { PageImage } from './page-image';
 import { PageNavigation } from './page-navigation';
@@ -8,6 +8,7 @@ import { Tab } from '../../stores/tab-store';
 import { usePreloadImages } from '../../hooks/use-preload-images';
 import { useSlideshowScroll } from '../../hooks/use-slideshow-scroll';
 import { useSettings } from '../../contexts/settings-context';
+import { useViewerRef } from '../../contexts/viewer-ref-context';
 
 type SinglePageModeProps = {
   comic: Comic;
@@ -34,7 +35,14 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
   const viewMode = activeTab?.viewMode ?? 'single';
   const isSidebarCollapsed = activeTab?.sidebarCollapsed ?? false;
   
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollContainerRef: containerRef } = useViewerRef();
+
+  // Scroll to top when page changes
+  useEffect(() => {
+    if (containerRef.current?.scrollTo) {
+      containerRef.current.scrollTo(0, 0);
+    }
+  }, [currentPage, containerRef]);
 
   // Preload adjacent images
   usePreloadImages(pages, currentPage);
@@ -54,29 +62,18 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
   const handleNextPage = () => {
     if (currentPage < pages.length - 1 && activeTabId) {
       updateTab(activeTabId, { currentPage: currentPage + 1 });
-      // Scroll to top on page change
-      if (containerRef.current?.scrollTo) {
-        containerRef.current.scrollTo(0, 0);
-      }
     }
   };
 
   const handlePrevPage = () => {
     if (currentPage > 0 && activeTabId) {
       updateTab(activeTabId, { currentPage: currentPage - 1 });
-      // Scroll to top on page change
-      if (containerRef.current?.scrollTo) {
-        containerRef.current.scrollTo(0, 0);
-      }
     }
   };
 
   const handleGoToPage = (pageNumber: number) => {
     if (activeTabId) {
       updateTab(activeTabId, { currentPage: pageNumber });
-      if (containerRef.current?.scrollTo) {
-        containerRef.current.scrollTo(0, 0);
-      }
     }
   };
 

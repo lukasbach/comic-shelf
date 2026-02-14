@@ -8,4 +8,5 @@ export type Tab = {
   viewMode?: 'overview' | 'single' | 'scroll';
   zoomLevel?: number;
   sidebarCollapsed?: boolean;
+  slideshowActive?: boolean;
 };

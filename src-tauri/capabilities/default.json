@@ -20,6 +20,9 @@
     "fs:allow-exists",
     "fs:allow-remove",
     "fs:read-all",
-    "fs:scope-home-recursive"
+    {
+      "identifier": "fs:scope",
+      "allow": [{ "path": "**/*" }]
+    }
   ]
 }

@@ -1,9 +1,13 @@
 import { getAllIndexPaths } from './index-path-service';
 import { indexComics, IndexingProgress } from './indexing-service';
 
-export type GlobalIndexingProgress = IndexingProgress & {
+export type GlobalIndexingProgress = {
+  status: 'scanning' | 'indexing' | 'cleanup';
   currentPathIndex: number;
   totalPaths: number;
+  current?: number;
+  total?: number;
+  currentPath?: string;
 };
 
 /**
@@ -15,16 +19,32 @@ export const reindexAll = async (
   const paths = await getAllIndexPaths();
   const totalPaths = paths.length;
 
+  if (totalPaths === 0) return;
+
   for (let i = 0; i < totalPaths; i++) {
     const path = paths[i];
+    onProgress?.({
+      status: 'scanning',
+      currentPathIndex: i + 1,
+      totalPaths,
+      currentPath: path.path
+    });
+
     await indexComics(path.path, path.pattern, (p) => {
       onProgress?.({
         ...p,
+        status: 'indexing',
         currentPathIndex: i + 1,
         totalPaths,
       });
     });
   }
+
+  onProgress?.({
+    status: 'cleanup',
+    currentPathIndex: totalPaths,
+    totalPaths
+  });
 };
 
 /**

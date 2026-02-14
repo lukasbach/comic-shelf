@@ -88,25 +88,30 @@ export const extractMetadata = (relativePath: string, pattern: string): Record<s
  * Walks a directory recursively and returns all folders that contain images.
  */
 const walkDirectory = async (dirPath: string): Promise<string[]> => {
-  const entries = await readDir(dirPath);
-  const comicDirs: string[] = [];
-  let containsImages = false;
+  try {
+    const entries = await readDir(dirPath);
+    const comicDirs: string[] = [];
+    let containsImages = false;
 
-  for (const entry of entries) {
-    const fullPath = await join(dirPath, entry.name);
-    if (entry.isDirectory) {
-      const nestedComicDirs = await walkDirectory(fullPath);
-      comicDirs.push(...nestedComicDirs);
-    } else if (entry.isFile && isImageFile(entry.name)) {
-      containsImages = true;
+    for (const entry of entries) {
+      const fullPath = await join(dirPath, entry.name);
+      if (entry.isDirectory) {
+        const nestedComicDirs = await walkDirectory(fullPath);
+        comicDirs.push(...nestedComicDirs);
+      } else if (entry.isFile && isImageFile(entry.name)) {
+        containsImages = true;
+      }
     }
-  }
 
-  if (containsImages) {
-    comicDirs.push(dirPath);
-  }
+    if (containsImages) {
+      comicDirs.push(dirPath);
+    }
 
-  return comicDirs;
+    return comicDirs;
+  } catch (error) {
+    console.error(`Failed to read directory ${dirPath}:`, error);
+    return [];
+  }
 };
 
 /**
@@ -114,6 +119,11 @@ const walkDirectory = async (dirPath: string): Promise<string[]> => {
  */
 export const scanDirectory = async (basePath: string, pattern: string): Promise<IndexedComic[]> => {
   const comicPaths = await walkDirectory(basePath);
+  if (comicPaths.length === 0) {
+    console.log(`No comic directories found in ${basePath}`);
+    return [];
+  }
+  
   const indexedComics: IndexedComic[] = [];
 
   for (const comicPath of comicPaths) {

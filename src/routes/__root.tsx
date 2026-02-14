@@ -1,6 +1,7 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router'
 import { SettingsProvider } from '../contexts/settings-context'
 import { TabProvider } from '../contexts/tab-context'
+import { IndexingProvider } from '../contexts/indexing-context'
 import { TopBar } from '../components/top-bar'
 import { TabBar } from '../components/tab-bar'
 
@@ -12,13 +13,15 @@ function RootLayout() {
   return (
     <SettingsProvider>
       <TabProvider>
-        <div className="flex flex-col h-screen overflow-hidden bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-          <TopBar />
-          <TabBar />
-          <main className="flex-1 overflow-hidden relative">
-            <Outlet />
-          </main>
-        </div>
+        <IndexingProvider>
+          <div className="flex flex-col h-screen overflow-hidden bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+            <TopBar />
+            <TabBar />
+            <main className="flex-1 overflow-hidden relative">
+              <Outlet />
+            </main>
+          </div>
+        </IndexingProvider>
       </TabProvider>
     </SettingsProvider>
   )

@@ -8,6 +8,7 @@ export type Comic = {
   cover_image_path: string | null;
   page_count: number;
   is_favorite: number; // SQLite boolean (0/1)
+  is_viewed: number; // SQLite boolean (0/1)
   view_count: number;
   created_at: string;
   updated_at: string;
@@ -23,6 +24,7 @@ export type ComicPage = {
   file_name: string;
   thumbnail_path: string | null;
   is_favorite: number;
+  is_viewed: number;
   view_count: number;
   last_opened_at: string | null;
 };

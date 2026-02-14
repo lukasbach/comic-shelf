@@ -1,30 +1,85 @@
-import React from 'react';
-import { RxFileText } from 'react-icons/rx';
+import React, { useState } from 'react';
+import { RxFileText, RxEyeOpen, RxEyeClosed } from 'react-icons/rx';
 import type { FavoritePage } from '../hooks/use-favorite-pages';
 import { getImageUrl } from '../utils/image-utils';
 import { ComicContextMenu, ComicDropdownMenu } from './comic-context-menu';
 import { FavoriteButton } from './favorite-button';
+import * as comicPageService from '../services/comic-page-service';
 
 type FavoriteImageCardProps = {
   page: FavoritePage;
   onOpen: (comicId: number, pageNumber: number) => void;
+  onUpdate?: () => void;
 };
 
-export const FavoriteImageCard: React.FC<FavoriteImageCardProps> = ({ page, onOpen }) => {
+export const FavoriteImageCard: React.FC<FavoriteImageCardProps> = ({ page, onOpen, onUpdate }) => {
+  const [isFavorite, setIsFavorite] = useState(page.is_favorite === 1);
+  const [isViewed, setIsViewed] = useState(page.is_viewed === 1);
+  const [viewCount, setViewCount] = useState(page.view_count);
+
   const thumbUrl = page.thumbnail_path ? getImageUrl(page.thumbnail_path) : getImageUrl(page.file_path);
 
-  const handleToggleFavorite = (e?: React.MouseEvent) => {
+  const handleToggleFavorite = async (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    // This is handled by context menu and hooks usually, 
-    // but for the card we might need a direct way if we add a button
+    try {
+      setIsFavorite(!isFavorite);
+      await comicPageService.togglePageFavorite(page.id);
+      onUpdate?.();
+    } catch (err) {
+      console.error('Failed to toggle favorite:', err);
+      setIsFavorite(page.is_favorite === 1);
+    }
+  };
+
+  const handleToggleViewed = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    try {
+      setIsViewed(!isViewed);
+      await comicPageService.togglePageViewed(page.id);
+      onUpdate?.();
+    } catch (err) {
+      console.error('Failed to toggle viewed:', err);
+      setIsViewed(page.is_viewed === 1);
+    }
+  };
+
+  const handleIncrementViewCount = async () => {
+    try {
+      setViewCount(viewCount + 1);
+      await comicPageService.incrementPageViewCount(page.id);
+      onUpdate?.();
+    } catch (err) {
+      console.error('Failed to increment view count:', err);
+      setViewCount(viewCount);
+    }
+  };
+
+  const handleDecrementViewCount = async () => {
+    try {
+      setViewCount(Math.max(0, viewCount - 1));
+      await comicPageService.decrementPageViewCount(page.id);
+      onUpdate?.();
+    } catch (err) {
+      console.error('Failed to decrement view count:', err);
+      setViewCount(viewCount);
+    }
   };
 
   return (
     <ComicContextMenu 
       page={page} 
       onOpen={() => onOpen(page.comic_id, page.page_number)}
-      isFavorite={page.is_favorite === 1}
-      viewCount={page.view_count}
+      isFavorite={isFavorite}
+      setIsFavorite={setIsFavorite}
+      isViewed={isViewed}
+      setIsViewed={setIsViewed}
+      viewCount={viewCount}
+      setViewCount={setViewCount}
+      onToggleFavorite={handleToggleFavorite}
+      onToggleViewed={handleToggleViewed}
+      onIncrementViewCount={handleIncrementViewCount}
+      onDecrementViewCount={handleDecrementViewCount}
+      onUpdate={onUpdate}
     >
       <div 
         className="group flex flex-col bg-card rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all cursor-pointer relative"
@@ -48,20 +103,43 @@ export const FavoriteImageCard: React.FC<FavoriteImageCardProps> = ({ page, onOp
 
           <div className="absolute top-2 right-2 flex flex-row-reverse items-center gap-1.5 z-10">
             <FavoriteButton 
-              isFavorite={page.is_favorite === 1} 
-              onToggle={() => {}} // Hooked up via context menu usually, but here we'd need to lift state if we want optimistic updates like ComicCard
+              isFavorite={isFavorite} 
+              onToggle={handleToggleFavorite}
               size="sm"
-              className={`w-7 h-7 bg-black/60 backdrop-blur-md rounded-full text-white shadow-lg transition-all ${page.is_favorite === 1 ? 'opacity-100 scale-100' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100'}`}
+              className={`w-7 h-7 bg-black/60 backdrop-blur-md rounded-full text-white shadow-lg transition-all ${isFavorite ? 'opacity-100 scale-100' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100'}`}
             />
+            <button
+              onClick={handleToggleViewed}
+              className={`w-7 h-7 flex items-center justify-center bg-black/60 backdrop-blur-md rounded-full shadow-lg transition-all ${isViewed ? 'opacity-100 scale-100 text-blue-400' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 text-white'} hover:bg-black/80`}
+              title={isViewed ? "Mark as Unviewed" : "Mark as Viewed"}
+            >
+              {isViewed ? <RxEyeOpen size={16} /> : <RxEyeClosed size={16} />}
+            </button>
             <ComicDropdownMenu 
               page={page}
-              isFavorite={page.is_favorite === 1}
-              viewCount={page.view_count}
+              isFavorite={isFavorite}
+              setIsFavorite={setIsFavorite}
+              isViewed={isViewed}
+              setIsViewed={setIsViewed}
+              viewCount={viewCount}
+              setViewCount={setViewCount}
+              onToggleFavorite={handleToggleFavorite}
+              onToggleViewed={handleToggleViewed}
+              onIncrementViewCount={handleIncrementViewCount}
+              onDecrementViewCount={handleDecrementViewCount}
+              onUpdate={onUpdate}
               className="w-7 h-7 bg-black/60 backdrop-blur-md rounded-full text-white shadow-lg opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all hover:bg-black/90"
             />
           </div>
 
-          <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white p-2 transform translate-y-full group-hover:translate-y-0 transition-transform">
+          <div className="absolute bottom-2 left-2 flex items-center gap-1.5 z-10">
+             <div className="px-1.5 py-0.5 bg-black/60 backdrop-blur-md rounded text-[10px] text-white flex items-center gap-1">
+               <RxEyeOpen size={10} />
+               <span>{viewCount}</span>
+             </div>
+          </div>
+
+          <div className="absolute bottom-0 left-0 right-0 bg-black/70 backdrop-blur-sm text-white p-2">
             <p className="text-[10px] font-medium truncate">{page.comic_title}</p>
             <p className="text-[10px] opacity-80">Page {page.page_number}</p>
           </div>

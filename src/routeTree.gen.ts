@@ -18,6 +18,7 @@ import { Route as LibrarySearchRouteImport } from './routes/library/search'
 import { Route as LibraryListRouteImport } from './routes/library/list'
 import { Route as LibraryFavoritesRouteImport } from './routes/library/favorites'
 import { Route as LibraryArtistsRouteImport } from './routes/library/artists'
+import { Route as LibraryAllPagesRouteImport } from './routes/library/all-pages'
 
 const LibraryRouteRoute = LibraryRouteRouteImport.update({
   id: '/library',
@@ -64,10 +65,16 @@ const LibraryArtistsRoute = LibraryArtistsRouteImport.update({
   path: '/artists',
   getParentRoute: () => LibraryRouteRoute,
 } as any)
+const LibraryAllPagesRoute = LibraryAllPagesRouteImport.update({
+  id: '/all-pages',
+  path: '/all-pages',
+  getParentRoute: () => LibraryRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/library': typeof LibraryRouteRouteWithChildren
+  '/library/all-pages': typeof LibraryAllPagesRoute
   '/library/artists': typeof LibraryArtistsRoute
   '/library/favorites': typeof LibraryFavoritesRoute
   '/library/list': typeof LibraryListRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/library/all-pages': typeof LibraryAllPagesRoute
   '/library/artists': typeof LibraryArtistsRoute
   '/library/favorites': typeof LibraryFavoritesRoute
   '/library/list': typeof LibraryListRoute
@@ -90,6 +98,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/library': typeof LibraryRouteRouteWithChildren
+  '/library/all-pages': typeof LibraryAllPagesRoute
   '/library/artists': typeof LibraryArtistsRoute
   '/library/favorites': typeof LibraryFavoritesRoute
   '/library/list': typeof LibraryListRoute
@@ -103,6 +112,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/library'
+    | '/library/all-pages'
     | '/library/artists'
     | '/library/favorites'
     | '/library/list'
@@ -113,6 +123,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/library/all-pages'
     | '/library/artists'
     | '/library/favorites'
     | '/library/list'
@@ -124,6 +135,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/library'
+    | '/library/all-pages'
     | '/library/artists'
     | '/library/favorites'
     | '/library/list'
@@ -205,10 +217,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LibraryArtistsRouteImport
       parentRoute: typeof LibraryRouteRoute
     }
+    '/library/all-pages': {
+      id: '/library/all-pages'
+      path: '/all-pages'
+      fullPath: '/library/all-pages'
+      preLoaderRoute: typeof LibraryAllPagesRouteImport
+      parentRoute: typeof LibraryRouteRoute
+    }
   }
 }
 
 interface LibraryRouteRouteChildren {
+  LibraryAllPagesRoute: typeof LibraryAllPagesRoute
   LibraryArtistsRoute: typeof LibraryArtistsRoute
   LibraryFavoritesRoute: typeof LibraryFavoritesRoute
   LibraryListRoute: typeof LibraryListRoute
@@ -217,6 +237,7 @@ interface LibraryRouteRouteChildren {
 }
 
 const LibraryRouteRouteChildren: LibraryRouteRouteChildren = {
+  LibraryAllPagesRoute: LibraryAllPagesRoute,
   LibraryArtistsRoute: LibraryArtistsRoute,
   LibraryFavoritesRoute: LibraryFavoritesRoute,
   LibraryListRoute: LibraryListRoute,

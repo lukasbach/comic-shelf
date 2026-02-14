@@ -1,83 +1,77 @@
 import React, { useState } from 'react';
 import { RxFileText, RxEyeOpen, RxEyeClosed } from 'react-icons/rx';
-import type { Comic } from '../types/comic';
 import { getImageUrl } from '../utils/image-utils';
-import * as comicService from '../services/comic-service';
-import { FavoriteButton } from './favorite-button';
-import { ViewCounter } from './view-counter';
 import { ComicContextMenu, ComicDropdownMenu } from './comic-context-menu';
+import { FavoriteButton } from './favorite-button';
+import * as comicPageService from '../services/comic-page-service';
+import { AllPageItem } from '../hooks/use-all-pages';
 
-type ComicCardProps = {
-  comic: Comic;
-  onOpen: (comic: Comic) => void;
+type PageCardProps = {
+  page: AllPageItem;
+  onOpen: (comicId: number, pageNumber: number) => void;
+  onUpdate?: () => void;
 };
 
-export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen }) => {
-  const [isFavorite, setIsFavorite] = useState(comic.is_favorite === 1);
-  const [isViewed, setIsViewed] = useState(comic.is_viewed === 1);
-  const [viewCount, setViewCount] = useState(comic.view_count);
+export const PageCard: React.FC<PageCardProps> = ({ page, onOpen, onUpdate }) => {
+  const [isFavorite, setIsFavorite] = useState(page.is_favorite === 1);
+  const [isViewed, setIsViewed] = useState(page.is_viewed === 1);
+  const [viewCount, setViewCount] = useState(page.view_count);
 
+  const thumbUrl = page.thumbnail_path ? getImageUrl(page.thumbnail_path) : getImageUrl(page.file_path);
+  
   const handleToggleFavorite = async (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    e?.preventDefault();
     try {
-      // Optimistic update
-      setIsFavorite(!isFavorite);
-      await comicService.toggleFavorite(comic.id);
-    } catch (error) {
-      console.error('Failed to toggle favorite:', error);
-      setIsFavorite(isFavorite); // Revert on error
+      const newVal = !isFavorite;
+      setIsFavorite(newVal);
+      await comicPageService.togglePageFavorite(page.id);
+      onUpdate?.();
+    } catch (err) {
+      console.error('Failed to toggle page favorite:', err);
+      setIsFavorite(page.is_favorite === 1);
     }
   };
 
   const handleToggleViewed = async (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    e?.preventDefault();
     try {
-      // Optimistic update
-      setIsViewed(!isViewed);
-      await comicService.toggleViewed(comic.id);
-    } catch (error) {
-      console.error('Failed to toggle viewed:', error);
-      setIsViewed(isViewed); // Revert on error
+      const newVal = !isViewed;
+      setIsViewed(newVal);
+      await comicPageService.togglePageViewed(page.id);
+      onUpdate?.();
+    } catch (err) {
+      console.error('Failed to toggle page viewed:', err);
+      setIsViewed(page.is_viewed === 1);
     }
   };
 
-  const handleIncrementViewCount = async (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    e?.preventDefault();
+  const handleIncrementViewCount = async () => {
     try {
-      // Optimistic update
-      setViewCount(viewCount + 1);
-      await comicService.incrementViewCount(comic.id);
-    } catch (error) {
-      console.error('Failed to increment view count:', error);
-      setViewCount(viewCount); // Revert on error
+      setViewCount(prev => prev + 1);
+      await comicPageService.incrementPageViewCount(page.id);
+      onUpdate?.();
+    } catch (err) {
+      console.error('Failed to increment view count:', err);
+      setViewCount(page.view_count);
     }
   };
 
-  const handleDecrementViewCount = async (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    e?.preventDefault();
+  const handleDecrementViewCount = async () => {
     try {
-      // Optimistic update
-      const newCount = Math.max(0, viewCount - 1);
-      setViewCount(newCount);
-      await comicService.decrementViewCount(comic.id);
-    } catch (error) {
-      console.error('Failed to decrement view count:', error);
-      setViewCount(viewCount); // Revert on error
+      setViewCount(prev => Math.max(0, prev - 1));
+      await comicPageService.decrementPageViewCount(page.id);
+      onUpdate?.();
+    } catch (err) {
+      console.error('Failed to decrement view count:', err);
+      setViewCount(page.view_count);
     }
   };
-
-  const coverUrl = comic.thumbnail_path 
-    ? getImageUrl(comic.thumbnail_path) 
-    : (comic.cover_image_path ? getImageUrl(comic.cover_image_path) : '');
 
   return (
     <ComicContextMenu 
-      comic={comic} 
-      isFavorite={isFavorite} 
+      page={page} 
+      onOpen={() => onOpen(page.comic_id, page.page_number)}
+      isFavorite={isFavorite}
       setIsFavorite={setIsFavorite}
       isViewed={isViewed}
       setIsViewed={setIsViewed}
@@ -87,16 +81,17 @@ export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen }) => {
       onToggleViewed={handleToggleViewed}
       onIncrementViewCount={handleIncrementViewCount}
       onDecrementViewCount={handleDecrementViewCount}
+      onUpdate={onUpdate}
     >
       <div 
         className="group flex flex-col bg-card rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all cursor-pointer relative"
-        onClick={() => onOpen(comic)}
+        onClick={() => onOpen(page.comic_id, page.page_number)}
       >
         <div className="relative aspect-3/4 overflow-hidden bg-muted">
-          {coverUrl ? (
+          {thumbUrl ? (
             <img 
-              src={coverUrl} 
-              alt={comic.title} 
+              src={thumbUrl} 
+              alt={`${page.comic_title} - Page ${page.page_number}`} 
               className="w-full h-full object-cover transition-transform group-hover:scale-105"
               loading="lazy"
             />
@@ -108,10 +103,11 @@ export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen }) => {
           
           <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors pointer-events-none" />
 
+          {/* Overlays */}
           <div className="absolute top-2 right-2 flex flex-row-reverse items-center gap-1.5 z-10">
             <FavoriteButton 
               isFavorite={isFavorite} 
-              onToggle={handleToggleFavorite} 
+              onToggle={handleToggleFavorite}
               size="sm"
               className={`w-7 h-7 bg-black/60 backdrop-blur-md rounded-full text-white shadow-lg transition-all ${isFavorite ? 'opacity-100 scale-100' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100'}`}
             />
@@ -123,7 +119,7 @@ export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen }) => {
               {isViewed ? <RxEyeOpen size={16} /> : <RxEyeClosed size={16} />}
             </button>
             <ComicDropdownMenu 
-              comic={comic}
+              page={page}
               isFavorite={isFavorite}
               setIsFavorite={setIsFavorite}
               isViewed={isViewed}
@@ -134,33 +130,21 @@ export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen }) => {
               onToggleViewed={handleToggleViewed}
               onIncrementViewCount={handleIncrementViewCount}
               onDecrementViewCount={handleDecrementViewCount}
+              onUpdate={onUpdate}
               className="w-7 h-7 bg-black/60 backdrop-blur-md rounded-full text-white shadow-lg opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all hover:bg-black/90"
             />
           </div>
 
-          <div className="absolute bottom-2 left-2 flex gap-1 z-10">
-            <ViewCounter 
-              count={viewCount} 
-              onIncrement={handleIncrementViewCount} 
-              size="sm"
-            />
+          <div className="absolute bottom-2 left-2 flex items-center gap-1.5 z-10">
+             <div className="px-1.5 py-0.5 bg-black/60 backdrop-blur-md rounded text-[10px] text-white flex items-center gap-1 shadow-sm">
+               <RxEyeOpen size={10} />
+               <span>{viewCount}</span>
+             </div>
           </div>
-        </div>
-        
-        <div className="p-3 flex flex-col gap-1 min-w-0">
-          <h3 className="font-semibold text-sm truncate" title={comic.title}>
-            {comic.title}
-          </h3>
-          <p className="text-xs text-muted-foreground truncate" title={comic.artist || 'Unknown Artist'}>
-            {comic.artist || 'Unknown Artist'}
-          </p>
-          <div className="flex items-center justify-between mt-1">
-            <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-              {comic.series || ''}
-            </span>
-            <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded">
-              {comic.page_count}P
-            </span>
+
+          <div className="absolute bottom-0 left-0 right-0 bg-black/70 backdrop-blur-sm text-white p-2 pt-3 bg-linear-to-t from-black/80 to-transparent">
+            <p className="text-[10px] font-medium truncate leading-tight" title={page.comic_title}>{page.comic_title}</p>
+            <p className="text-[10px] opacity-80">Page {page.page_number}</p>
           </div>
         </div>
       </div>

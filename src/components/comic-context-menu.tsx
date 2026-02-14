@@ -9,7 +9,9 @@ import {
     RxStarFilled,
     RxOpenInNewWindow,
     RxArchive,
-    RxDotsVertical
+    RxDotsVertical,
+    RxEyeOpen,
+    RxEyeClosed
 } from 'react-icons/rx';
 import type { Comic, ComicPage } from '../types/comic';
 import * as comicService from '../services/comic-service';
@@ -26,10 +28,13 @@ export interface ComicMenuProps {
   // State for optimistic updates if provided
   isFavorite?: boolean;
   setIsFavorite?: (val: boolean) => void;
+  isViewed?: boolean;
+  setIsViewed?: (val: boolean) => void;
   viewCount?: number;
   setViewCount?: (val: number) => void;
   // Individual action overrides/callbacks
   onToggleFavorite?: () => void;
+  onToggleViewed?: () => void;
   onIncrementViewCount?: () => void;
   onDecrementViewCount?: () => void;
   onUpdate?: () => void;
@@ -41,9 +46,12 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
   onOpen,
   isFavorite: controlledIsFavorite,
   setIsFavorite: controlledSetIsFavorite,
+  isViewed: controlledIsViewed,
+  setIsViewed: controlledSetIsViewed,
   viewCount: controlledViewCount,
   setViewCount: controlledSetViewCount,
   onToggleFavorite: manualToggleFavorite,
+  onToggleViewed: manualToggleViewed,
   onIncrementViewCount: manualIncrement,
   onDecrementViewCount: manualDecrement,
   onUpdate,
@@ -57,10 +65,15 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
   const isComic = !!comic;
   
   const [localIsFavorite, setLocalIsFavorite] = useState(isComic ? comic?.is_favorite === 1 : page?.is_favorite === 1);
+  const [localIsViewed, setLocalIsViewed] = useState(isComic ? comic?.is_viewed === 1 : page?.is_viewed === 1);
   const [localViewCount, setLocalViewCount] = useState(isComic ? comic?.view_count : page?.view_count || 0);
 
   const fav = controlledSetIsFavorite ? (controlledIsFavorite ?? false) : localIsFavorite;
   const setFav = controlledSetIsFavorite ?? setLocalIsFavorite;
+  
+  const viewed = controlledSetIsViewed ? (controlledIsViewed ?? false) : localIsViewed;
+  const setViewed = controlledSetIsViewed ?? setLocalIsViewed;
+
   const count = controlledSetViewCount ? (controlledViewCount ?? 0) : (localViewCount ?? 0);
   const setCount = controlledSetViewCount ?? setLocalViewCount;
 
@@ -123,6 +136,32 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
         } catch (error) {
             console.error('Failed to toggle favorite:', error);
             setFav(fav);
+        }
+    }
+  };
+
+  const handleToggleViewed = async () => {
+    if (manualToggleViewed) {
+      manualToggleViewed();
+      return;
+    }
+    if (isComic && comic) {
+        try {
+            setViewed(!viewed);
+            await comicService.toggleViewed(comic.id);
+            onUpdate?.();
+        } catch (error) {
+            console.error('Failed to toggle viewed:', error);
+            setViewed(viewed);
+        }
+    } else if (page) {
+        try {
+            setViewed(!viewed);
+            await comicPageService.togglePageViewed(page.id);
+            onUpdate?.();
+        } catch (error) {
+            console.error('Failed to toggle viewed:', error);
+            setViewed(viewed);
         }
     }
   };
@@ -216,6 +255,11 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
       <MenuItem className={itemClass} onSelect={handleToggleFavorite}>
         {fav ? <RxStarFilled className="w-4 h-4 text-yellow-500" /> : <RxStar className="w-4 h-4" />}
         <span>{fav ? 'Remove from favorites' : 'Add to favorites'}</span>
+      </MenuItem>
+
+      <MenuItem className={itemClass} onSelect={handleToggleViewed}>
+        {viewed ? <RxEyeOpen className="w-4 h-4 text-blue-500" /> : <RxEyeClosed className="w-4 h-4" />}
+        <span>{viewed ? 'Mark as unviewed' : 'Mark as viewed'}</span>
       </MenuItem>
       
       <MenuSeparator className={separatorClass} />

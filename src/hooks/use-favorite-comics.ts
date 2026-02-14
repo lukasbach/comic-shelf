@@ -15,6 +15,9 @@ export const useFavoriteComics = () => {
 
   useEffect(() => {
     fetchComics();
+
+    window.addEventListener('favorites-updated', fetchComics);
+    return () => window.removeEventListener('favorites-updated', fetchComics);
   }, []);
 
   return { comics, loading, refetch: fetchComics };

@@ -40,6 +40,11 @@ export const togglePageFavorite = async (id: number): Promise<void> => {
   await db.execute('UPDATE comic_pages SET is_favorite = NOT is_favorite WHERE id = $1', [id]);
 };
 
+export const togglePageViewed = async (id: number): Promise<void> => {
+  const db = await getDb();
+  await db.execute('UPDATE comic_pages SET is_viewed = NOT is_viewed WHERE id = $1', [id]);
+};
+
 export const incrementPageViewCount = async (id: number): Promise<void> => {
   const db = await getDb();
   await db.execute('UPDATE comic_pages SET view_count = view_count + 1 WHERE id = $1', [id]);
@@ -53,6 +58,17 @@ export const decrementPageViewCount = async (id: number): Promise<void> => {
 export const updatePageLastOpened = async (id: number): Promise<void> => {
   const db = await getDb();
   await db.execute('UPDATE comic_pages SET last_opened_at = datetime(\'now\') WHERE id = $1', [id]);
+  window.dispatchEvent(new CustomEvent('comic-opened'));
+};
+
+export const getAllPages = async (): Promise<(ComicPage & { comic_title: string; comic_path: string; comic_artist: string | null })[]> => {
+  const db = await getDb();
+  return await db.select<(ComicPage & { comic_title: string; comic_path: string; comic_artist: string | null })[]>(`
+    SELECT p.*, c.title as comic_title, c.path as comic_path, c.artist as comic_artist
+    FROM comic_pages p 
+    JOIN comics c ON p.comic_id = c.id 
+    ORDER BY c.title ASC, p.page_number ASC
+  `);
 };
 
 export const getFavoritePages = async (): Promise<(ComicPage & { comic_title: string })[]> => {
@@ -64,4 +80,16 @@ export const getFavoritePages = async (): Promise<(ComicPage & { comic_title: st
     WHERE p.is_favorite = 1
     ORDER BY c.title ASC, p.page_number ASC
   `);
+};
+
+export const getRecentlyOpenedPages = async (limit: number = 6): Promise<(ComicPage & { comic_title: string })[]> => {
+  const db = await getDb();
+  return await db.select<(ComicPage & { comic_title: string })[]>(`
+    SELECT p.*, c.title as comic_title 
+    FROM comic_pages p 
+    JOIN comics c ON p.comic_id = c.id 
+    WHERE p.last_opened_at IS NOT NULL
+    ORDER BY p.last_opened_at DESC
+    LIMIT $1
+  `, [limit]);
 };

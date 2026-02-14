@@ -53,6 +53,18 @@ export const useComicData = (comicId: number) => {
     }
   }, [comic]);
 
+  const toggleComicViewed = useCallback(async () => {
+    if (!comic) return;
+    const oldViewed = comic.is_viewed;
+    try {
+      setComic(prev => prev ? { ...prev, is_viewed: prev.is_viewed === 1 ? 0 : 1 } : null);
+      await comicService.toggleViewed(comic.id);
+    } catch (err) {
+      console.error('Failed to toggle comic viewed:', err);
+      setComic(prev => prev ? { ...prev, is_viewed: oldViewed } : null);
+    }
+  }, [comic]);
+
   const incrementComicViewCount = useCallback(async () => {
     if (!comic) return;
     try {
@@ -86,6 +98,20 @@ export const useComicData = (comicId: number) => {
     } catch (err) {
       console.error('Failed to toggle page favorite:', err);
       setPages(prev => prev.map(p => p.id === pageId ? { ...p, is_favorite: oldFavorite } : p));
+    }
+  }, [pages]);
+
+  const togglePageViewed = useCallback(async (pageId: number) => {
+    const pageIndex = pages.findIndex(p => p.id === pageId);
+    if (pageIndex === -1) return;
+    
+    const oldViewed = pages[pageIndex].is_viewed;
+    try {
+      setPages(prev => prev.map(p => p.id === pageId ? { ...p, is_viewed: p.is_viewed === 1 ? 0 : 1 } : p));
+      await comicPageService.togglePageViewed(pageId);
+    } catch (err) {
+      console.error('Failed to toggle page viewed:', err);
+      setPages(prev => prev.map(p => p.id === pageId ? { ...p, is_viewed: oldViewed } : p));
     }
   }, [pages]);
 
@@ -131,9 +157,11 @@ export const useComicData = (comicId: number) => {
     loading, 
     error, 
     toggleComicFavorite, 
+    toggleComicViewed,
     incrementComicViewCount,
     decrementComicViewCount,
     togglePageFavorite,
+    togglePageViewed,
     incrementPageViewCount,
     decrementPageViewCount,
     markPageAsOpened

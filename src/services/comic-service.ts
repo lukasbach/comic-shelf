@@ -71,26 +71,38 @@ export const upsertComic = async (comic: Omit<Comic, 'id' | 'created_at' | 'upda
 export const deleteComic = async (id: number): Promise<void> => {
   const db = await getDb();
   await db.execute('DELETE FROM comics WHERE id = $1', [id]);
+  window.dispatchEvent(new CustomEvent('favorites-updated'));
 };
 
 export const toggleFavorite = async (id: number): Promise<void> => {
   const db = await getDb();
-  await db.execute('UPDATE comics SET is_favorite = NOT is_favorite WHERE id = $1', [id]);
+  await db.execute('UPDATE comics SET is_favorite = NOT is_favorite, updated_at = datetime(\'now\') WHERE id = $1', [id]);
+  window.dispatchEvent(new CustomEvent('favorites-updated'));
+};
+
+export const toggleViewed = async (id: number): Promise<void> => {
+  const db = await getDb();
+  await db.execute('UPDATE comics SET is_viewed = NOT is_viewed WHERE id = $1', [id]);
+  window.dispatchEvent(new CustomEvent('favorites-updated'));
 };
 
 export const incrementViewCount = async (id: number): Promise<void> => {
   const db = await getDb();
   await db.execute('UPDATE comics SET view_count = view_count + 1 WHERE id = $1', [id]);
+  window.dispatchEvent(new CustomEvent('favorites-updated'));
 };
 
 export const decrementViewCount = async (id: number): Promise<void> => {
   const db = await getDb();
   await db.execute('UPDATE comics SET view_count = MAX(0, view_count - 1) WHERE id = $1', [id]);
+  window.dispatchEvent(new CustomEvent('favorites-updated'));
 };
 
 export const updateComicLastOpened = async (id: number): Promise<void> => {
   const db = await getDb();
   await db.execute('UPDATE comics SET last_opened_at = datetime(\'now\') WHERE id = $1', [id]);
+  window.dispatchEvent(new CustomEvent('favorites-updated'));
+  window.dispatchEvent(new CustomEvent('comic-opened'));
 };
 
 export const getFavoriteComics = async (): Promise<Comic[]> => {
@@ -100,6 +112,18 @@ export const getFavoriteComics = async (): Promise<Comic[]> => {
     FROM comics c 
     LEFT JOIN comic_pages p ON c.id = p.comic_id AND p.page_number = 1
     WHERE c.is_favorite = 1 
-    ORDER BY c.title ASC
+    ORDER BY c.updated_at DESC
   `);
+};
+
+export const getRecentlyOpenedComics = async (limit: number = 6): Promise<Comic[]> => {
+  const db = await getDb();
+  return await db.select<Comic[]>(`
+    SELECT c.*, p.thumbnail_path 
+    FROM comics c 
+    LEFT JOIN comic_pages p ON c.id = p.comic_id AND p.page_number = 1
+    WHERE c.last_opened_at IS NOT NULL
+    ORDER BY c.last_opened_at DESC
+    LIMIT $1
+  `, [limit]);
 };

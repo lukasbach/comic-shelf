@@ -1,73 +1,79 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useMemo } from 'react';
 import { LibraryGrid } from '../../components/library-grid';
-import { ComicCard } from '../../components/comic-card';
-import { useComics } from '../../hooks/use-comics';
-import { useOpenComic } from '../../hooks/use-open-comic';
-import { RxSymbol, RxArrowDown, RxArrowUp, RxMagnifyingGlass, RxEyeOpen, RxEyeClosed, RxStar, RxStarFilled } from 'react-icons/rx';
+import { PageCard } from '../../components/page-card';
+import { useAllPages } from '../../hooks/use-all-pages';
+import { useOpenComicPage } from '../../hooks/use-open-comic-page';
+import {
+    RxSymbol,
+    RxArrowDown,
+    RxArrowUp,
+    RxMagnifyingGlass,
+    RxEyeOpen,
+    RxEyeClosed,
+    RxStar,
+    RxStarFilled
+} from 'react-icons/rx';
 
-export const Route = createFileRoute('/library/list')({
-  component: LibraryList,
+export const Route = createFileRoute('/library/all-pages')({
+  component: AllPagesList,
 });
 
-type SortKey = 'title' | 'artist' | 'date' | 'views' | 'path' | 'recent';
+type SortKey = 'comic_title' | 'path' | 'views' | 'recent';
 type ViewFilter = 'all' | 'viewed' | 'not-viewed';
 type FavoriteFilter = 'all' | 'favorited' | 'not-favorited';
 
-function LibraryList() {
-  const { comics, loading } = useComics();
-  const openComic = useOpenComic();
-  const [sortKey, setSortKey] = useState<SortKey>('title');
+function AllPagesList() {
+  const { pages, loading, refetch } = useAllPages();
+  const openComicPage = useOpenComicPage();
+  const [sortKey, setSortKey] = useState<SortKey>('comic_title');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [searchQuery, setSearchQuery] = useState('');
   const [viewFilter, setViewFilter] = useState<ViewFilter>('all');
   const [favoriteFilter, setFavoriteFilter] = useState<FavoriteFilter>('all');
 
-  const filteredAndSortedComics = useMemo(() => {
-    let result = [...comics];
+  const filteredAndSortedPages = useMemo(() => {
+    let result = [...pages];
 
     // Search filter
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(c => 
-        c.title.toLowerCase().includes(q) || 
-        (c.artist || '').toLowerCase().includes(q) || 
-        c.path.toLowerCase().includes(q)
+      result = result.filter(p => 
+        p.comic_title.toLowerCase().includes(q) || 
+        (p.comic_artist || '').toLowerCase().includes(q) || 
+        p.file_path.toLowerCase().includes(q)
       );
     }
 
     // View filter
     if (viewFilter === 'viewed') {
-      result = result.filter(c => c.is_viewed === 1);
+      result = result.filter(p => p.is_viewed === 1);
     } else if (viewFilter === 'not-viewed') {
-      result = result.filter(c => c.is_viewed === 0);
+      result = result.filter(p => p.is_viewed === 0);
     }
 
     // Favorite filter
     if (favoriteFilter === 'favorited') {
-      result = result.filter(c => c.is_favorite === 1);
+      result = result.filter(p => p.is_favorite === 1);
     } else if (favoriteFilter === 'not-favorited') {
-      result = result.filter(c => c.is_favorite === 0);
+      result = result.filter(p => p.is_favorite === 0);
     }
 
     // Sort
     return result.sort((a, b) => {
       let comparison = 0;
       switch (sortKey) {
-        case 'title':
-          comparison = a.title.localeCompare(b.title);
+        case 'comic_title':
+          comparison = a.comic_title.localeCompare(b.comic_title);
+          if (comparison === 0) {
+            comparison = a.page_number - b.page_number;
+          }
           break;
-        case 'artist':
-          comparison = (a.artist || '').localeCompare(b.artist || '');
-          break;
-        case 'date':
-          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case 'path':
+          comparison = a.file_path.localeCompare(b.file_path);
           break;
         case 'views':
           comparison = a.view_count - b.view_count;
-          break;
-        case 'path':
-          comparison = a.path.localeCompare(b.path);
           break;
         case 'recent':
           const timeA = a.last_opened_at ? new Date(a.last_opened_at).getTime() : 0;
@@ -77,7 +83,7 @@ function LibraryList() {
       }
       return sortOrder === 'asc' ? comparison : -comparison;
     });
-  }, [comics, sortKey, sortOrder, searchQuery, viewFilter, favoriteFilter]);
+  }, [pages, sortKey, sortOrder, searchQuery, viewFilter, favoriteFilter]);
 
   const toggleOrder = () => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
 
@@ -89,20 +95,11 @@ function LibraryList() {
     );
   }
 
-  if (comics.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-4 text-center">
-        <p className="text-lg font-medium">No comics found.</p>
-        <p className="text-sm">Configure indexing paths in Settings.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col h-full gap-6 p-6 overflow-hidden">
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">All Comics ({filteredAndSortedComics.length})</h1>
+          <h1 className="text-2xl font-bold">All Pages ({filteredAndSortedPages.length})</h1>
           
           <div className="flex items-center gap-2 bg-muted p-1 rounded-md">
             <select 
@@ -110,10 +107,8 @@ function LibraryList() {
               onChange={(e) => setSortKey(e.target.value as SortKey)}
               className="bg-transparent text-sm font-medium px-2 py-1 outline-none cursor-pointer"
             >
-              <option value="title">Sort by Title</option>
+              <option value="comic_title">Sort by Comic Title</option>
               <option value="path">Sort by Path</option>
-              <option value="artist">Sort by Artist</option>
-              <option value="date">Sort by Date Added</option>
               <option value="views">Sort by View Count</option>
               <option value="recent">Sort by Recently Opened</option>
             </select>
@@ -132,7 +127,7 @@ function LibraryList() {
             <RxMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search by title, author or path..."
+              placeholder="Search by comic title, author or path..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-muted border-none rounded-md py-2 pl-9 pr-4 text-sm focus:ring-1 focus:ring-primary outline-none"
@@ -192,15 +187,15 @@ function LibraryList() {
       </div>
 
       <div className="flex-1 overflow-auto">
-        {filteredAndSortedComics.length > 0 ? (
+        {filteredAndSortedPages.length > 0 ? (
           <LibraryGrid>
-            {filteredAndSortedComics.map((comic) => (
-              <ComicCard key={comic.id} comic={comic} onOpen={openComic} />
+            {filteredAndSortedPages.map((page) => (
+              <PageCard key={page.id} page={page} onOpen={openComicPage} onUpdate={refetch} />
             ))}
           </LibraryGrid>
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-2">
-            <p>No comics match your filters.</p>
+            <p>No pages match your filters.</p>
             <button 
               onClick={() => {
                 setSearchQuery('');

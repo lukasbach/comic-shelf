@@ -52,6 +52,15 @@ fn get_migrations() -> Vec<Migration> {
             ",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 3,
+            description: "add_is_viewed",
+            sql: "
+                ALTER TABLE comics ADD COLUMN is_viewed INTEGER NOT NULL DEFAULT 0;
+                ALTER TABLE comic_pages ADD COLUMN is_viewed INTEGER NOT NULL DEFAULT 0;
+            ",
+            kind: MigrationKind::Up,
+        },
     ]
 }
 

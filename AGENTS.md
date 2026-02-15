@@ -1,4 +1,4 @@
-﻿# Comic Viewer Development Progress
+﻿# Comic Shelf Development Progress
 
 ## Task 1: Project Scaffolding
 - [x] Initialize Tauri v2 project
@@ -33,7 +33,7 @@
 - **Routing**: TanStack Router is configured with file-based routing.
   - `/` redirects to `/library`.
   - `/library` contains a `LibrarySidebar` and an `Outlet` for sub-routes (`/`, `/list`, `/artists`, etc.).
-  - `/viewer/$comicId` renders the comic viewer.
+  - `/viewer/$comicId` renders the comic shelf viewer.
   - `/settings` renders the settings page.
 - **App Shell**: The `RootLayout` in `__root.tsx` wraps the app with `SettingsProvider` and `TabProvider`. It displays the `TopBar` (with breadcrumbs and settings) and the `TabBar` (when 2+ tabs are open).
 - **Navigation**: Regular navigation (clicking links) updates the current tab. Middle-clicking opens a new tab. Breadcrumbs are dynamic and reflect the current route. The sidebar provides navigation between different library views. The currently displayed page is always represented by a tab, and the tab bar is only visible when multiple tabs exist.
@@ -82,7 +82,7 @@
 - **Progress Tracking**: The `IndexingProvider` exports `isIndexing`, `progress`, and `errors` state. A new `IndexingStatus` component in the sidebar provides real-time feedback and error reporting.
 - **Utilities**: `getImageUrl` in `src/utils/image-utils.ts` handles the conversion of native file paths to Tauri asset URLs.
 
-## Task 6: Comic Viewer â€” Overview Mode
+## Task 6: Comic Shelf — Overview Mode
 - [x] Implement `useComicData` hook for loading comic and pages
 - [x] Create Viewer UI components (Header, Grid, Page Thumbnail)
 - [x] Implement Overview Mode responsive grid
@@ -101,7 +101,7 @@
 - **State Management**: The viewer relies on the `TabProvider` (`useTabs` hook) to persist and manage the current mode and page per tab.
 - **Placeholders**: While Task 6 focuses on Overview mode, placeholders for `SinglePageMode` and `ScrollMode` have been added to ensure a functional mode-switching UI.
 
-## Task 7: Comic Viewer â€” Single Page Mode
+## Task 7: Comic Shelf — Single Page Mode
 - [x] Implement `usePreloadImages` hook for preloading adjacent pages
 - [x] Create `PageImage` component with zoom and fit-width logic
 - [x] Create `PageNavigation` component for manual page switching and jumps
@@ -118,7 +118,7 @@
 - **Navigation**: Integrated with the tab system to persist current page, zoom level, and fit mode per tab. Added jump-to-page functionality by clicking the page number.
 - **Inconsistencies Fixed**: Standardized `currentPage` to be 0-indexed across the viewer components to simplify array access. Fixed image skewing issue by ensuring `height: auto` is always applied during zoom.
 
-## Task 8: Comic Viewer  Scroll Mode
+## Task 8: Comic Shelf — Scroll Mode
 - [x] Implement `useScrollPageTracker` hook for scroll synchronization
 - [x] Create `LazyPage` component for efficient rendering
 - [x] Create `ScrollPageIndicator` floating element
@@ -164,45 +164,21 @@
 - [x] Implement theme switching (light/dark/system)
 - [x] Verify implementation with unit tests
 
-## Task 12: Grid Virtualization
-- [x] Implement generic `VirtualizedGrid` component using TanStack Virtual
-- [x] Virtualize Comic Library Explorer view
-- [x] Virtualize All Comics (List) view
-- [x] Virtualize All Pages view
-- [x] Virtualize Favorites view
-- [x] Virtualize Viewer Overview mode
-- [x] Verify implementation with responsive layout matching existing grids
+## Task 13: Theme System & Final Integration
+- [x] Configure Tailwind CSS v4 dark mode variant
+- [x] Implement theme switching (Light/Dark/System) in Settings
+- [x] Update all UI components (TopBar, TabBar, Sidebar, Cards) with consistent gray-scale theme
+- [x] Implement global `ErrorBoundary` for crash protection
+- [x] Implement `ToastProvider` for app-wide notifications
+- [x] Implement dynamic window titles and Tauri window configuration
+- [x] Rename application to "Comic Shelf"
+- [x] Resolve all TypeScript type errors and verify build
+- [x] Verify all 63 unit tests pass
 
 ### Implementation Details
-- **Virtualized Grid**: Created a robust `VirtualizedGrid` component that calculates the number of columns based on container width (using `ResizeObserver`) to group items into rows. This is necessary because virtualization typically works on a single dimension (rows), but the UI requires a grid.
-- **Responsive Design**: The component supports a `columnsMap` to match the application's existing Tailwind breakpoints (`sm`, `md`, `lg`, `xl`).
-- **Performance**: By only rendering the visible rows plus a small overscan, the application can now handle thousands of comics or pages in the library views without performance degradation.
-- **Layout Consistency**: All virtualized views preserve the `aspect-3/4` card layout and spacing of the original implementation.
-
-### Implementation Details
-- **Settings Page**: Built using `@tanstack/react-form` for centralized state management. It features sections for General (theme, view mode), Slideshow (delay, auto-scroll), Hotkeys (customizable navigation, zoom, and tab controls), and Library (index path management).
-- **Hotkey System**:
-  - **Normalization**: Standardized keyboard event handling in `src/utils/hotkey-utils.ts` to support cross-OS modifiers.
-  - **Recording**: Implemented a "Record" UI in `HotkeyInput` that captures and formats unique key combinations.
-  - **Global Listener**: A global `useAppHotkeys` hook in `RootLayout` listens for keyboard events and maps them to app actions (Next/Prev Page, Zoom, Slideshow Toggle) based on the user's settings.
-  - **Viewer Integration**: A `ViewerRefContext` provides a mechanism for the global hotkey hook to trigger scrolling within the dedicated viewer modes without deep prop drilling.
-- **Theme Switching**: Supports Light, Dark, and System modes with automatic system preference tracking.
-- **Persistence**: All settings are persisted to the filesystem using the Tauri Store plugin, with reactive updates across the application via `SettingsProvider`.
-- **Slideshow Sync**: Slideshow state was promoted to the global tab state to allow hotkeys and UI components to stay in sync.
-
-### Implementation Details
-- **Slideshow Logic**: The slideshow system is split into multiple hooks. `useSlideshow` manages the high-level state (active, paused, progress) and is used in the main viewer route.
-- **Single Page Mode**: When the slideshow is active in single-page mode, `useSlideshowScroll` handles the timing. If a page is zoomed in and taller than the viewport, it performs a linear auto-scroll to the bottom (taking up 90% of the delay) before advancing. If the page fits, it simply waits the full delay duration.
-- **Scroll Mode**: In scroll mode, `useAutoScroll` calculates a constant scroll speed based on the number of pages and the slideshow delay. It continuously scrolls the entire comic and automatically resets to the top with a 1-second pause whenreaching the end.
-- **UI Integration**: A "Slideshow" button was added to the `ViewerHeader`. When active, a floating `SlideshowIndicator` appears in the bottom-left corner with a progress bar (for single-page mode), status, and control buttons (Pause/Stop).
-- **Smoothness**: All animations use `requestAnimationFrame` for high-performance, smooth linear motion.
-- **Settings**: The system respects the `slideshowDelay` from the app settings.
-- **Auto-Stop**: Slideshow automatically stops when switching to "Overview" mode.
-
-### Implementation Details
-- **Scroll Mode**: Implemented a continuous vertical scroll view for comics. All pages are stacked with a small gap, allowing for a seamless reading experience.
-- **Efficient Rendering**: Used `IntersectionObserver` in the `LazyPage` component to only render images when they are near the viewport. This significantly improves performance for long comics and reduces memory usage.
-- **Scroll Synchronization**: The `useScrollPageTracker` hook uses `IntersectionObserver` on each page to detect the most visible page and sync it back to the tab's `currentPage` state. This ensures that switching between modes or viewing the breadcrumbs/sidebar always reflects the user's current position.
-- **Page Indicator**: A floating `ScrollPageIndicator` appears in the bottom-right corner during scrolling, showing "Page X / Y". It automatically fades out after 2 seconds of inactivity.
-- **Initial Positioning**: When switching to Scroll Mode, the viewer automatically scrolls to the `currentPage` stored in the tab state, ensuring a smooth transition from other view modes.
-- **Zoom Support**: Integrated with the existing zoom level from the tab state. Zoom levels > 100% enable horizontal scrolling within the viewer.
+- **Theme System**: Leverages Tailwind v4's class-based dark mode (`.dark`). The `SettingsProvider` injects the `.dark` class into the root element and manages `color-scheme` meta tags for system-level integration.
+- **UI Polishing**: Standardized on a neutral `gray` palette (replacing mixed `slate` and `black` backgrounds) for a cleaner, unified look. Refined component hover states and active indicators for better contrast in dark mode.
+- **Error Handling**: Added a robust `ErrorBoundary` component that catches React rendering errors and provides a descriptive "Something went wrong" UI with a reload button.
+- **Notifications**: Introduced a lightweight `Toast` system using a React Context, allowing any component to show status updates (e.g., indexing success/failure).
+- **Branding**: Consolidated the application name to "Comic Shelf" across the desktop configuration, window titles, and UI elements.
+- **Integration**: Fixed several navigation-related type errors in TanStack Router by ensuring strict search parameter validation.

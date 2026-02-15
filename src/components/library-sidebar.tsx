@@ -149,10 +149,10 @@ export function LibrarySidebar() {
             to={item.to}
             activeOptions={{ exact: true }}
             activeProps={{
-              className: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200',
+              className: 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
             }}
             inactiveProps={{
-              className: 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800',
+              className: 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
             }}
             onAuxClick={(e) => {
               if (e.button === 1) { // Middle click

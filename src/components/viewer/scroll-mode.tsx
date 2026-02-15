@@ -132,7 +132,7 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
   };
 
   return (
-    <div className="flex h-full w-full overflow-hidden bg-gray-50 dark:bg-gray-950">
+    <div className="flex h-full w-full overflow-hidden bg-gray-100 dark:bg-gray-900">
       <div className="flex-1 flex flex-col min-w-0 relative">
         <div 
           ref={containerRef}

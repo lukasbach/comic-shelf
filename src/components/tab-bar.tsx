@@ -49,10 +49,10 @@ function SortableTab({ tab, isActive, onClose, onSelect }: SortableTabProps) {
       style={style}
       {...attributes}
       {...listeners}
-      className={`flex items-center group min-w-30 max-w-60 border-r border-border transition-colors cursor-pointer select-none ${
+      className={`flex items-center group min-w-30 max-w-60 border-r border-gray-200 dark:border-gray-700 transition-colors cursor-pointer select-none ${
         isActive 
-          ? 'bg-background border-b-2 border-b-primary hover:bg-muted/50' 
-          : 'hover:bg-muted'
+          ? 'bg-white dark:bg-gray-800 border-b-2 border-b-blue-500' 
+          : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
       }`}
       onClick={() => onSelect(tab.id, tab.path)}
       onAuxClick={(e) => {
@@ -64,7 +64,7 @@ function SortableTab({ tab, isActive, onClose, onSelect }: SortableTabProps) {
     >
       <div
         className={`flex-1 px-3 py-2 text-sm truncate text-left ${
-          isActive ? 'font-medium text-primary' : 'text-muted-foreground'
+          isActive ? 'font-medium text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
         }`}
       >
         {tab.title}

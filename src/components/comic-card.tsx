@@ -89,7 +89,7 @@ export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen }) => {
       onDecrementViewCount={handleDecrementViewCount}
     >
       <div 
-        className="group flex flex-col bg-card rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all cursor-pointer relative"
+        className="group flex flex-col bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-gray-900/30 hover:shadow-md transition-all cursor-pointer relative"
         onClick={(e) => onOpen(comic, e)}
         onAuxClick={(e) => {
           if (e.button === 1) {
@@ -97,7 +97,7 @@ export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen }) => {
           }
         }}
       >
-        <div className="relative aspect-3/4 overflow-hidden bg-muted">
+        <div className="relative aspect-3/4 overflow-hidden bg-gray-100 dark:bg-gray-900">
           {coverUrl ? (
             <img 
               src={coverUrl} 

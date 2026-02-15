@@ -56,7 +56,7 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
   }
 
   return (
-    <div className="w-72 h-full bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden">
+    <div className="w-72 h-full bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden">
       {/* Sidebar Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-900">
         <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500">Controls</h3>

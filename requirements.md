@@ -1,4 +1,4 @@
-# Comic Viewer App
+# Comic Shelf App
 
 The app is a local desktop app that indexes locally stored comics and allows users to view them. The user can configure which folders to index, and all nested folders with image files inside will be considered a comic book. There are a number of displaying options the user can configure.
 

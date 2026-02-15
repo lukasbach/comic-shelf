@@ -815,6 +815,29 @@ async fn build_index_payload_for_path(
     .map_err(|error| format!("Failed to join indexing task: {error}"))?
 }
 
+#[tauri::command]
+async fn get_comic_pages(
+    app: AppHandle,
+    base_path: String,
+    total_comics: usize,
+    current_comic: usize,
+    comic_path: String,
+    source_type: String,
+) -> Result<Vec<IndexedPagePayload>, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        build_pages_for_candidate(
+            &app,
+            &base_path,
+            total_comics,
+            current_comic,
+            &comic_path,
+            &source_type,
+        )
+    })
+    .await
+    .map_err(|error| format!("Failed to join indexing task: {error}"))?
+}
+
 fn write_resized_thumbnail_bytes(bytes: &[u8], target_path: &Path) -> Result<(), String> {
     let image = image::load_from_memory(bytes).map_err(|e| format!("Failed to decode image bytes: {e}"))?;
     let (width, height) = image.dimensions();
@@ -1221,6 +1244,15 @@ fn get_migrations() -> Vec<Migration> {
             ",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 6,
+            description: "add_indexing_status",
+            sql: "
+                ALTER TABLE comics ADD COLUMN indexing_status TEXT NOT NULL DEFAULT 'completed';
+                ALTER TABLE comics ADD COLUMN indexing_error TEXT;
+            ",
+            kind: MigrationKind::Up,
+        },
     ]
 }
 
@@ -1240,6 +1272,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             scan_comic_candidates,
             build_index_payload_for_path,
+            get_comic_pages,
             list_image_pages,
             read_binary_file,
             count_pdf_pages,

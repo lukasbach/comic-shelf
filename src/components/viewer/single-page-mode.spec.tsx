@@ -53,6 +53,8 @@ const mockComic: Comic = {
   created_at: '',
   updated_at: '',
   bookmark_page: null,
+  indexing_status: 'completed',
+  indexing_error: null,
 };
 
 const mockPages: ComicPage[] = [

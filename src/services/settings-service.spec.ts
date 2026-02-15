@@ -30,17 +30,17 @@ describe('settings-service', () => {
   });
 
   it('loadSettings should merge saved settings with defaults', async () => {
-    const savedSettings = { theme: 'light' };
+    const savedSettings = { slideshowDelay: 5000 };
     mockStore.get.mockResolvedValue(savedSettings);
 
     const settings = await settingsService.loadSettings();
 
-    expect(settings.theme).toBe('light');
+    expect(settings.slideshowDelay).toBe(5000);
     expect(settings.hotkeys.nextPage).toBe(settingsService.DEFAULT_SETTINGS.hotkeys.nextPage);
   });
 
   it('saveSettings should call set and save', async () => {
-    const newSettings = { ...settingsService.DEFAULT_SETTINGS, theme: 'light' as const };
+    const newSettings = { ...settingsService.DEFAULT_SETTINGS, slideshowDelay: 5000 };
     
     await settingsService.saveSettings(newSettings);
 

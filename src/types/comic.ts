@@ -15,6 +15,8 @@ export type Comic = {
   updated_at: string;
   last_opened_at: string | null;
   bookmark_page: number | null;
+  indexing_status: 'pending' | 'processing' | 'completed' | 'failed';
+  indexing_error?: string | null;
   thumbnail_path?: string | null;
 };
 

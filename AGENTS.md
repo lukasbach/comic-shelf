@@ -46,6 +46,7 @@
 - [x] Implement indexing service for database synchronization
 - [x] Implement stale item removal and error handling during indexing
 - [x] Implement global re-index orchestration
+- [x] Implement interactive indexing progress with database persistence and UI status indicators
 - [x] Create indexing context for state and progress tracking
 - [x] Integrate automatic indexing trigger on app start
 - [x] Verify implementation with unit tests
@@ -161,7 +162,7 @@
 ## Task 11: Settings & Hotkeys
 - [x] Implement settings page with user preferences
 - [x] Implement global hotkeys for navigation and controls
-- [x] Implement theme switching (light/dark/system)
+- [x] Integrate theme (hardcoded dark mode)
 - [x] Verify implementation with unit tests
 
 ## Task 12: Grid Virtualization
@@ -180,13 +181,13 @@
 - **Layout Consistency**: All virtualized views preserve the `aspect-3/4` card layout and spacing of the original implementation.
 
 ### Implementation Details
-- **Settings Page**: Built using `@tanstack/react-form` for centralized state management. It features sections for General (theme, view mode), Slideshow (delay, auto-scroll), Hotkeys (customizable navigation, zoom, and tab controls), and Library (index path management).
+- **Settings Page**: Built using `@tanstack/react-form` for centralized state management. It features sections for Library (index path management), General (view mode), Slideshow (delay, auto-scroll), and Hotkeys (customizable navigation, zoom, and tab controls). Settings are auto-saved with a 1s debounce.
 - **Hotkey System**:
   - **Normalization**: Standardized keyboard event handling in `src/utils/hotkey-utils.ts` to support cross-OS modifiers.
   - **Recording**: Implemented a "Record" UI in `HotkeyInput` that captures and formats unique key combinations.
   - **Global Listener**: A global `useAppHotkeys` hook in `RootLayout` listens for keyboard events and maps them to app actions (Next/Prev Page, Zoom, Slideshow Toggle) based on the user's settings.
   - **Viewer Integration**: A `ViewerRefContext` provides a mechanism for the global hotkey hook to trigger scrolling within the dedicated viewer modes without deep prop drilling.
-- **Theme Switching**: Supports Light, Dark, and System modes with automatic system preference tracking.
+- **Theme**: Fixed to Dark mode to match application aesthetics.
 - **Persistence**: All settings are persisted to the filesystem using the Tauri Store plugin, with reactive updates across the application via `SettingsProvider`.
 - **Slideshow Sync**: Slideshow state was promoted to the global tab state to allow hotkeys and UI components to stay in sync.
 

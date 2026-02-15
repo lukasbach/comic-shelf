@@ -62,6 +62,22 @@ export const buildIndexPayloadForPath = async (
   return await invoke<BuildIndexPayloadResult>('build_index_payload_for_path', { basePath, pattern });
 };
 
+export const getComicPages = async (
+  basePath: string,
+  totalComics: number,
+  currentComic: number,
+  comicPath: string,
+  sourceType: string
+): Promise<IndexedPagePayload[]> => {
+  return await invoke<IndexedPagePayload[]>('get_comic_pages', {
+    basePath,
+    totalComics,
+    currentComic,
+    comicPath,
+    sourceType,
+  });
+};
+
 export const listImagePages = async (comicDirPath: string): Promise<ImagePageEntry[]> => {
   return await invoke<ImagePageEntry[]>('list_image_pages', { comicDirPath });
 };

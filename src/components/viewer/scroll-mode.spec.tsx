@@ -56,6 +56,8 @@ describe('ScrollMode', () => {
         page_count: 2,
         cover_image_path: null,
         thumbnail_path: null,
+        indexing_status: 'completed',
+        indexing_error: null,
     };
 
     const mockPages: ComicPage[] = [

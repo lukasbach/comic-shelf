@@ -53,6 +53,7 @@ describe('comic-service', () => {
       page_count: 10,
       is_favorite: 0,
       view_count: 0,
+      indexing_status: 'completed' as const,
     };
 
     const id = await comicService.upsertComic(comic);

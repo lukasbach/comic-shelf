@@ -50,11 +50,23 @@ export const getArtistsWithMetadata = async (): Promise<ArtistMetadata[]> => {
   `);
 };
 
-export const upsertComic = async (comic: Omit<Comic, 'id' | 'created_at' | 'updated_at' | 'is_viewed' | 'last_opened_at' | 'bookmark_page' | 'is_favorite' | 'view_count'>): Promise<number> => {
+export const upsertComic = async (
+  comic: Omit<
+    Comic,
+    | 'id'
+    | 'created_at'
+    | 'updated_at'
+    | 'is_viewed'
+    | 'last_opened_at'
+    | 'bookmark_page'
+    | 'is_favorite'
+    | 'view_count'
+  >
+): Promise<number> => {
   const db = await getDb();
   await db.execute(
-    `INSERT INTO comics (path, source_type, title, artist, series, issue, cover_image_path, page_count, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, datetime('now'))
+    `INSERT INTO comics (path, source_type, title, artist, series, issue, cover_image_path, page_count, indexing_status, indexing_error, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, datetime('now'))
      ON CONFLICT(path) DO UPDATE SET
        source_type = excluded.source_type,
        title = excluded.title,
@@ -63,15 +75,58 @@ export const upsertComic = async (comic: Omit<Comic, 'id' | 'created_at' | 'upda
        issue = excluded.issue,
        cover_image_path = excluded.cover_image_path,
        page_count = excluded.page_count,
+       indexing_status = excluded.indexing_status,
+       indexing_error = excluded.indexing_error,
        updated_at = datetime('now')`,
-    [comic.path, comic.source_type ?? 'image', comic.title, comic.artist, comic.series, comic.issue, comic.cover_image_path, comic.page_count]
+    [
+      comic.path,
+      comic.source_type ?? 'image',
+      comic.title,
+      comic.artist,
+      comic.series,
+      comic.issue,
+      comic.cover_image_path,
+      comic.page_count,
+      comic.indexing_status ?? 'completed',
+      comic.indexing_error ?? null,
+    ]
   );
 
-  const results = await db.select<{ id: number }[]>('SELECT id FROM comics WHERE path = $1', [comic.path]);
+  const results = await db.select<{ id: number }[]>(
+    'SELECT id FROM comics WHERE path = $1',
+    [comic.path]
+  );
   if (results.length === 0) {
-    throw new Error(`Failed to retrieve comic ID after upsert for path: ${comic.path}`);
+    throw new Error(
+      `Failed to retrieve comic ID after upsert for path: ${comic.path}`
+    );
   }
+  window.dispatchEvent(new CustomEvent('library-updated'));
   return results[0].id;
+};
+
+export const getComicByPath = async (
+  path: string
+): Promise<Comic | null> => {
+  const db = await getDb();
+  const results = await db.select<Comic[]>(
+    'SELECT * FROM comics WHERE path = $1',
+    [path]
+  );
+  return results.length > 0 ? results[0] : null;
+};
+
+export const updateIndexingStatus = async (
+  id: number,
+  status: Comic['indexing_status'],
+  error?: string
+): Promise<void> => {
+  const db = await getDb();
+  await db.execute(
+    "UPDATE comics SET indexing_status = $1, indexing_error = $2, updated_at = datetime('now') WHERE id = $3",
+    [status, error ?? null, id]
+  );
+  window.dispatchEvent(new CustomEvent('library-updated'));
 };
 
 export const deleteComic = async (id: number): Promise<void> => {

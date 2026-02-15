@@ -20,7 +20,7 @@ interface VirtualizedGridProps<T> {
 export function VirtualizedGrid<T>({
   items,
   renderItem,
-  itemHeight = 350, // Default estimate for comic/page card + info
+  itemHeight = 450, // Default estimate for comic/page card + info
   gap = 16,
   padding = 0,
   className = "",
@@ -72,6 +72,10 @@ export function VirtualizedGrid<T>({
     getScrollElement: () => parentRef.current,
     estimateSize: () => itemHeight + gap,
     overscan: 5,
+    // Measure actual row height to handle dynamic card heights and prevent overlap
+    measureElement: (el) => {
+      return el.getBoundingClientRect().height;
+    }
   });
 
   return (
@@ -92,16 +96,18 @@ export function VirtualizedGrid<T>({
         {rowVirtualizer.getVirtualItems().map((virtualRow) => (
           <div
             key={virtualRow.index}
+            data-index={virtualRow.index}
+            ref={rowVirtualizer.measureElement}
             style={{
               position: 'absolute',
               top: 0,
               left: 0,
               width: '100%',
-              height: `${itemHeight}px`,
               transform: `translateY(${virtualRow.start}px)`,
               display: 'grid',
               gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
               gap: `${gap}px`,
+              paddingBottom: `${gap}px`,
             }}
           >
             {rows[virtualRow.index].map((item, colIndex) => (

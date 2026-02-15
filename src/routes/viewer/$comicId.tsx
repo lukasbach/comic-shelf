@@ -40,7 +40,7 @@ function ComicViewerPage() {
   const [gallerySelectionPageId, setGallerySelectionPageId] = React.useState<number | null>(null);
   
   // Default to overview if no mode is set in tab
-  const viewMode = activeTab?.viewMode ?? 'overview';
+  const viewMode = activeTab?.viewMode ?? settings.defaultViewMode ?? 'overview';
 
   const { 
     comic, 
@@ -314,6 +314,14 @@ function ComicViewerPage() {
         currentPage={activeTab?.currentPage}
         currentPageFilename={currentPageFilename}
       />
+      {viewMode !== 'overview' && (
+        <div className="h-1 bg-gray-200 dark:bg-gray-800 shrink-0 overflow-hidden">
+          <div 
+            className="h-full bg-blue-600 transition-all duration-300 ease-in-out"
+            style={{ width: `${pages.length > 0 ? ((currentPageIndex + 1) / pages.length) * 100 : 0}%` }}
+          />
+        </div>
+      )}
       <div className="flex-1 overflow-hidden">
         {renderContent()}
       </div>

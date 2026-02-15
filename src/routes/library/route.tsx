@@ -9,7 +9,7 @@ function LibraryLayout() {
   return (
     <div className="flex h-full w-full overflow-hidden">
       <LibrarySidebar />
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 flex flex-col overflow-hidden bg-background">
         <Outlet />
       </div>
     </div>

@@ -1,14 +1,16 @@
-import { useEffect } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { GridView } from '../../components/grid-view';
+import { GridPage, SortOption } from '../../components/grid-page';
 import { ComicCard } from '../../components/comic-card';
 import { PageCard } from '../../components/page-card';
 import { useFavoriteComics } from '../../hooks/use-favorite-comics';
 import { useFavoritePages } from '../../hooks/use-favorite-pages';
 import { useOpenComic } from '../../hooks/use-open-comic';
 import { useOpenComicPage } from '../../hooks/use-open-comic-page';
-import { RxSymbol, RxStarFilled, RxGrid, RxFile } from 'react-icons/rx';
+import { RxStarFilled, RxGrid, RxFile } from 'react-icons/rx';
 import { Tabs } from '../../components/tabs';
+import { Comic } from '../../types/comic';
+import { AllPageItem } from '../../hooks/use-all-pages';
+import { naturalSortComparator } from '../../utils/image-utils';
 
 export const Route = createFileRoute('/library/favorites')({
   validateSearch: (search: Record<string, unknown>) => {
@@ -18,6 +20,18 @@ export const Route = createFileRoute('/library/favorites')({
   },
   component: LibraryFavorites,
 });
+
+const comicSortOptions: SortOption<Comic>[] = [
+  { label: 'Title', value: 'title', comparator: (a, b) => naturalSortComparator(a.title, b.title) },
+  { label: 'Artist', value: 'artist', comparator: (a, b) => naturalSortComparator(a.artist || '', b.artist || '') },
+  { label: 'Date Added', value: 'date', comparator: (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime() },
+];
+
+const pageSortOptions: SortOption<AllPageItem>[] = [
+  { label: 'Comic Title', value: 'comic_title', comparator: (a, b) => naturalSortComparator(a.comic_title, b.comic_title) },
+  { label: 'Page Number', value: 'page', comparator: (a, b) => a.page_number - b.page_number },
+  { label: 'Date Added', value: 'date', comparator: (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime() },
+];
 
 function LibraryFavorites() {
   const { tab: activeTab } = Route.useSearch();
@@ -38,87 +52,49 @@ function LibraryFavorites() {
   const tabItems = [
     {
       id: 'comics',
-      label: 'Comics',
-      count: favoriteComics.length,
+      label: `Comics (${favoriteComics.length})`,
       icon: <RxGrid size={18} />,
     },
     {
       id: 'pages',
-      label: 'Pages',
-      count: favoritePages.length,
+      label: `Pages (${favoritePages.length})`,
       icon: <RxFile size={18} />,
     },
   ];
 
-  useEffect(() => {
-    if (!loadingComics && !loadingPages) {
-      if (favoriteComics.length === 0 && favoritePages.length > 0 && activeTab === 'comics') {
-        setActiveTab('pages');
-      }
-    }
-  }, [loadingComics, loadingPages, favoriteComics.length, favoritePages.length]);
-
   const loading = loadingComics || loadingPages;
-  const hasFavorites = favoriteComics.length > 0 || favoritePages.length > 0;
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <RxSymbol className="animate-spin text-muted-foreground" size={32} />
-      </div>
-    );
-  }
-
-  if (!hasFavorites) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-4 text-center">
-        <RxStarFilled size={48} className="opacity-20" />
-        <p className="text-lg font-medium">No favorites yet.</p>
-        <p className="text-sm">Star comics or pages to see them here.</p>
-      </div>
-    );
-  }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex items-center justify-between p-6 pb-4">
-        <h1 className="text-2xl font-bold">Favorites</h1>
-      </div>
-
-      <div className="px-6 mb-2">
-        <Tabs 
-          items={tabItems} 
-          activeId={activeTab} 
-          onChange={(id) => setActiveTab(id)} 
-        />
-      </div>
-
-      {activeTab === 'comics' ? (
-        <GridView
-          items={favoriteComics}
-          renderItem={(comic) => (
-            <ComicCard 
-              key={comic.id} 
-              comic={comic} 
-              onOpen={openComic} 
-            />
-          )}
-          emptyMessage="No favorite comics yet."
-        />
+    <GridPage<any>
+      type={activeTab === 'comics' ? 'comics' : 'pages'}
+      title="Favorites"
+      icon={<RxStarFilled size={24} className="text-amber-400" />}
+      items={activeTab === 'comics' ? favoriteComics : favoritePages}
+      loading={loading}
+      renderItem={(item) => activeTab === 'comics' ? (
+        <ComicCard key={item.id} comic={item} onOpen={openComic} />
       ) : (
-        <GridView
-          items={favoritePages}
-          renderItem={(page) => (
-            <PageCard 
-              key={page.id} 
-              page={page as any} 
-              onOpen={openComicPage} 
-              onUpdate={refreshPages}
-            />
-          )}
-          emptyMessage="No favorite pages yet."
-        />
+        <PageCard key={item.id} page={item} onOpen={openComicPage} onUpdate={refreshPages} />
       )}
-    </div>
+      actions={
+        <div className="flex items-center bg-muted/30 p-1 rounded-lg border border-border/50">
+          <Tabs 
+            items={tabItems} 
+            activeId={activeTab} 
+            onChange={(id) => setActiveTab(id)} 
+          />
+        </div>
+      }
+      searchFields={(item) => activeTab === 'comics' 
+        ? [item.title, item.artist, item.path]
+        : [item.comic_title, item.comic_artist, item.file_path]
+      }
+      sortOptions={activeTab === 'comics' ? comicSortOptions : pageSortOptions}
+      defaultSortKey={activeTab === 'comics' ? 'title' : 'comic_title'}
+      showViewFilter
+      isViewed={(item) => item.is_viewed === 1}
+      emptyMessage={activeTab === 'comics' ? "No favorite comics yet." : "No favorite pages yet."}
+      noItemsMessage={activeTab === 'comics' ? "No favorite comics yet." : "No favorite pages yet."}
+    />
   );
 }

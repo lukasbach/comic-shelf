@@ -49,19 +49,19 @@ export const HotkeyInput: React.FC<HotkeyInputProps> = ({ value, onChange, label
 
   return (
     <div className="flex flex-col gap-1" ref={containerRef}>
-      <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{label}</label>
+      <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">{label}</label>
       <div className={`flex items-center gap-2 p-2 rounded-lg border transition-colors ${
         isRecording 
           ? 'bg-blue-500/10 border-blue-500 ring-2 ring-blue-500/20' 
           : isDuplicate
             ? 'bg-red-500/5 border-red-500/50'
-            : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+            : 'bg-slate-800 border-slate-700 hover:border-slate-600'
       }`}>
         <div className="flex-1 font-mono text-sm min-h-6 flex items-center">
           {isRecording ? (
-            <span className="text-blue-600 dark:text-blue-400 animate-pulse">Press a key...</span>
+            <span className="text-blue-400 animate-pulse">Press a key...</span>
           ) : (
-            <span className={isDuplicate ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100'}>
+            <span className={isDuplicate ? 'text-red-400' : 'text-slate-200'}>
               {getDisplayKey(value) || 'None'}
             </span>
           )}
@@ -72,7 +72,7 @@ export const HotkeyInput: React.FC<HotkeyInputProps> = ({ value, onChange, label
             <button
               type="button"
               onClick={() => setIsRecording(false)}
-              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors cursor-pointer"
+              className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-slate-200 transition-colors"
               title="Cancel"
             >
               <RxCross2 size={16} />
@@ -82,7 +82,7 @@ export const HotkeyInput: React.FC<HotkeyInputProps> = ({ value, onChange, label
               <button
                 type="button"
                 onClick={() => setIsRecording(true)}
-                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-slate-200 transition-colors"
                 title="Record Hotkey"
               >
                 <RxKeyboard size={16} />
@@ -91,7 +91,7 @@ export const HotkeyInput: React.FC<HotkeyInputProps> = ({ value, onChange, label
                 <button
                   type="button"
                   onClick={() => onChange('')}
-                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                  className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-slate-200 transition-colors"
                   title="Clear Hotkey"
                 >
                   <RxReset size={16} />

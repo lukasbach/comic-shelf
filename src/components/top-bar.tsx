@@ -30,7 +30,7 @@ export function TopBar() {
   }, [appWindow])
 
   return (
-    <header className="h-12 relative flex items-center justify-between px-4 border-b bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 z-20 select-none">
+    <header className="h-12 relative flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 z-20 select-none">
       <div
         data-tauri-drag-region
         className="absolute inset-0"
@@ -39,16 +39,15 @@ export function TopBar() {
       <div className="flex items-center gap-4 relative pointer-events-none">
         <Link
           to="/library"
-          search={{ path: '' }}
           className="text-xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mr-4 pointer-events-auto cursor-pointer"
           onAuxClick={(e) => {
             if (e.button === 1) {
               openLibraryTab('/library', 'Explorer')
-              navigate({ to: '/library', search: { path: '' } })
+              navigate({ to: '/library' })
             }
           }}
         >
-          Comic Shelf
+          ComicShelf
         </Link>
         <div className="pointer-events-auto">
           <BreadcrumbBar />

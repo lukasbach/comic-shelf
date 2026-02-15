@@ -101,19 +101,19 @@ function SettingsPage() {
 
   if (loadingSettings) {
     return (
-      <div className="flex items-center justify-center h-full bg-white dark:bg-gray-900">
-        <RxSymbol className="animate-spin text-gray-500" size={32} />
+      <div className="flex items-center justify-center h-full bg-slate-950">
+        <RxSymbol className="animate-spin text-slate-400" size={32} />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full overflow-auto bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+    <div className="flex flex-col h-full overflow-auto bg-slate-950 text-slate-200">
       <div className="max-w-4xl mx-auto w-full p-8 pb-24 space-y-12">
-        <header className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 pb-6">
+        <header className="flex items-center justify-between border-b border-slate-800 pb-6">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Settings</h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">Configure your reading experience and library.</p>
+            <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+            <p className="text-slate-400 mt-1">Configure your reading experience and library.</p>
           </div>
           <div className="flex items-center gap-4">
             <button
@@ -122,8 +122,8 @@ function SettingsPage() {
               className={`px-6 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
                 saveStatus === 'saved' 
                   ? 'bg-green-600 text-white' 
-                  : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20'
-              } disabled:opacity-50 min-w-35 justify-center cursor-pointer`}
+                  : 'bg-blue-600 hover:bg-blue-500 text-white'
+              } disabled:opacity-50 min-w-35 justify-center`}
             >
               {saveStatus === 'saving' ? (
                 <RxSymbol className="animate-spin" />
@@ -144,16 +144,16 @@ function SettingsPage() {
         >
           {/* General Section */}
           <section className="space-y-6">
-            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+            <div className="flex items-center gap-2 text-blue-400">
               <RxDesktop size={20} />
               <h2 className="text-xl font-semibold">General</h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-gray-50 dark:bg-gray-800/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-slate-900/50 p-6 rounded-xl border border-slate-800">
               <form.Field name="theme">
                 {(field) => (
                   <div className="space-y-3">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Theme</label>
+                    <label className="text-sm font-medium text-slate-300">Theme</label>
                     <div className="flex gap-2">
                       {[
                         { value: 'light', icon: RxSun, label: 'Light' },
@@ -167,7 +167,7 @@ function SettingsPage() {
                           className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border transition-all ${
                             field.state.value === opt.value
                               ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20'
-                              : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500 cursor-pointer'
+                              : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600'
                           }`}
                         >
                           <opt.icon />
@@ -182,7 +182,7 @@ function SettingsPage() {
               <form.Field name="defaultViewMode">
                 {(field) => (
                   <div className="space-y-3">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Default View Mode</label>
+                    <label className="text-sm font-medium text-slate-300">Default View Mode</label>
                     <div className="flex gap-2">
                       {[
                         { value: 'overview', icon: RxGrid, label: 'Overview' },
@@ -196,7 +196,7 @@ function SettingsPage() {
                           className={`flex-1 flex flex-col items-center justify-center gap-1 p-2 rounded-lg border transition-all ${
                             field.state.value === opt.value
                               ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20'
-                              : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500 cursor-pointer'
+                              : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600'
                           }`}
                         >
                           <opt.icon size={18} />
@@ -211,7 +211,7 @@ function SettingsPage() {
               <form.Field name="defaultFitMode">
                 {(field) => (
                   <div className="space-y-3">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Default Fit Mode</label>
+                    <label className="text-sm font-medium text-slate-300">Default Fit Mode</label>
                     <div className="flex gap-2">
                       {[
                         { value: 'width', label: 'Fit Width' },
@@ -224,7 +224,7 @@ function SettingsPage() {
                           className={`flex-1 flex flex-col items-center justify-center gap-1 p-2 rounded-lg border transition-all ${
                             field.state.value === opt.value
                               ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20'
-                              : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500 cursor-pointer'
+                              : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600'
                           }`}
                         >
                           <span className="text-[10px] uppercase font-bold tracking-tighter">{opt.label}</span>
@@ -239,8 +239,8 @@ function SettingsPage() {
                 {(field) => (
                   <div className="space-y-3 col-span-full">
                     <div className="flex justify-between items-center">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Default Zoom Level</label>
-                      <span className="text-blue-600 dark:text-blue-400 font-mono font-bold">{field.state.value}%</span>
+                      <label className="text-sm font-medium text-slate-300">Default Zoom Level</label>
+                      <span className="text-blue-400 font-mono font-bold">{field.state.value}%</span>
                     </div>
                     <div className="flex items-center gap-4">
                       <input
@@ -250,7 +250,7 @@ function SettingsPage() {
                         step="10"
                         value={field.state.value}
                         onChange={(e) => field.handleChange(Number(e.target.value))}
-                        className="flex-1 accent-blue-500 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                        className="flex-1 accent-blue-500 h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer"
                       />
                     </div>
                   </div>
@@ -261,18 +261,18 @@ function SettingsPage() {
 
           {/* Slideshow Section */}
           <section className="space-y-6">
-            <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
+            <div className="flex items-center gap-2 text-purple-400">
               <RxTimer size={20} />
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Slideshow</h2>
+              <h2 className="text-xl font-semibold">Slideshow</h2>
             </div>
             
-            <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700 space-y-8">
+            <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800 space-y-8">
               <form.Field name="slideshowDelay">
                 {(field) => (
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Auto-advance Delay</label>
-                      <span className="text-purple-600 dark:text-purple-400 font-mono font-bold">{(field.state.value / 1000).toFixed(1)}s</span>
+                      <label className="text-sm font-medium text-slate-300">Auto-advance Delay</label>
+                      <span className="text-purple-400 font-mono font-bold">{(field.state.value / 1000).toFixed(1)}s</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                        {[3000, 5000, 8000, 10000, 15000].map((ms) => (
@@ -280,10 +280,10 @@ function SettingsPage() {
                           key={ms}
                           type="button"
                           onClick={() => field.handleChange(ms)}
-                          className={`px-3 py-1.5 rounded-md border text-xs font-medium transition-all cursor-pointer ${
+                          className={`px-3 py-1.5 rounded-md border text-xs font-medium transition-all ${
                             field.state.value === ms
                               ? 'bg-purple-600 border-purple-500 text-white'
-                              : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500'
+                              : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600'
                           }`}
                         >
                           {ms / 1000}s
@@ -297,7 +297,7 @@ function SettingsPage() {
                           step="500"
                           value={field.state.value}
                           onChange={(e) => field.handleChange(Number(e.target.value))}
-                          className="w-full accent-purple-500 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                          className="w-full accent-purple-500 h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer"
                         />
                       </div>
                     </div>
@@ -309,12 +309,12 @@ function SettingsPage() {
 
           {/* Hotkeys Section */}
           <section className="space-y-6">
-            <div className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400">
+            <div className="flex items-center gap-2 text-yellow-400">
               <RxKeyboard size={20} />
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Hotkeys</h2>
+              <h2 className="text-xl font-semibold">Hotkeys</h2>
             </div>
             
-            <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 { name: 'nextPage', label: 'Next Page' },
                 { name: 'prevPage', label: 'Previous Page' },
@@ -340,18 +340,18 @@ function SettingsPage() {
                 </form.Field>
               ))}
             </div>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 italic">Hotkeys are automatically disabled when typing in input fields.</p>
+            <p className="text-[10px] text-slate-500 italic">Hotkeys are automatically disabled when typing in input fields.</p>
           </section>
 
           {/* Indexing Section */}
           <section className="space-y-6">
-            <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+            <div className="flex items-center gap-2 text-green-400">
               <RxArchive size={20} />
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Library & Indexing</h2>
+              <h2 className="text-xl font-semibold">Library & Indexing</h2>
             </div>
             
-            <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700 space-y-6">
-              <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-4">
+            <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800 space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
                 <form.Field name="autoReindex">
                   {(field) => (
                     <div className="flex items-center gap-3">
@@ -360,8 +360,8 @@ function SettingsPage() {
                         role="switch"
                         aria-checked={field.state.value}
                         onClick={() => field.handleChange(!field.state.value)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white ${
-                          field.state.value ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                          field.state.value ? 'bg-blue-600' : 'bg-slate-700'
                         }`}
                       >
                         <span
@@ -371,8 +371,8 @@ function SettingsPage() {
                         />
                       </button>
                       <div>
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Auto-reindex on startup</span>
-                        <p className="text-[10px] text-gray-500 dark:text-gray-400">Scan for new comics when the application opens.</p>
+                        <span className="text-sm font-medium text-slate-200">Auto-reindex on startup</span>
+                        <p className="text-[10px] text-slate-500">Scan for new comics when the application opens.</p>
                       </div>
                     </div>
                   )}
@@ -381,13 +381,13 @@ function SettingsPage() {
 
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-200">Index Paths</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Directories scanned for comics.</p>
+                  <h3 className="text-sm font-medium text-slate-200">Index Paths</h3>
+                  <p className="text-xs text-slate-500">Directories scanned for comics.</p>
                 </div>
                 <button
                   type="button"
                   onClick={handleSelectFolder}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-200 transition-colors cursor-pointer"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-medium text-slate-200 transition-colors"
                 >
                   <RxPlus /> Add Path
                 </button>
@@ -395,21 +395,21 @@ function SettingsPage() {
 
               <div className="space-y-2">
                 {indexPaths.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg text-gray-400 dark:text-gray-600">
+                  <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-800 rounded-lg text-slate-600">
                     <RxArchive size={32} className="mb-2 opacity-50" />
                     <p className="text-sm">No index paths configured.</p>
                   </div>
                 ) : (
                   indexPaths.map((path) => (
-                    <div key={path.id} className="flex items-center justify-between p-3 bg-white dark:bg-gray-700/50 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div key={path.id} className="flex items-center justify-between p-3 bg-slate-800/50 border border-slate-800 rounded-lg">
                       <div className="truncate flex-1 mr-4">
-                        <div className="text-sm text-gray-700 dark:text-gray-200 truncate">{path.path}</div>
-                        <div className="text-[10px] text-gray-500 dark:text-gray-400 font-mono">{path.pattern}</div>
+                        <div className="text-sm text-slate-200 truncate">{path.path}</div>
+                        <div className="text-[10px] text-slate-500 font-mono">{path.pattern}</div>
                       </div>
                       <button
                         type="button"
                         onClick={() => handleRemovePath(path.id!)}
-                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-all cursor-pointer"
+                        className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
                       >
                         <RxTrash size={16} />
                       </button>
@@ -418,21 +418,21 @@ function SettingsPage() {
                 )}
               </div>
 
-              <div className="pt-4 border-t border-gray-200 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="text-xs text-gray-500 dark:text-gray-400">
+              <div className="pt-4 border-t border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="text-xs text-slate-500">
                    {lastIndexedAt ? `Last indexed: ${new Date(lastIndexedAt).toLocaleString()}` : 'Never indexed'}
                 </div>
                 
                 {isIndexing && progress && (
                   <div className="flex-1 max-w-md space-y-1">
-                    <div className="flex justify-between text-[10px] text-gray-500 dark:text-gray-400 uppercase">
+                    <div className="flex justify-between text-[10px] text-slate-400 uppercase">
                       <span>{progress.status === 'scanning' ? 'Scanning...' : 'Indexing...'}</span>
                       <span>{(progress.current ?? 0)} / {(progress.total ?? 0)}</span>
                     </div>
-                    <div className="text-[10px] text-gray-500 dark:text-gray-400 truncate" title={progress.currentTask || ''}>
+                    <div className="text-[10px] text-slate-400 truncate" title={progress.currentTask || ''}>
                       {progress.currentTask || 'Working...'}
                     </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 h-1.5 rounded-full overflow-hidden">
+                    <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                       <div 
                         className="bg-green-500 h-full transition-all duration-300"
                         style={{ width: `${progress.percentage ?? (((progress.current ?? 0) / (progress.total ?? 1)) * 100)}%` }}
@@ -445,7 +445,7 @@ function SettingsPage() {
                   type="button"
                   onClick={startIndexing}
                   disabled={isIndexing}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600/10 hover:bg-green-600/20 border border-green-200 dark:border-green-800 rounded-lg text-sm font-medium text-green-600 dark:text-green-400 transition-all disabled:opacity-50 cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600/10 hover:bg-green-600/20 border border-green-600/30 rounded-lg text-sm font-medium text-green-400 transition-all disabled:opacity-50"
                 >
                   {isIndexing ? <RxSymbol className="animate-spin" /> : <RxReload />}
                   {isIndexing ? 'Indexing...' : 'Force Re-index All'}
@@ -455,7 +455,7 @@ function SettingsPage() {
           </section>
         </form>
 
-        <footer className="pt-12 border-t border-gray-200 dark:border-gray-800 flex gap-4">
+        <footer className="pt-12 border-t border-slate-800 flex gap-4">
            <button
              type="button"
              onClick={() => {
@@ -464,7 +464,7 @@ function SettingsPage() {
                   updateSettings(DEFAULT_SETTINGS);
                 }
              }}
-             className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors cursor-pointer"
+             className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
            >
              Reset to Defaults
            </button>

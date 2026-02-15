@@ -7,9 +7,9 @@ export const Route = createFileRoute('/library')({
 
 function LibraryLayout() {
   return (
-    <div className="flex h-full w-full overflow-hidden bg-white dark:bg-gray-900">
+    <div className="flex h-full w-full overflow-hidden">
       <LibrarySidebar />
-      <div className="flex-1 overflow-hidden relative flex flex-col">
+      <div className="flex-1 overflow-auto">
         <Outlet />
       </div>
     </div>

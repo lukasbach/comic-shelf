@@ -32,7 +32,7 @@ function ComicViewerPage() {
   const search = Route.useSearch();
   const { tabs, activeTabId, updateTab } = useTabs();
   const { settings } = useSettings();
-  const { scrollToPage, registerNextPage, registerPrevPage } = useViewerRef();
+  const { scrollContainerRef, scrollToPage, registerNextPage, registerPrevPage } = useViewerRef();
   const activeTab = tabs.find((t: Tab) => t.id === activeTabId);
   const [showBookmarkPrompt, setShowBookmarkPrompt] = React.useState(false);
   const [promptHandled, setPromptHandled] = React.useState(false);
@@ -56,12 +56,6 @@ function ComicViewerPage() {
     setBookmark,
     clearBookmark
   } = useComicData(Number(comicId));
-
-  useEffect(() => {
-    if (comic) {
-      document.title = `Comic Shelf — ${comic.title}`;
-    }
-  }, [comic]);
 
   // Show prompt if bookmark exists and not already handled or explicitly requested via search
   useEffect(() => {
@@ -246,7 +240,7 @@ function ComicViewerPage() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 overflow-hidden relative">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-950 overflow-hidden relative">
       <ViewerHeader
         comic={comic}
         pageCount={pages.length}

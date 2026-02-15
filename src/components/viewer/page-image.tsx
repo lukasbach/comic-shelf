@@ -33,7 +33,7 @@ export const PageImage: React.FC<PageImageProps> = ({ page, zoomLevel, fitMode, 
   return (
     <div 
       ref={containerRef}
-      className={`relative w-full h-full overflow-auto flex justify-center ${isFitWidth ? 'items-start' : 'items-center'}`}
+      className="relative w-full h-full overflow-auto flex items-start justify-start"
     >
       <RenderedPageImage
         page={page}
@@ -53,6 +53,7 @@ export const PageImage: React.FC<PageImageProps> = ({ page, zoomLevel, fitMode, 
           maxHeight: isFitBoth ? '100%' : 'none',
           display: 'block',
           flexShrink: 0,
+          margin: isFitWidth ? '0 auto' : 'auto',
         }}
       />
     </div>

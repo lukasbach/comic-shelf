@@ -90,11 +90,10 @@ export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.Ref
       >
         <div
           ref={internalRef}
-          className="group flex flex-col items-center w-fit min-w-full mb-2 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative"
+          className="group flex flex-col items-start w-fit min-w-full mb-2 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative"
           style={{ 
             minHeight: !isVisible ? estimatedHeight : 'auto',
             height: isFitBoth ? '100dvh' : 'auto',
-            justifyContent: isFitBoth ? 'center' : 'stretch'
           }}
         >
           <div className="w-full flex justify-between items-center px-4 py-1 text-xs text-gray-500 bg-gray-200 dark:bg-gray-900">
@@ -153,11 +152,12 @@ export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.Ref
                 maxWidth: (isFitWidth || isFitBoth) ? '100%' : 'none',
                 maxHeight: isFitBoth ? '100%' : 'none',
                 flexShrink: 0,
+                margin: 'auto',
               }}
             />
           )}
           {!isVisible && (
-            <div className="flex items-center justify-center p-20">
+            <div className="flex items-center justify-center p-20 m-auto">
               <div className="animate-pulse text-gray-400">Loading...</div>
             </div>
           )}

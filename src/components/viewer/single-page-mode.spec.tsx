@@ -90,6 +90,11 @@ describe('SinglePageMode', () => {
   });
 
   it('navigates to next page on click', () => {
+    (useTabs as any).mockReturnValue({
+      tabs: [{ id: 'tab1', currentPage: 0, zoomLevel: 100, fitMode: 'width', viewMode: 'single', sidebarCollapsed: true }],
+      activeTabId: 'tab1',
+      updateTab,
+    });
     render(
       <ViewerRefProvider>
         <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} onDecrementPageViewCount={vi.fn()} />
@@ -102,7 +107,7 @@ describe('SinglePageMode', () => {
 
   it('navigates to prev page on click', () => {
     (useTabs as any).mockReturnValue({
-      tabs: [{ id: 'tab1', currentPage: 1, zoomLevel: 100, fitMode: 'width', viewMode: 'single', sidebarCollapsed: false }],
+      tabs: [{ id: 'tab1', currentPage: 1, zoomLevel: 100, fitMode: 'width', viewMode: 'single', sidebarCollapsed: true }],
       activeTabId: 'tab1',
       updateTab,
     });
@@ -118,7 +123,7 @@ describe('SinglePageMode', () => {
 
   it('wraps around to first page when clicking next on last page', () => {
     (useTabs as any).mockReturnValue({
-      tabs: [{ id: 'tab1', currentPage: 2, zoomLevel: 100, fitMode: 'width', viewMode: 'single', sidebarCollapsed: false }],
+      tabs: [{ id: 'tab1', currentPage: 2, zoomLevel: 100, fitMode: 'width', viewMode: 'single', sidebarCollapsed: true }],
       activeTabId: 'tab1',
       updateTab,
     });
@@ -134,7 +139,7 @@ describe('SinglePageMode', () => {
 
   it('wraps around to last page when clicking prev on first page', () => {
     (useTabs as any).mockReturnValue({
-      tabs: [{ id: 'tab1', currentPage: 0, zoomLevel: 100, fitMode: 'width', viewMode: 'single', sidebarCollapsed: false }],
+      tabs: [{ id: 'tab1', currentPage: 0, zoomLevel: 100, fitMode: 'width', viewMode: 'single', sidebarCollapsed: true }],
       activeTabId: 'tab1',
       updateTab,
     });

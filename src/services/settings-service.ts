@@ -47,7 +47,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   autoReindex: true,
   lastIndexedAt: null,
   enableGalleries: false,
-  showViewCount: true,
+  showViewCount: false,
 };
 
 const STORE_PATH = 'settings.json';

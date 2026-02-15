@@ -234,7 +234,7 @@ function ComicViewerPage() {
         onClearBookmark={handleClearBookmark}
         currentPage={activeTab?.currentPage}
       />
-      <div className="flex-1 overflow-hidden" ref={scrollContainerRef}>
+      <div className="flex-1 overflow-hidden">
         {renderContent()}
       </div>
 

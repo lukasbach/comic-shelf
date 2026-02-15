@@ -1,4 +1,4 @@
-import React, { RefObject, useState } from 'react';
+import React, { RefObject, useState, useLayoutEffect } from 'react';
 import { ComicPage } from '../../types/comic';
 import { RenderedPageImage } from './rendered-page-image';
 
@@ -11,6 +11,14 @@ type PageImageProps = {
 
 export const PageImage: React.FC<PageImageProps> = ({ page, zoomLevel, fitMode, containerRef }) => {
   const [naturalSize, setNaturalSize] = useState<{ width: number; height: number } | null>(null);
+
+  // Reset scroll position when page changes
+  useLayoutEffect(() => {
+    if (containerRef?.current) {
+      containerRef.current.scrollTop = 0;
+      containerRef.current.scrollLeft = 0;
+    }
+  }, [page.id, containerRef]);
 
   const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     setNaturalSize({

@@ -2,11 +2,11 @@ import * as comicService from './comic-service';
 import * as pageService from './comic-page-service';
 import { getAllIndexPaths } from './index-path-service';
 import {
-  buildIndexPayloadForPath,
-  cleanupIndexedThumbnails,
-  listenToRustIndexingProgress,
-  type IndexedComicPayload,
-  type IndexedPagePayload,
+    buildIndexPayloadForPath,
+    cleanupIndexedThumbnails,
+    listenToRustIndexingProgress,
+    type IndexedComicPayload,
+    type IndexedPagePayload,
 } from './source-file-service';
 import * as thumbnailService from './thumbnail-service';
 import { renderPdfPagesToPngBytes } from './page-source-utils';

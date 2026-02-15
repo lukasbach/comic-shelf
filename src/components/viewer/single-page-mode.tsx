@@ -40,14 +40,8 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
   
   const { scrollContainerRef: containerRef } = useViewerRef();
 
-  // Scroll to top when page changes
-  useEffect(() => {
-    if (containerRef.current?.scrollTo) {
-      containerRef.current.scrollTo(0, 0);
-    }
-  }, [currentPage, containerRef]);
-
   // Preload adjacent images
+  usePreloadImages(pages, currentPage);
   usePreloadImages(pages, currentPage);
 
   // Slideshow scroll logic

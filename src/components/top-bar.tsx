@@ -1,14 +1,17 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { BreadcrumbBar } from './breadcrumb-bar'
 import { RxGear, RxMinus, RxBox, RxCross2, RxCopy } from 'react-icons/rx'
 import { LuGithub } from 'react-icons/lu'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { useEffect, useState } from 'react'
+import { useTabs } from '../contexts/tab-context'
 
 export function TopBar() {
   const [isMaximized, setIsMaximized] = useState(false)
   const appWindow = getCurrentWindow()
+  const { openLibraryTab } = useTabs()
+  const navigate = useNavigate()
 
   useEffect(() => {
     const updateMaximized = async () => {
@@ -34,9 +37,18 @@ export function TopBar() {
         onDoubleClick={() => appWindow.toggleMaximize()}
       />
       <div className="flex items-center gap-4 relative pointer-events-none">
-        <div className="text-xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mr-4">
+        <Link
+          to="/library"
+          className="text-xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mr-4 pointer-events-auto cursor-pointer"
+          onAuxClick={(e) => {
+            if (e.button === 1) {
+              openLibraryTab('/library', 'Explorer')
+              navigate({ to: '/library' })
+            }
+          }}
+        >
           ComicShelf
-        </div>
+        </Link>
         <div className="pointer-events-auto">
           <BreadcrumbBar />
         </div>

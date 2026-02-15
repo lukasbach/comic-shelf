@@ -20,6 +20,7 @@ type ViewerHeaderProps = {
   onJumpToBookmark?: () => void;
   onClearBookmark?: () => void;
   currentPage?: number;
+  currentPageFilename?: string;
 };
 
 export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
@@ -37,6 +38,7 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
   onJumpToBookmark,
   onClearBookmark,
   currentPage,
+  currentPageFilename,
 }) => {
   const isBookmarkedOnCurrentPage = comic.bookmark_page === currentPage;
 
@@ -69,6 +71,14 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
               size="sm"
             />
           </div>
+          {currentPageFilename && currentMode !== 'overview' && (
+            <div className="hidden md:flex items-center gap-2 border-l border-gray-200 dark:border-gray-800 ml-2 pl-3 overflow-hidden">
+              <RxFile className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+              <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 truncate max-w-48 lg:max-w-96" title={currentPageFilename}>
+                {currentPageFilename}
+              </span>
+            </div>
+          )}
           {comic.bookmark_page !== null && (
             <div className="flex items-center gap-1 border-l border-gray-200 dark:border-gray-800 ml-2 pl-3">
               <button

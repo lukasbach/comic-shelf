@@ -32,7 +32,7 @@ function ComicViewerPage() {
   const search = Route.useSearch();
   const { tabs, activeTabId, updateTab } = useTabs();
   const { settings } = useSettings();
-  const { scrollContainerRef, scrollToPage, registerNextPage, registerPrevPage } = useViewerRef();
+  const { scrollToPage, registerNextPage, registerPrevPage } = useViewerRef();
   const activeTab = tabs.find((t: Tab) => t.id === activeTabId);
   const [showBookmarkPrompt, setShowBookmarkPrompt] = React.useState(false);
   const [promptHandled, setPromptHandled] = React.useState(false);
@@ -191,6 +191,9 @@ function ComicViewerPage() {
     return <NotFound />;
   }
 
+  const currentPageIndex = activeTab?.currentPage ?? 0;
+  const currentPageFilename = pages[currentPageIndex]?.file_name;
+
   const renderContent = () => {
     switch (viewMode) {
       case 'overview':
@@ -256,6 +259,7 @@ function ComicViewerPage() {
         onJumpToBookmark={handleJumpToBookmark}
         onClearBookmark={handleClearBookmark}
         currentPage={activeTab?.currentPage}
+        currentPageFilename={currentPageFilename}
       />
       <div className="flex-1 overflow-hidden">
         {renderContent()}

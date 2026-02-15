@@ -50,7 +50,7 @@ describe('ScrollMode', () => {
         updated_at: '2023-01-01',
         view_count: 0,
         is_favorite: 0,
-        is_viewed: 0,
+        last_opened_at: null,
         last_opened_at: null,
         bookmark_page: null,
         page_count: 2,

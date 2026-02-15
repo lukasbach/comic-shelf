@@ -46,8 +46,10 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
     <ComicContextMenu
       comic={comic}
       isFavorite={comic.is_favorite === 1}
+      isViewed={!!comic.last_opened_at}
       viewCount={comic.view_count}
       onToggleFavorite={onToggleFavorite}
+      onToggleViewed={onToggleViewed}
       onIncrementViewCount={onIncrementViewCount}
       onDecrementViewCount={onDecrementViewCount}
     >

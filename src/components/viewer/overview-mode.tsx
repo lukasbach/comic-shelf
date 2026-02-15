@@ -10,6 +10,7 @@ type OverviewModeProps = {
   comic: Comic;
   pages: ComicPage[];
   onTogglePageFavorite: (pageId: number) => void;
+  onTogglePageViewed: (pageId: number) => void;
   onIncrementPageViewCount: (pageId: number) => void;
   onDecrementPageViewCount: (pageId: number) => void;
   isGallery?: boolean;
@@ -20,6 +21,7 @@ type OverviewModeProps = {
 export const OverviewMode: React.FC<OverviewModeProps> = ({ 
   pages, 
   onTogglePageFavorite, 
+  onTogglePageViewed,
   onIncrementPageViewCount,
   onDecrementPageViewCount,
   isGallery,
@@ -68,6 +70,7 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
             isActive={index === currentPage}
             onClick={() => handlePageClick(index)}
             onToggleFavorite={() => onTogglePageFavorite(page.id)}
+            onToggleViewed={() => onTogglePageViewed(page.id)}
             onIncrementViewCount={() => onIncrementPageViewCount(page.id)}
             onDecrementViewCount={() => onDecrementPageViewCount(page.id)}
             isGallery={isGallery}

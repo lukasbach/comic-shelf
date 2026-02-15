@@ -37,7 +37,7 @@ export const useRecentlyViewed = (limit: number = 6) => {
       window.removeEventListener('favorites-updated', handleUpdate);
       window.removeEventListener('comic-opened', handleUpdate);
     };
-  }, [fetchRecentlyOpened]);
+  }, [fetchRecentlyViewed]);
 
-  return { comics, pages, loading, refetch: fetchRecentlyOpened };
+  return { comics, pages, loading, refetch: fetchRecentlyViewed };
 };

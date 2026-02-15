@@ -26,6 +26,9 @@ export const useComicData = (idOrSlug: string | number) => {
         .then(async (g) => {
           if (!g) throw new Error('Gallery not found');
           const p = await galleryService.getGalleryPages(gId);
+          // Update last opened
+          galleryService.updateGalleryLastOpened(gId).catch(err => console.error('Failed to update gallery last opened:', err));
+          
           if (isMounted) {
             // Map Gallery to a Comic-like structure for the viewer
             setComic({
@@ -106,46 +109,62 @@ export const useComicData = (idOrSlug: string | number) => {
     const oldFavorite = comic.is_favorite;
     try {
       setComic(prev => prev ? { ...prev, is_favorite: prev.is_favorite === 1 ? 0 : 1 } : null);
-      await comicService.toggleFavorite(comic.id);
+      if (isGallery) {
+        await galleryService.toggleGalleryFavorite(comic.id);
+      } else {
+        await comicService.toggleFavorite(comic.id);
+      }
     } catch (err) {
       console.error('Failed to toggle comic favorite:', err);
       setComic(prev => prev ? { ...prev, is_favorite: oldFavorite } : null);
     }
-  }, [comic]);
+  }, [comic, isGallery]);
 
   const toggleComicViewed = useCallback(async () => {
     if (!comic) return;
     const oldLastOpened = comic.last_opened_at;
     try {
       setComic(prev => prev ? { ...prev, last_opened_at: prev.last_opened_at ? null : new Date().toISOString() } : null);
-      await comicService.toggleViewed(comic.id);
+      if (isGallery) {
+        await galleryService.toggleGalleryViewed(comic.id);
+      } else {
+        await comicService.toggleViewed(comic.id);
+      }
     } catch (err) {
       console.error('Failed to toggle comic viewed:', err);
       setComic(prev => prev ? { ...prev, last_opened_at: oldLastOpened } : null);
     }
-  }, [comic]);
+  }, [comic, isGallery]);
 
   const incrementComicViewCount = useCallback(async () => {
     if (!comic) return;
     try {
       setComic(prev => prev ? { ...prev, view_count: prev.view_count + 1 } : null);
-      await comicService.incrementViewCount(comic.id);
+      if (isGallery) {
+        await galleryService.incrementGalleryViewCount(comic.id);
+      } else {
+        await comicService.incrementViewCount(comic.id);
+      }
     } catch (err) {
       console.error('Failed to increment comic view count:', err);
       setComic(prev => prev ? { ...prev, view_count: prev.view_count } : null);
     }
-  }, [comic]);
+  }, [comic, isGallery]);
 
   const decrementComicViewCount = useCallback(async () => {
     if (!comic) return;
     try {
       setComic(prev => prev ? { ...prev, view_count: Math.max(0, prev.view_count - 1) } : null);
-      await comicService.decrementViewCount(comic.id);
+      if (isGallery) {
+        await galleryService.decrementGalleryViewCount(comic.id);
+      } else {
+        await comicService.decrementViewCount(comic.id);
+      }
     } catch (err) {
       console.error('Failed to decrement comic view count:', err);
       setComic(prev => prev ? { ...prev, view_count: prev.view_count } : null);
     }
-  }, [comic]);
+  }, [comic, isGallery]);
 
   const togglePageFavorite = useCallback(async (pageId: number) => {
     const pageIndex = pages.findIndex(p => p.id === pageId);

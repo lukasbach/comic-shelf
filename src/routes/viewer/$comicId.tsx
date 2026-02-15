@@ -53,6 +53,7 @@ function ComicViewerPage() {
     incrementComicViewCount,
     decrementComicViewCount,
     togglePageFavorite,
+    togglePageViewed,
     incrementPageViewCount,
     decrementPageViewCount,
     markPageAsOpened,
@@ -238,6 +239,7 @@ function ComicViewerPage() {
             comic={comic} 
             pages={pages} 
             onTogglePageFavorite={togglePageFavorite}
+            onTogglePageViewed={togglePageViewed}
             onIncrementPageViewCount={incrementPageViewCount}
             onDecrementPageViewCount={decrementPageViewCount}
             isGallery={isGallery}
@@ -253,6 +255,7 @@ function ComicViewerPage() {
             slideshowActive={slideshow.isActive}
             onSlideshowComplete={nextPage}
             onTogglePageFavorite={togglePageFavorite}
+            onTogglePageViewed={togglePageViewed}
             onIncrementPageViewCount={incrementPageViewCount}
             onDecrementPageViewCount={decrementPageViewCount}
             isGallery={isGallery}
@@ -267,6 +270,7 @@ function ComicViewerPage() {
             pages={pages} 
             slideshowActive={slideshow.isActive}
             onTogglePageFavorite={togglePageFavorite}
+            onTogglePageViewed={togglePageViewed}
             onIncrementPageViewCount={incrementPageViewCount}
             onDecrementPageViewCount={decrementPageViewCount}
             isGallery={isGallery}
@@ -280,6 +284,7 @@ function ComicViewerPage() {
             comic={comic} 
             pages={pages} 
             onTogglePageFavorite={togglePageFavorite}
+            onTogglePageViewed={togglePageViewed}
             onIncrementPageViewCount={incrementPageViewCount}
             onDecrementPageViewCount={decrementPageViewCount}
             isGallery={isGallery}

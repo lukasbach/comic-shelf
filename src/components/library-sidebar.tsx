@@ -1,15 +1,15 @@
 import { FC } from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
 import {
-    RxArchive,
-    RxListBullet,
-    RxPerson,
-    RxStar,
-    RxFileText,
-    RxCounterClockwiseClock,
-    RxBookmark,
-    RxPlus,
-    RxLayers
+  RxArchive,
+  RxListBullet,
+  RxPerson,
+  RxStar,
+  RxFileText,
+  RxCounterClockwiseClock,
+  RxBookmark,
+  RxPlus,
+  RxLayers
 } from 'react-icons/rx'
 import { useTabs } from '../contexts/tab-context'
 import { useIndexing } from '../contexts/indexing-context'
@@ -35,7 +35,7 @@ const SmallCard: FC<{
   onClick: (e?: React.MouseEvent) => void
   onUpdate: () => void
   comic?: Comic
-  page?: RecentlyOpenedPage
+  page?: RecentlyViewedPage
   subBadge?: string
 }> = ({ title, thumbnail, isActive, onClick, onUpdate, comic, page, subBadge }) => {
   const coverUrl = thumbnail ? getImageUrl(thumbnail) : null

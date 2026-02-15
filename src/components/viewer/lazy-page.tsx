@@ -11,7 +11,9 @@ type LazyPageProps = {
   fitMode: 'width' | 'both' | 'none';
   onVisible?: (pageNumber: number) => void;
   isFavorite?: boolean;
+  isViewed?: boolean;
   onToggleFavorite?: () => void;
+  onToggleViewed?: () => void;
   onIncrementViewCount?: () => void;
   onDecrementViewCount?: () => void;
   isGallery?: boolean;
@@ -21,7 +23,7 @@ type LazyPageProps = {
 };
 
 export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.RefAttributes<HTMLDivElement>> = React.forwardRef<HTMLDivElement, LazyPageProps>(
-  ({ page, zoomLevel, fitMode, onVisible, isFavorite, onToggleFavorite, onIncrementViewCount, onDecrementViewCount, isGallery, onRemoveFromGallery, onAddToGallery, enableGalleries }, ref) => {
+  ({ page, zoomLevel, fitMode, onVisible, isFavorite, isViewed, onToggleFavorite, onToggleViewed, onIncrementViewCount, onDecrementViewCount, isGallery, onRemoveFromGallery, onAddToGallery, enableGalleries }, ref) => {
     const [isVisible, setIsVisible] = useState(false);
     const [naturalSize, setNaturalSize] = useState<{ width: number; height: number } | null>(null);
     const internalRef = useRef<HTMLDivElement>(null);
@@ -83,8 +85,10 @@ export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.Ref
       <ComicContextMenu
         page={page}
         isFavorite={page.is_favorite === 1}
+        isViewed={isViewed}
         viewCount={page.view_count}
         onToggleFavorite={onToggleFavorite}
+        onToggleViewed={onToggleViewed}
         onIncrementViewCount={onIncrementViewCount}
         onDecrementViewCount={onDecrementViewCount}
       >

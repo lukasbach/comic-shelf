@@ -25,8 +25,10 @@ type ViewerSidebarProps = {
   onToggleCollapse: () => void;
   page?: ComicPage;
   isFavorite?: boolean;
+  isViewed?: boolean;
   viewCount?: number;
   onToggleFavorite?: () => void;
+  onToggleViewed?: () => void;
   onIncrementViewCount?: () => void;
   onDecrementViewCount?: () => void;
   isGallery?: boolean;
@@ -49,8 +51,10 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
   onToggleCollapse,
   page,
   isFavorite = false,
+  isViewed = false,
   viewCount = 0,
   onToggleFavorite,
+  onToggleViewed,
   onIncrementViewCount,
   onDecrementViewCount,
   isGallery,
@@ -230,8 +234,10 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
               <ComicContextMenu
                 page={page}
                 isFavorite={isFavorite}
+                isViewed={isViewed}
                 viewCount={viewCount}
                 onToggleFavorite={onToggleFavorite}
+                onToggleViewed={onToggleViewed}
                 onIncrementViewCount={onIncrementViewCount}
                 onDecrementViewCount={onDecrementViewCount}
               >

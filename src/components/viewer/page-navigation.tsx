@@ -13,8 +13,10 @@ type PageNavigationProps = {
   onNextPage: () => void;
   onGoToPage: (page: number) => void;
   isFavorite?: boolean;
+  isViewed?: boolean;
   viewCount?: number;
   onToggleFavorite?: () => void;
+  onToggleViewed?: () => void;
   onIncrementViewCount?: () => void;
   onDecrementViewCount?: () => void;
   isGallery?: boolean;
@@ -31,8 +33,10 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
   onNextPage,
   onGoToPage,
   isFavorite = false,
+  isViewed = false,
   viewCount = 0,
   onToggleFavorite,
+  onToggleViewed,
   onIncrementViewCount,
   onDecrementViewCount,
   isGallery,
@@ -141,8 +145,10 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
         <ComicContextMenu
           page={page}
           isFavorite={isFavorite}
+          isViewed={isViewed}
           viewCount={viewCount}
           onToggleFavorite={onToggleFavorite}
+          onToggleViewed={onToggleViewed}
           onIncrementViewCount={onIncrementViewCount}
           onDecrementViewCount={onDecrementViewCount}
         >

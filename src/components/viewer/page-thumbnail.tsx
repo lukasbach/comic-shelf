@@ -11,6 +11,7 @@ type PageThumbnailProps = {
   isActive: boolean;
   onClick: () => void;
   onToggleFavorite: () => void;
+  onToggleViewed: () => void;
   onIncrementViewCount: () => void;
   onDecrementViewCount: () => void;
   isGallery?: boolean;
@@ -24,6 +25,7 @@ export const PageThumbnail: React.FC<PageThumbnailProps> = ({
   isActive, 
   onClick,
   onToggleFavorite,
+  onToggleViewed,
   onIncrementViewCount,
   onDecrementViewCount,
   isGallery,
@@ -31,12 +33,16 @@ export const PageThumbnail: React.FC<PageThumbnailProps> = ({
   onAddToGallery,
   enableGalleries
 }) => {
+  const isViewed = !!page.last_opened_at;
+
   return (
     <ComicContextMenu 
       page={page} 
       isFavorite={page.is_favorite === 1}
+      isViewed={isViewed}
       viewCount={page.view_count}
       onToggleFavorite={onToggleFavorite}
+      onToggleViewed={onToggleViewed}
       onIncrementViewCount={onIncrementViewCount}
       onDecrementViewCount={onDecrementViewCount}
     >

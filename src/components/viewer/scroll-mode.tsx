@@ -15,6 +15,7 @@ type ScrollModeProps = {
   pages: ComicPage[];
   slideshowActive?: boolean;
   onTogglePageFavorite: (pageId: number) => void;
+  onTogglePageViewed: (pageId: number) => void;
   onIncrementPageViewCount: (pageId: number) => void;
   onDecrementPageViewCount: (pageId: number) => void;
   isGallery?: boolean;
@@ -26,6 +27,7 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
   pages, 
   slideshowActive = false,
   onTogglePageFavorite,
+  onTogglePageViewed,
   onIncrementPageViewCount,
   onDecrementPageViewCount,
   isGallery,
@@ -158,7 +160,9 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
               zoomLevel={zoomLevel}
               fitMode={fitMode}
               isFavorite={page.is_favorite === 1}
+              isViewed={!!page.last_opened_at}
               onToggleFavorite={() => onTogglePageFavorite(page.id)}
+              onToggleViewed={() => onTogglePageViewed(page.id)}
               onIncrementViewCount={() => onIncrementPageViewCount(page.id)}
               onDecrementViewCount={() => onDecrementPageViewCount(page.id)}
               isGallery={isGallery}
@@ -193,8 +197,10 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={handleToggleSidebar}
         isFavorite={currentPageData?.is_favorite === 1}
+        isViewed={!!currentPageData?.last_opened_at}
         viewCount={currentPageData?.view_count}
         onToggleFavorite={() => currentPageData && onTogglePageFavorite(currentPageData.id)}
+        onToggleViewed={() => currentPageData && onTogglePageViewed(currentPageData.id)}
         onIncrementViewCount={() => currentPageData && onIncrementPageViewCount(currentPageData.id)}
         onDecrementViewCount={() => currentPageData && onDecrementPageViewCount(currentPageData.id)}
         isGallery={isGallery}

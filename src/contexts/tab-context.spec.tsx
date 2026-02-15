@@ -34,7 +34,7 @@ const mockComic: Comic = {
   cover_image_path: null,
   page_count: 10,
   is_favorite: 0,
-  is_viewed: 0,
+  last_opened_at: null,
   view_count: 0,
   last_opened_at: null,
   created_at: '',

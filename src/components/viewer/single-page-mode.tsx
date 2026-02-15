@@ -16,6 +16,7 @@ type SinglePageModeProps = {
   slideshowActive?: boolean;
   onSlideshowComplete?: () => void;
   onTogglePageFavorite: (pageId: number) => void;
+  onTogglePageViewed: (pageId: number) => void;
   onIncrementPageViewCount: (pageId: number) => void;
   onDecrementPageViewCount: (pageId: number) => void;
   isGallery?: boolean;
@@ -28,6 +29,7 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
   slideshowActive = false,
   onSlideshowComplete,
   onTogglePageFavorite,
+  onTogglePageViewed,
   onIncrementPageViewCount,
   onDecrementPageViewCount,
   isGallery,
@@ -134,8 +136,10 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
             onNextPage={handleNextPage}
             onGoToPage={handleGoToPage}
             isFavorite={currentPageData.is_favorite === 1}
+            isViewed={!!currentPageData.last_opened_at}
             viewCount={currentPageData.view_count}
             onToggleFavorite={() => onTogglePageFavorite(currentPageData.id)}
+            onToggleViewed={() => onTogglePageViewed(currentPageData.id)}
             onIncrementViewCount={() => onIncrementPageViewCount(currentPageData.id)}
             onDecrementViewCount={() => onDecrementPageViewCount(currentPageData.id)}
             isGallery={isGallery}
@@ -160,8 +164,10 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={handleToggleSidebar}
         isFavorite={currentPageData.is_favorite === 1}
+        isViewed={!!currentPageData.last_opened_at}
         viewCount={currentPageData.view_count}
         onToggleFavorite={() => onTogglePageFavorite(currentPageData.id)}
+        onToggleViewed={() => onTogglePageViewed(currentPageData.id)}
         onIncrementViewCount={() => onIncrementPageViewCount(currentPageData.id)}
         onDecrementViewCount={() => onDecrementPageViewCount(currentPageData.id)}
         isGallery={isGallery}

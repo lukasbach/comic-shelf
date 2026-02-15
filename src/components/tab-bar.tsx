@@ -55,6 +55,12 @@ function SortableTab({ tab, isActive, onClose, onSelect }: SortableTabProps) {
           : 'hover:bg-muted'
       }`}
       onClick={() => onSelect(tab.id, tab.path)}
+      onAuxClick={(e) => {
+        if (e.button === 1) {
+          e.stopPropagation();
+          onClose(tab.id);
+        }
+      }}
     >
       <div
         className={`flex-1 px-3 py-2 text-sm truncate text-left ${
@@ -115,7 +121,7 @@ export function TabBar() {
   const handleClose = (id: string) => {
     closeTab(id)
     if (tabs.length === 1) {
-      navigate({ to: '/library' })
+      navigate({ to: '/library', search: { path: '' } as any })
     }
   }
 

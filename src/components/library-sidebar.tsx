@@ -23,7 +23,7 @@ const SmallCard: FC<{
   title: string
   thumbnail: string | null | undefined
   isActive?: boolean
-  onClick: () => void
+  onClick: (e?: React.MouseEvent) => void
   onUpdate: () => void
   comic?: Comic
   page?: RecentlyOpenedPage
@@ -33,7 +33,12 @@ const SmallCard: FC<{
 
   const content = (
     <button
-      onClick={onClick}
+      onClick={(e) => onClick(e)}
+      onAuxClick={(e) => {
+        if (e.button === 1) {
+          onClick(e)
+        }
+      }}
       title={title}
       className={`group flex flex-col gap-1 p-0.5 rounded transition-all text-left overflow-hidden w-full ${
         isActive
@@ -148,7 +153,7 @@ export function LibrarySidebar() {
                   title={comic.title}
                   thumbnail={comic.thumbnail_path}
                   isActive={location.pathname === `/viewer/${comic.id}`}
-                  onClick={() => openComic(comic)}
+                  onClick={(e) => openComic(comic, e)}
                   onUpdate={handleUpdate}
                 />
               ))}
@@ -183,7 +188,7 @@ export function LibrarySidebar() {
                         title={comic.title}
                         thumbnail={comic.thumbnail_path}
                         isActive={location.pathname === `/viewer/${comic.id}`}
-                        onClick={() => openComic(comic)}
+                        onClick={(e) => openComic(comic, e)}
                         onUpdate={handleUpdate}
                       />
                     );
@@ -196,7 +201,7 @@ export function LibrarySidebar() {
                         title={page.comic_title}
                         thumbnail={page.thumbnail_path}
                         subBadge={`P${page.page_number}`}
-                        onClick={() => openComicPage(page.comic_id, page.page_number)}
+                        onClick={(e) => openComicPage(page.comic_id, page.page_number, e)}
                         onUpdate={handleUpdate}
                       />
                     );

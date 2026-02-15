@@ -9,7 +9,7 @@ import { ComicContextMenu, ComicDropdownMenu } from './comic-context-menu';
 
 type ComicCardProps = {
   comic: Comic;
-  onOpen: (comic: Comic) => void;
+  onOpen: (comic: Comic, e?: React.MouseEvent) => void;
 };
 
 export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen }) => {
@@ -90,7 +90,12 @@ export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen }) => {
     >
       <div 
         className="group flex flex-col bg-card rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all cursor-pointer relative"
-        onClick={() => onOpen(comic)}
+        onClick={(e) => onOpen(comic, e)}
+        onAuxClick={(e) => {
+          if (e.button === 1) {
+            onOpen(comic, e);
+          }
+        }}
       >
         <div className="relative aspect-3/4 overflow-hidden bg-muted">
           {coverUrl ? (

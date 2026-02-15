@@ -77,13 +77,21 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
   const count = controlledSetViewCount ? (controlledViewCount ?? 0) : (localViewCount ?? 0);
   const setCount = controlledSetViewCount ?? setLocalViewCount;
 
-  const handleOpenInNewTab = () => {
+  const handleOpen = () => {
     if (onOpen) {
       onOpen();
     } else if (comic) {
       openComic(comic);
     } else if (page) {
       openComicPage(page.comic_id, page.page_number);
+    }
+  };
+
+  const handleOpenInNewTab = () => {
+    if (comic) {
+      openComic(comic, { ctrlKey: true } as any);
+    } else if (page) {
+      openComicPage(page.comic_id, page.page_number, { ctrlKey: true } as any);
     }
   };
 
@@ -232,6 +240,10 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
 
   return (
     <>
+      <MenuItem className={itemClass} onSelect={handleOpen}>
+        <RxExternalLink className="w-4 h-4" />
+        <span>Open</span>
+      </MenuItem>
       <MenuItem className={itemClass} onSelect={handleOpenInNewTab}>
         <RxExternalLink className="w-4 h-4" />
         <span>Open in new tab</span>

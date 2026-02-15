@@ -1,8 +1,9 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useNavigate, createFileRoute } from '@tanstack/react-router';
 import { useComics } from '../../hooks/use-comics';
 import { useIndexPaths } from '../../hooks/use-index-paths';
 import { useOpenComic } from '../../hooks/use-open-comic';
+import { useTabs } from '../../contexts/tab-context';
 import { RxSymbol } from 'react-icons/rx';
 import { VirtualizedGrid } from '../../components/virtualized-grid';
 import { ComicCard } from '../../components/comic-card';
@@ -35,12 +36,24 @@ function LibraryExplorer() {
   const { comics, loading: loadingComics } = useComics();
   const { indexPaths, loading: loadingPaths } = useIndexPaths();
   const openComic = useOpenComic();
+  const { openLibraryTab } = useTabs();
 
   const setCurrentPath = (path: string) => {
     navigate({
-      to: '/library/',
-      search: { path },
+      to: '/library',
+      search: { path } as any,
     });
+  };
+
+  const handleFolderClick = (path: string, e?: React.MouseEvent) => {
+    const isNewTab = e ? (e.ctrlKey || e.metaKey || (e as any).button === 1) : false;
+    
+    if (isNewTab) {
+      const title = path.split(/[\\/]/).pop() || path;
+      openLibraryTab(`/library?path=${encodeURIComponent(path)}`, title, true);
+    }
+    
+    setCurrentPath(path);
   };
 
   const currentItems = useMemo(() => {
@@ -151,7 +164,7 @@ function LibraryExplorer() {
                   path={item.path}
                   thumbnailPath={item.thumbnail_path}
                   comicCount={item.comic_count}
-                  onClick={setCurrentPath}
+                  onClick={handleFolderClick}
                 />
               ) : (
                 <ComicCard 

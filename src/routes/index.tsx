@@ -9,7 +9,7 @@ function RedirectComponent() {
   const navigate = useNavigate()
   
   useEffect(() => {
-    navigate({ to: '/library', replace: true })
+    navigate({ to: '/library', search: { path: '' } as any, replace: true })
   }, [navigate])
 
   return null

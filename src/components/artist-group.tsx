@@ -7,7 +7,7 @@ import type { Comic } from '../types/comic';
 type ArtistGroupProps = {
   artist: string;
   comics: Comic[];
-  onOpenComic: (comic: Comic) => void;
+  onOpenComic: (comic: Comic, e?: React.MouseEvent) => void;
 };
 
 export const ArtistGroup: React.FC<ArtistGroupProps> = ({ artist, comics, onOpenComic }) => {

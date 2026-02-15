@@ -7,7 +7,7 @@ type FolderCardProps = {
   path: string;
   thumbnailPath?: string;
   comicCount: number;
-  onClick: (path: string) => void;
+  onClick: (path: string, e?: React.MouseEvent) => void;
 };
 
 export const FolderCard: React.FC<FolderCardProps> = ({ 
@@ -22,7 +22,12 @@ export const FolderCard: React.FC<FolderCardProps> = ({
   return (
     <div 
       className="group flex flex-col bg-card rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all cursor-pointer relative"
-      onClick={() => onClick(path)}
+      onClick={(e) => onClick(path, e)}
+      onAuxClick={(e) => {
+        if (e.button === 1) {
+          onClick(path, e);
+        }
+      }}
     >
       <div className="relative aspect-3/4 overflow-hidden bg-muted flex items-center justify-center">
         {coverUrl ? (

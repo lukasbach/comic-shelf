@@ -1,14 +1,14 @@
-import { Link, useRouterState, useSearch } from '@tanstack/react-router'
+import { Link, useRouterState, useSearch, useNavigate } from '@tanstack/react-router'
 import { RxChevronRight } from 'react-icons/rx'
 import { useTabs } from '../contexts/tab-context'
 import { useIndexPaths } from '../hooks/use-index-paths'
 import { normalizePath } from '../utils/image-utils'
-import React from 'react'
 
 export function BreadcrumbBar() {
   const { location } = useRouterState()
-  const { tabs, activeTabId } = useTabs()
+  const { tabs, activeTabId, openLibraryTab } = useTabs()
   const { indexPaths } = useIndexPaths()
+  const navigate = useNavigate()
   const search = useSearch({ strict: false }) as { path?: string }
   
   const activeTab = tabs.find(t => t.id === activeTabId)
@@ -101,6 +101,15 @@ export function BreadcrumbBar() {
             className={`hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate max-w-40 ${
               index === segments.length - 1 ? 'text-gray-900 dark:text-gray-100 font-semibold' : ''
             }`}
+            onAuxClick={(e) => {
+              if (e.button === 1) {
+                if (segment.to.startsWith('/library')) {
+                  const searchStr = segment.search?.path ? `?path=${encodeURIComponent(segment.search.path)}` : '';
+                  openLibraryTab(segment.to + searchStr, segment.label);
+                  navigate({ to: segment.to as any, search: segment.search as any });
+                }
+              }
+            }}
           >
             {segment.label}
           </Link>

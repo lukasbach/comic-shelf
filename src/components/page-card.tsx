@@ -8,7 +8,7 @@ import { AllPageItem } from '../hooks/use-all-pages';
 
 type PageCardProps = {
   page: AllPageItem;
-  onOpen: (comicId: number, pageNumber: number) => void;
+  onOpen: (comicId: number, pageNumber: number, e?: React.MouseEvent) => void;
   onUpdate?: () => void;
 };
 
@@ -85,7 +85,12 @@ export const PageCard: React.FC<PageCardProps> = ({ page, onOpen, onUpdate }) =>
     >
       <div 
         className="group flex flex-col bg-card rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all cursor-pointer relative"
-        onClick={() => onOpen(page.comic_id, page.page_number)}
+        onClick={(e) => onOpen(page.comic_id, page.page_number, e)}
+        onAuxClick={(e) => {
+          if (e.button === 1) {
+            onOpen(page.comic_id, page.page_number, e);
+          }
+        }}
       >
         <div className="relative aspect-3/4 overflow-hidden bg-muted">
           {thumbUrl ? (

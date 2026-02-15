@@ -140,6 +140,19 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
             </button>
             <button
               onClick={() => {
+                onZoomChange(50);
+                onFitModeChange('none');
+              }}
+              className={`px-2 py-1.5 text-xs rounded transition-colors ${
+                fitMode === 'none' && zoomLevel === 50
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              50%
+            </button>
+            <button
+              onClick={() => {
                 onZoomChange(100);
                 onFitModeChange('none');
               }}
@@ -163,19 +176,6 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
               }`}
             >
               200%
-            </button>
-            <button
-              onClick={() => {
-                onZoomChange(300);
-                onFitModeChange('none');
-              }}
-              className={`px-2 py-1.5 text-xs rounded transition-colors ${
-                fitMode === 'none' && zoomLevel === 300
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
-              }`}
-            >
-              300%
             </button>
           </div>
         </section>

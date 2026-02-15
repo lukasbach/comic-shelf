@@ -52,6 +52,7 @@ describe('ScrollMode', () => {
         is_favorite: 0,
         is_viewed: 0,
         last_opened_at: null,
+        bookmark_page: null,
         page_count: 2,
         cover_image_path: null,
         thumbnail_path: null,

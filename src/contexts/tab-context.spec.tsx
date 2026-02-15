@@ -39,6 +39,7 @@ const mockComic: Comic = {
   last_opened_at: null,
   created_at: '',
   updated_at: '',
+  bookmark_page: null,
 };
 
 const TestComponent = () => {

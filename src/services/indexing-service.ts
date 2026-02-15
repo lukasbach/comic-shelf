@@ -213,8 +213,6 @@ export const indexComics = async (
         issue: comic.issue,
         cover_image_path: comic.coverImagePath ? normalizePath(comic.coverImagePath) : null,
         page_count: comic.pageCount,
-        is_favorite: 0,
-        view_count: 0,
       });
       console.info(`[Indexing] [${i + 1}/${total}] Comic upserted with id ${comicId} for ${comicPath}`);
 

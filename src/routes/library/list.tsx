@@ -40,7 +40,7 @@ function LibraryList() {
   const setParams = (updates: Partial<ListSearchParams>) => {
     navigate({
       to: '/library/list',
-      search: (prev) => ({ ...prev, ...updates }),
+      search: (prev: any) => ({ ...prev, ...updates }),
       replace: true,
     });
   };

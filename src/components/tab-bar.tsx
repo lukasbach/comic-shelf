@@ -1,4 +1,4 @@
-import { useNavigate, useRouter } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { useTabs } from '../contexts/tab-context'
 import { RxCross2 } from 'react-icons/rx'
 import {
@@ -86,7 +86,6 @@ function SortableTab({ tab, isActive, onClose, onSelect }: SortableTabProps) {
 export function TabBar() {
   const { tabs, activeTabId, closeTab, switchTab, reorderTabs } = useTabs()
   const navigate = useNavigate()
-  const router = useRouter()
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -112,7 +111,7 @@ export function TabBar() {
     }
   }
 
-  const handleSelect = (id: string, path: string) => {
+  const handleSelect = (id: string, _path: string) => {
     if (id !== activeTabId) {
       switchTab(id)
     }

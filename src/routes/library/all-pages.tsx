@@ -49,7 +49,7 @@ function AllPagesList() {
   const setParams = (updates: Partial<AllPagesSearchParams>) => {
     navigate({
       to: '/library/all-pages',
-      search: (prev) => ({ ...prev, ...updates }),
+      search: (prev: any) => ({ ...prev, ...updates }),
       replace: true,
     });
   };

@@ -33,7 +33,7 @@ export const getComicsByArtist = async (artist: string): Promise<Comic[]> => {
   `, [artist]);
 };
 
-export const upsertComic = async (comic: Omit<Comic, 'id' | 'created_at' | 'updated_at' | 'is_viewed' | 'last_opened_at'>): Promise<number> => {
+export const upsertComic = async (comic: Omit<Comic, 'id' | 'created_at' | 'updated_at' | 'is_viewed' | 'last_opened_at' | 'bookmark_page' | 'is_favorite' | 'view_count'>): Promise<number> => {
   const db = await getDb();
   await db.execute(
     `INSERT INTO comics (path, source_type, title, artist, series, issue, cover_image_path, page_count, updated_at)

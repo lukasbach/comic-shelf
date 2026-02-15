@@ -3,7 +3,7 @@ import { Comic } from '../../types/comic';
 import { RxGrid, RxFile, RxRows, RxPlay, RxStop, RxBookmark, RxBookmarkFilled, RxTrash } from 'react-icons/rx';
 import { FavoriteButton } from '../favorite-button';
 import { ViewCounter } from '../view-counter';
-import { ComicContextMenu } from '../comic-context-menu';
+import { ComicContextMenu, ComicDropdownMenu } from '../comic-context-menu';
 
 type ViewerHeaderProps = {
   comic: Comic;
@@ -13,6 +13,7 @@ type ViewerHeaderProps = {
   isSlideshowActive?: boolean;
   onToggleSlideshow?: () => void;
   onToggleFavorite: () => void;
+  onToggleViewed: () => void;
   onIncrementViewCount: () => void;
   onDecrementViewCount: () => void;
   onSetBookmark?: () => void;
@@ -29,6 +30,7 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
   isSlideshowActive = false,
   onToggleSlideshow,
   onToggleFavorite,
+  onToggleViewed,
   onIncrementViewCount,
   onDecrementViewCount,
   onSetBookmark,
@@ -153,6 +155,19 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
             >
               <RxRows className="w-4 h-4" />
             </button>
+          </div>
+
+          <div className="border-l border-gray-200 dark:border-gray-800 ml-1 pl-1">
+            <ComicDropdownMenu 
+              comic={comic}
+              isFavorite={comic.is_favorite === 1}
+              isViewed={comic.is_viewed === 1}
+              viewCount={comic.view_count}
+              onToggleFavorite={onToggleFavorite}
+              onToggleViewed={onToggleViewed}
+              onIncrementViewCount={onIncrementViewCount}
+              onDecrementViewCount={onDecrementViewCount}
+            />
           </div>
         </div>
       </div>

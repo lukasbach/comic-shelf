@@ -9,7 +9,7 @@ import {
   RxStarFilled,
   RxOpenInNewWindow,
   RxArchive,
-  RxDotsVertical,
+  RxDotsHorizontal,
   RxEyeOpen,
   RxEyeClosed
 } from 'react-icons/rx';
@@ -68,13 +68,13 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
   const [localIsViewed, setLocalIsViewed] = useState(isComic ? comic?.is_viewed === 1 : page?.is_viewed === 1);
   const [localViewCount, setLocalViewCount] = useState(isComic ? comic?.view_count : page?.view_count || 0);
 
-  const fav = controlledSetIsFavorite ? (controlledIsFavorite ?? false) : localIsFavorite;
+  const fav = controlledIsFavorite ?? localIsFavorite;
   const setFav = controlledSetIsFavorite ?? setLocalIsFavorite;
   
-  const viewed = controlledSetIsViewed ? (controlledIsViewed ?? false) : localIsViewed;
+  const viewed = controlledIsViewed ?? localIsViewed;
   const setViewed = controlledSetIsViewed ?? setLocalIsViewed;
 
-  const count = controlledSetViewCount ? (controlledViewCount ?? 0) : (localViewCount ?? 0);
+  const count = controlledViewCount ?? localViewCount ?? 0;
   const setCount = controlledSetViewCount ?? setLocalViewCount;
 
   const handleOpen = () => {
@@ -321,7 +321,7 @@ export const ComicDropdownMenu: React.FC<ComicMenuProps & { trigger?: React.Reac
               aria-label="More options"
               onClick={(e) => e.stopPropagation()}
             >
-              <RxDotsVertical className={`${className?.includes('w-') ? 'w-4 h-4' : 'w-5 h-5'}`} />
+              <RxDotsHorizontal className={`${className?.includes('w-') ? 'w-4 h-4' : 'w-5 h-5'}`} />
             </button>
           )}
         </DropdownMenu.Trigger>

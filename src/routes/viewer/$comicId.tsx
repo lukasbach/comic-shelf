@@ -46,6 +46,7 @@ function ComicViewerPage() {
     loading, 
     error, 
     toggleComicFavorite, 
+    toggleComicViewed,
     incrementComicViewCount,
     decrementComicViewCount,
     togglePageFavorite,
@@ -91,7 +92,7 @@ function ComicViewerPage() {
   }, [activeTabId, activeTab, pages.length]);
 
   const handleJumpToBookmark = () => {
-    if (activeTabId && comic?.bookmark_page !== null) {
+    if (activeTabId && comic && comic.bookmark_page !== null) {
       updateTab(activeTabId, { 
         currentPage: comic.bookmark_page,
         viewMode: 'single'
@@ -225,6 +226,7 @@ function ComicViewerPage() {
         isSlideshowActive={slideshow.isActive}
         onToggleSlideshow={toggleSlideshow}
         onToggleFavorite={toggleComicFavorite}
+        onToggleViewed={toggleComicViewed}
         onIncrementViewCount={incrementComicViewCount}
         onDecrementViewCount={decrementComicViewCount}
         onSetBookmark={handleSetBookmark}

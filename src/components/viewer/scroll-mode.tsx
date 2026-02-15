@@ -119,9 +119,9 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
     }
   };
 
-  const handleFitModeChange = (mode: 'width' | 'none') => {
+  const handleFitModeChange = (mode: 'width' | 'both' | 'none') => {
     if (activeTabId) {
-      updateTab(activeTabId, { fitMode: mode });
+      updateTab(activeTabId, { fitMode: mode === 'both' ? 'width' : mode });
     }
   };
 

@@ -74,6 +74,9 @@ export const createGallery = async (name: string): Promise<number> => {
     `INSERT INTO galleries (name, created_at, updated_at) VALUES ($1, datetime('now'), datetime('now'))`,
     [name]
   );
+  if (result.lastInsertId === undefined) {
+    throw new Error('Failed to create gallery: lastInsertId is undefined');
+  }
   return result.lastInsertId;
 };
 

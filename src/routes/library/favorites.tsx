@@ -22,7 +22,7 @@ export const Route = createFileRoute('/library/favorites')({
 function LibraryFavorites() {
   const { tab: activeTab } = Route.useSearch();
   const navigate = useNavigate();
-  const { comics: favoriteComics, loading: loadingComics, refresh: refreshComics } = useFavoriteComics();
+  const { comics: favoriteComics, loading: loadingComics } = useFavoriteComics();
   const { pages: favoritePages, loading: loadingPages, refresh: refreshPages } = useFavoritePages();
   const openComic = useOpenComic();
   const openComicPage = useOpenComicPage();
@@ -101,7 +101,6 @@ function LibraryFavorites() {
               key={comic.id} 
               comic={comic} 
               onOpen={openComic} 
-              onUpdate={refreshComics}
             />
           )}
           emptyMessage="No favorite comics yet."

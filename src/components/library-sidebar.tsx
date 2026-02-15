@@ -110,7 +110,7 @@ const navItems = [
 export function LibrarySidebar() {
   const { openLibraryTab } = useTabs()
   const { settings } = useSettings()
-  const { comics: favoriteComics, refetch: refetchFavorites } = useFavoriteComics()
+  const { comics: favoriteComics, refresh: refetchFavorites } = useFavoriteComics()
   const { comics: bookmarkedComics } = useBookmarkedComics()
   const { comics: recentComics, pages: recentPages, refetch: refetchRecent } = useRecentlyOpened(6)
   const { refresh: refreshPaths } = useIndexPaths()

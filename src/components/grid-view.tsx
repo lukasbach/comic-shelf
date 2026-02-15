@@ -4,6 +4,7 @@ import { VirtualizedGrid } from './virtualized-grid';
 interface GridViewProps<T> {
   items: T[];
   renderItem: (item: T, index: number) => React.ReactNode;
+  emptyMessage?: React.ReactNode;
   virtualized?: boolean;
   itemHeight?: number;
   gap?: number;
@@ -21,6 +22,7 @@ interface GridViewProps<T> {
 export function GridView<T>({
   items,
   renderItem,
+  emptyMessage,
   virtualized = true,
   itemHeight,
   gap = 16,
@@ -34,6 +36,14 @@ export function GridView<T>({
     default: 2,
   },
 }: GridViewProps<T>) {
+  if (items.length === 0 && emptyMessage) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-gray-400 dark:text-gray-600 italic">
+        {emptyMessage}
+      </div>
+    );
+  }
+
   if (virtualized) {
     return (
       <VirtualizedGrid

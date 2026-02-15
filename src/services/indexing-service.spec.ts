@@ -100,7 +100,7 @@ describe('indexing-service', () => {
     const comicService = await import('./comic-service');
 
     vi.mocked(sourceFileService.scanComicCandidates).mockResolvedValue({
-      candidates: [{ path: 'base/FolderComic', sourceType: 'image' }],
+      candidates: [{ path: 'base/FolderComic', sourceType: 'image', title: 'FolderComic' }],
       errors: [],
     });
     vi.mocked(sourceFileService.getComicPages).mockResolvedValue([

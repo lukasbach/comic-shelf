@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useGalleries } from '../../hooks/use-galleries';
 import { GalleryCard } from '../../components/gallery-card';
 import { GridView } from '../../components/grid-view';
@@ -31,7 +31,6 @@ function GalleriesPage() {
   const navigate = useNavigate();
   const { galleries, loading, refresh } = useGalleries();
   const { settings } = useSettings();
-  const [isCreating, setIsCreating] = useState(false);
 
   const setParams = (updates: Partial<GalleriesSearchParams>) => {
     navigate({

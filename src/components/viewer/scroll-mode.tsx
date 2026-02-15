@@ -148,7 +148,7 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
           className="flex-1 overflow-auto p-4 flex flex-col items-center"
         >
           <div 
-            className="flex flex-col items-center gap-4 w-full"
+            className="flex flex-col items-center gap-4 min-w-full w-fit"
           >
             {pages.map((page, index) => (
             <LazyPage

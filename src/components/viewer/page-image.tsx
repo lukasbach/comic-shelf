@@ -48,10 +48,11 @@ export const PageImage: React.FC<PageImageProps> = ({ page, zoomLevel, fitMode, 
               : naturalSize 
                 ? `${(naturalSize.width * zoomLevel) / 100}px` 
                 : 'auto',
-          height: isFitBoth ? 'auto' : 'auto',
+          height: 'auto',
           maxWidth: (isFitWidth || isFitBoth) ? '100%' : 'none',
           maxHeight: isFitBoth ? '100%' : 'none',
           display: 'block',
+          flexShrink: 0,
         }}
       />
     </div>

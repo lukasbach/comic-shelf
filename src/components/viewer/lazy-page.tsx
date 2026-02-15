@@ -90,7 +90,7 @@ export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.Ref
       >
         <div
           ref={internalRef}
-          className="group flex flex-col items-center w-full mb-2 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative"
+          className="group flex flex-col items-center w-fit min-w-full mb-2 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative"
           style={{ 
             minHeight: !isVisible ? estimatedHeight : 'auto',
             height: isFitBoth ? '100dvh' : 'auto',
@@ -149,9 +149,10 @@ export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.Ref
                     : naturalSize 
                       ? `${(naturalSize.width * zoomLevel) / 100}px` 
                       : 'auto',
-                height: isFitBoth ? 'auto' : 'auto',
+                height: 'auto',
                 maxWidth: (isFitWidth || isFitBoth) ? '100%' : 'none',
                 maxHeight: isFitBoth ? '100%' : 'none',
+                flexShrink: 0,
               }}
             />
           )}

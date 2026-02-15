@@ -169,7 +169,7 @@ export function GridPage<T>({
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-4 text-center p-6">
-        <div className="opacity-20">{icon && React.cloneElement(icon as React.ReactElement, { size: 64 })}</div>
+        <div className="opacity-20">{icon && React.cloneElement(icon as React.ReactElement<any>, { size: 64 })}</div>
         <p className="text-lg font-medium">{noItemsMessage}</p>
       </div>
     );

@@ -6,6 +6,7 @@ export type AllPageItem = ComicPage & {
   comic_title: string; 
   comic_path: string; 
   comic_artist: string | null;
+  created_at: string;
 };
 
 export const useAllPages = () => {

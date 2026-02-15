@@ -130,7 +130,7 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
       }
     }
-  }, [location.pathname, location.searchStr, activeTabId, tabs, isSwitchingTab]);
+  }, [location.pathname, location.searchStr, activeTabId, tabs, isSwitchingTab, settings]);
 
   const openTab = useCallback((
     comic: { id: number; path: string; title: string }, 
@@ -171,7 +171,7 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       );
       router.history.push(targetPath);
     }
-  }, [activeTabId, router]);
+  }, [activeTabId, router, settings]);
 
   const openLibraryTab = useCallback((path: string, title: string, newTab: boolean = true) => {
     const tabData: Partial<Tab> = {

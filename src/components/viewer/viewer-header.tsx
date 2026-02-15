@@ -103,13 +103,13 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
         <div className="flex items-center gap-2">
           {onSetBookmark && currentMode !== 'overview' && currentPage !== undefined && (
             <button
-              onClick={onSetBookmark}
+              onClick={isBookmarkedOnCurrentPage ? onClearBookmark : onSetBookmark}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                 isBookmarkedOnCurrentPage
-                  ? 'bg-amber-500 text-white shadow-sm'
+                  ? 'bg-amber-500 text-white shadow-sm hover:bg-amber-600'
                   : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700'
               }`}
-              title={isBookmarkedOnCurrentPage ? 'Bookmark Set Here' : 'Set Bookmark at Current Page'}
+              title={isBookmarkedOnCurrentPage ? 'Clear Bookmark' : 'Set Bookmark at Current Page'}
             >
               {isBookmarkedOnCurrentPage ? <RxBookmarkFilled className="w-4 h-4" /> : <RxBookmark className="w-4 h-4" />}
               <span className="hidden md:inline">{isBookmarkedOnCurrentPage ? 'Bookmarked' : 'Set Bookmark'}</span>

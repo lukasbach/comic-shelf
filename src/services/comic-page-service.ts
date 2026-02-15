@@ -81,20 +81,20 @@ export const updatePageLastOpened = async (id: number): Promise<void> => {
   window.dispatchEvent(new CustomEvent('comic-opened'));
 };
 
-export const getAllPages = async (): Promise<(ComicPage & { comic_title: string; comic_path: string; comic_artist: string | null })[]> => {
+export const getAllPages = async (): Promise<(ComicPage & { comic_title: string; comic_path: string; comic_artist: string | null; created_at: string })[]> => {
   const db = await getDb();
-  return await db.select<(ComicPage & { comic_title: string; comic_path: string; comic_artist: string | null })[]>(`
-    SELECT p.*, c.title as comic_title, c.path as comic_path, c.artist as comic_artist
+  return await db.select<(ComicPage & { comic_title: string; comic_path: string; comic_artist: string | null; created_at: string })[]>(`
+    SELECT p.*, c.title as comic_title, c.path as comic_path, c.artist as comic_artist, c.created_at
     FROM comic_pages p 
     JOIN comics c ON p.comic_id = c.id 
     ORDER BY c.title ASC, p.page_number ASC
   `);
 };
 
-export const getFavoritePages = async (): Promise<(ComicPage & { comic_title: string; comic_path: string })[]> => {
+export const getFavoritePages = async (): Promise<(ComicPage & { comic_title: string; comic_path: string; created_at: string })[]> => {
   const db = await getDb();
-  return await db.select<(ComicPage & { comic_title: string; comic_path: string })[]>(`
-    SELECT p.*, c.title as comic_title, c.path as comic_path
+  return await db.select<(ComicPage & { comic_title: string; comic_path: string; created_at: string })[]>(`
+    SELECT p.*, c.title as comic_title, c.path as comic_path, c.created_at
     FROM comic_pages p 
     JOIN comics c ON p.comic_id = c.id 
     WHERE p.is_favorite = 1

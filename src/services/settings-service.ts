@@ -40,7 +40,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   },
   defaultZoomLevel: 100,
   defaultFitMode: 'width',
-  defaultViewMode: 'single',
+  defaultViewMode: 'overview',
   slideshowDelay: 5000,
   slideshowAutoScroll: true,
   autoReindex: true,

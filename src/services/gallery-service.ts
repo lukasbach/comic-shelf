@@ -19,6 +19,24 @@ export const getGalleries = async (): Promise<Gallery[]> => {
   `);
 };
 
+export const getFavoriteGalleries = async (): Promise<Gallery[]> => {
+  const db = await getDb();
+  return await db.select<Gallery[]>(`
+    SELECT g.*, COUNT(gp.id) as page_count,
+      (SELECT cp.thumbnail_path 
+       FROM gallery_pages gp2 
+       JOIN comic_pages cp ON gp2.comic_page_id = cp.id 
+       WHERE gp2.gallery_id = g.id 
+       ORDER BY gp2.added_at ASC 
+       LIMIT 1) as thumbnail_path
+    FROM galleries g
+    LEFT JOIN gallery_pages gp ON g.id = gp.gallery_id
+    WHERE g.is_favorite = 1
+    GROUP BY g.id
+    ORDER BY g.name ASC
+  `);
+};
+
 export const getGalleryById = async (id: number): Promise<Gallery | null> => {
   const db = await getDb();
   const results = await db.select<Gallery[]>(`

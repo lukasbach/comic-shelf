@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RxEyeOpen, RxEyeClosed } from 'react-icons/rx';
+import { RxEyeOpen, RxEyeClosed, RxLayers } from 'react-icons/rx';
 import { getImageUrl } from '../utils/image-utils';
 import { ComicContextMenu, ComicDropdownMenu } from './comic-context-menu';
 import { FavoriteButton } from './favorite-button';
@@ -12,9 +12,10 @@ type PageCardProps = {
   page: AllPageItem;
   onOpen: (comicId: number, pageNumber: number, e?: React.MouseEvent, comicInfo?: { id: number; path: string; title: string }) => void;
   onUpdate?: () => void;
+  onAddToGallery?: (pageId: number) => void;
 };
 
-export const PageCard: React.FC<PageCardProps> = ({ page, onOpen, onUpdate }) => {
+export const PageCard: React.FC<PageCardProps> = ({ page, onOpen, onUpdate, onAddToGallery }) => {
   const { settings } = useSettings();
   const [isFavorite, setIsFavorite] = useState(page.is_favorite === 1);
   const [isViewed, setIsViewed] = useState(page.last_opened_at !== null);
@@ -82,16 +83,25 @@ export const PageCard: React.FC<PageCardProps> = ({ page, onOpen, onUpdate }) =>
             isFavorite={isFavorite} 
             onToggle={handleToggleFavorite}
             size="sm"
-            className={`w-7 h-7 bg-black/60 backdrop-blur-md rounded-full text-white shadow-lg transition-all ${isFavorite ? 'opacity-100 scale-100' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100'}`}
+            className={`w-6 h-6 bg-black/40 backdrop-blur-sm rounded-full text-white shadow-md transition-all ${isFavorite ? 'opacity-100 scale-100' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100'}`}
           />
+          {settings.enableGalleries && onAddToGallery && (
+            <button
+               onClick={(e) => { e.stopPropagation(); onAddToGallery(page.id); }}
+               className="w-6 h-6 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-full text-white shadow-md opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all hover:bg-pink-600/80"
+               title="Add to Gallery"
+            >
+              <RxLayers size={14} />
+            </button>
+          )}
           {settings.showViewCount && (
             <button
               onClick={handleToggleViewed}
               onAuxClick={(e) => e.stopPropagation()}
-              className={`w-7 h-7 flex items-center justify-center bg-black/60 backdrop-blur-md rounded-full shadow-lg transition-all ${isViewed ? 'opacity-100 scale-100 text-blue-400' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 text-white'} hover:bg-black/80`}
+              className={`w-6 h-6 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-full shadow-md transition-all ${isViewed ? 'opacity-100 scale-100 text-blue-400' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 text-white'} hover:bg-black/80`}
               title={isViewed ? "Mark as Unviewed" : "Mark as Viewed"}
             >
-              {isViewed ? <RxEyeOpen size={16} /> : <RxEyeClosed size={16} />}
+              {isViewed ? <RxEyeOpen size={14} /> : <RxEyeClosed size={14} />}
             </button>
           )}
           <ComicDropdownMenu 
@@ -107,7 +117,8 @@ export const PageCard: React.FC<PageCardProps> = ({ page, onOpen, onUpdate }) =>
             onIncrementViewCount={handleIncrementViewCount}
             onDecrementViewCount={handleDecrementViewCount}
             onUpdate={onUpdate}
-            className="w-7 h-7 bg-black/60 backdrop-blur-md rounded-full text-white shadow-lg opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all hover:bg-black/90"
+            onAddToGallery={onAddToGallery ? () => onAddToGallery(page.id) : undefined}
+            className="w-6 h-6 bg-black/40 backdrop-blur-sm rounded-full text-white shadow-md opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all hover:bg-black/80"
           />
         </>
       }
@@ -123,6 +134,7 @@ export const PageCard: React.FC<PageCardProps> = ({ page, onOpen, onUpdate }) =>
           onOpen={() => onOpen(page.comic_id, page.page_number, undefined, { id: page.comic_id, title: page.comic_title, path: page.comic_path })}
           isFavorite={isFavorite}
           setIsFavorite={setIsFavorite}
+          onAddToGallery={onAddToGallery ? () => onAddToGallery(page.id) : undefined}
           isViewed={isViewed}
           setIsViewed={setIsViewed}
           viewCount={viewCount}

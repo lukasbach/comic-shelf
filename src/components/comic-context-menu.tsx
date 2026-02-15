@@ -11,7 +11,9 @@ import {
   RxArchive,
   RxDotsHorizontal,
   RxEyeOpen,
-  RxEyeClosed
+  RxEyeClosed,
+  RxCross2,
+  RxLayers
 } from 'react-icons/rx';
 import type { Comic, ComicPage } from '../types/comic';
 import * as comicService from '../services/comic-service';
@@ -43,6 +45,8 @@ export interface ComicMenuProps {
   onIncrementViewCount?: () => void;
   onDecrementViewCount?: () => void;
   onUpdate?: () => void;
+  onAddToGallery?: () => void;
+  onRemoveFromGallery?: () => void;
   // Extra items
   extraItems?: React.ReactNode;
 }
@@ -63,6 +67,8 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
   onIncrementViewCount: manualIncrement,
   onDecrementViewCount: manualDecrement,
   onUpdate,
+  onAddToGallery,
+  onRemoveFromGallery,
   isDropdown = false,
   extraItems
 }) => {
@@ -361,6 +367,20 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
         {fav ? <RxStarFilled className="w-4 h-4 text-yellow-500" /> : <RxStar className="w-4 h-4" />}
         <span>{fav ? 'Remove from favorites' : 'Add to favorites'}</span>
       </MenuItem>
+
+      {onAddToGallery && (
+        <MenuItem className={itemClass} onSelect={onAddToGallery}>
+          <RxLayers className="w-4 h-4 text-pink-500" />
+          <span>Add to gallery</span>
+        </MenuItem>
+      )}
+
+      {onRemoveFromGallery && (
+        <MenuItem className={itemClass} onSelect={onRemoveFromGallery}>
+          <RxCross2 className="w-4 h-4 text-red-500" />
+          <span>Remove from gallery</span>
+        </MenuItem>
+      )}
       
       {extraItems && (
         <>

@@ -91,6 +91,8 @@ export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.Ref
         onToggleViewed={onToggleViewed}
         onIncrementViewCount={onIncrementViewCount}
         onDecrementViewCount={onDecrementViewCount}
+        onAddToGallery={enableGalleries && !isGallery ? onAddToGallery : undefined}
+        onRemoveFromGallery={enableGalleries && isGallery ? onRemoveFromGallery : undefined}
       >
         <div
           ref={internalRef}
@@ -106,22 +108,22 @@ export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.Ref
           </div>
 
           {enableGalleries && (
-            <div className="absolute top-2 left-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            <div className="absolute top-2 right-10 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               {isGallery ? (
                 <button
                   onClick={(e) => { e.stopPropagation(); onRemoveFromGallery?.(); }}
-                  className="p-1.5 bg-red-600/80 hover:bg-red-600 text-white rounded-lg transition-all border border-red-500/30 shadow-lg"
+                  className="w-6 h-6 flex items-center justify-center bg-black/40 backdrop-blur-sm hover:bg-red-600/80 text-white rounded-full transition-all shadow-md"
                   title="Remove from Gallery"
                 >
-                  <RxCross2 size={18} />
+                  <RxCross2 size={14} />
                 </button>
               ) : (
                 <button
                   onClick={(e) => { e.stopPropagation(); onAddToGallery?.(); }}
-                  className="p-1.5 bg-pink-600/80 hover:bg-pink-600 text-white rounded-lg transition-all border border-pink-500/30 shadow-lg"
+                  className="w-6 h-6 flex items-center justify-center bg-black/40 backdrop-blur-sm hover:bg-pink-600/80 text-white rounded-full transition-all shadow-md"
                   title="Add to Gallery"
                 >
-                  <RxLayers size={18} />
+                  <RxLayers size={14} />
                 </button>
               )}
             </div>
@@ -133,7 +135,7 @@ export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.Ref
                 isFavorite={isFavorite || false} 
                 onToggle={onToggleFavorite} 
                 size="sm"
-                className="bg-black/40 backdrop-blur-sm p-1.5 rounded-full text-white shadow-lg"
+                className="w-6 h-6 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-full text-white shadow-md"
               />
             </div>
           )}

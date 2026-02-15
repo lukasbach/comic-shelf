@@ -109,16 +109,16 @@ export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen }) => {
             isFavorite={isFavorite} 
             onToggle={handleToggleFavorite} 
             size="sm"
-            className={`w-7 h-7 bg-black/60 backdrop-blur-md rounded-full text-white shadow-lg transition-all ${isFavorite ? 'opacity-100 scale-100' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100'}`}
+            className={`w-6 h-6 bg-black/40 backdrop-blur-sm rounded-full text-white shadow-md transition-all ${isFavorite ? 'opacity-100 scale-100' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100'}`}
           />
           {settings.showViewCount && (
             <button
               onClick={handleToggleViewed}
               onAuxClick={(e) => e.stopPropagation()}
-              className={`w-7 h-7 flex items-center justify-center bg-black/60 backdrop-blur-md rounded-full shadow-lg transition-all ${isViewed ? 'opacity-100 scale-100 text-blue-400' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 text-white'} hover:bg-black/80`}
+              className={`w-6 h-6 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-full shadow-md transition-all ${isViewed ? 'opacity-100 scale-100 text-blue-400' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 text-white'} hover:bg-black/80`}
               title={isViewed ? "Mark as Unviewed" : "Mark as Viewed"}
             >
-              {isViewed ? <RxEyeOpen size={16} /> : <RxEyeClosed size={16} />}
+              {isViewed ? <RxEyeOpen size={14} /> : <RxEyeClosed size={14} />}
             </button>
           )}
           <ComicDropdownMenu 
@@ -133,7 +133,7 @@ export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen }) => {
             onToggleViewed={handleToggleViewed}
             onIncrementViewCount={handleIncrementViewCount}
             onDecrementViewCount={handleDecrementViewCount}
-            className="w-7 h-7 bg-black/60 backdrop-blur-md rounded-full text-white shadow-lg opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all hover:bg-black/90"
+            className="w-6 h-6 bg-black/40 backdrop-blur-sm rounded-full text-white shadow-md opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all hover:bg-black/80"
           />
         </>
       }

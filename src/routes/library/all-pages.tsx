@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { GridPage, SortOption } from '../../components/grid-page';
 import { PageCard } from '../../components/page-card';
@@ -5,6 +6,7 @@ import { useAllPages, AllPageItem } from '../../hooks/use-all-pages';
 import { useOpenComicPage } from '../../hooks/use-open-comic-page';
 import { RxImage } from 'react-icons/rx';
 import { naturalSortComparator } from '../../utils/image-utils';
+import { AddToGalleryDialog } from '../../components/add-to-gallery-dialog';
 
 export const Route = createFileRoute('/library/all-pages')({
   component: AllPagesList,
@@ -28,9 +30,11 @@ const sortOptions: SortOption<AllPageItem>[] = [
 function AllPagesList() {
   const { pages, loading, refetch } = useAllPages();
   const openComicPage = useOpenComicPage();
+  const [gallerySelectionPageId, setGallerySelectionPageId] = useState<number | null>(null);
 
   return (
-    <GridPage
+    <div className="h-full">
+      <GridPage
       type="pages"
       title="All Pages"
       icon={<RxImage size={24} />}
@@ -42,6 +46,7 @@ function AllPagesList() {
           page={page} 
           onOpen={openComicPage} 
           onUpdate={refetch} 
+          onAddToGallery={setGallerySelectionPageId}
         />
       )}
       searchFields={(page) => [page.comic_title, page.comic_artist, page.file_path]}
@@ -55,5 +60,13 @@ function AllPagesList() {
       noItemsMessage="No pages found. Start indexing comics to see them here."
       itemHeight={450}
     />
+
+    {gallerySelectionPageId !== null && (
+      <AddToGalleryDialog
+        comicPageId={gallerySelectionPageId}
+        onClose={() => setGallerySelectionPageId(null)}
+      />
+    )}
+    </div>
   );
 }

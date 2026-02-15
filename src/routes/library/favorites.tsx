@@ -15,6 +15,7 @@ import { Comic } from '../../types/comic';
 import { Gallery } from '../../types/gallery';
 import { AllPageItem } from '../../hooks/use-all-pages';
 import { naturalSortComparator } from '../../utils/image-utils';
+import { AddToGalleryDialog } from '../../components/add-to-gallery-dialog';
 
 export const Route = createFileRoute('/library/favorites')({
   validateSearch: (search: Record<string, unknown>) => {
@@ -86,7 +87,7 @@ function LibraryFavorites() {
       return <ComicCard key={item.id} comic={item} onOpen={openComic} />;
     }
     if (activeTab === 'pages') {
-      return <PageCard key={item.id} page={item} onOpen={openComicPage} onUpdate={refreshPages} />;
+      return <PageCard key={item.id} page={item} onOpen={openComicPage} onUpdate={refreshPages} onAddToGallery={setGallerySelectionPageId} />;
     }
     if (activeTab === 'galleries') {
       return (
@@ -137,7 +138,8 @@ function LibraryFavorites() {
   };
 
   return (
-    <GridPage<any>
+    <div className="h-full">
+      <GridPage<any>
       type={activeTab as any}
       title="Favorites"
       icon={<RxStarFilled size={24} className="text-amber-400" />}
@@ -161,5 +163,13 @@ function LibraryFavorites() {
       emptyMessage={getEmptyMessage()}
       noItemsMessage={getEmptyMessage()}
     />
+
+    {gallerySelectionPageId !== null && (
+      <AddToGalleryDialog
+        comicPageId={gallerySelectionPageId}
+        onClose={() => setGallerySelectionPageId(null)}
+      />
+    )}
+    </div>
   );
 }

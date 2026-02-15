@@ -15,8 +15,6 @@ import {
   RxTrash,
   RxCross2,
   RxDesktop,
-  RxMoon,
-  RxSun,
   RxViewHorizontal,
   RxViewVertical,
   RxGrid,
@@ -40,17 +38,14 @@ function SettingsPage() {
 
   const form = useForm({
     defaultValues: settings as AppSettings,
-    onSubmit: async ({ value }) => {
-      setSaveStatus('saving');
-      await updateSettings(value);
-      setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 2000);
-    },
     listeners: {
       onChangeDebounceMs: 1000,
-      onChange: ({ formApi }) => {
+      onChange: async ({ formApi }) => {
         if (formApi.state.isDirty) {
-          updateSettings(formApi.state.values as AppSettings);
+          setSaveStatus('saving');
+          await updateSettings(formApi.state.values as AppSettings);
+          setSaveStatus('saved');
+          setTimeout(() => setSaveStatus('idle'), 2000);
         }
       }
     }
@@ -131,32 +126,186 @@ function SettingsPage() {
             <p className="text-slate-400 mt-1">Configure your reading experience and library.</p>
           </div>
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => form.handleSubmit()}
-              disabled={saveStatus === 'saving'}
-              className={`px-6 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
-                saveStatus === 'saved' 
-                  ? 'bg-green-600 text-white' 
-                  : 'bg-blue-600 hover:bg-blue-500 text-white'
-              } disabled:opacity-50 min-w-35 justify-center`}
-            >
-              {saveStatus === 'saving' ? (
-                <RxSymbol className="animate-spin" />
-              ) : saveStatus === 'saved' ? (
-                <RxCheck />
-              ) : null}
-              {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : 'Save Changes'}
-            </button>
+            {saveStatus !== 'idle' && (
+              <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${
+                saveStatus === 'saving' ? 'bg-blue-600/10 text-blue-400' : 'bg-green-600/10 text-green-400'
+              }`}>
+                {saveStatus === 'saving' ? <RxSymbol className="animate-spin" /> : <RxCheck />}
+                {saveStatus === 'saving' ? 'Saving...' : 'Saved'}
+              </div>
+            )}
           </div>
         </header>
 
         <form 
           onSubmit={(e) => {
             e.preventDefault();
-            form.handleSubmit();
           }}
           className="space-y-12"
         >
+          {/* Indexing Section */}
+          <section className="space-y-6">
+            <div className="flex items-center gap-2 text-green-400">
+              <RxArchive size={20} />
+              <h2 className="text-xl font-semibold">Library & Indexing</h2>
+            </div>
+            
+            <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800 space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                <form.Field name="autoReindex">
+                  {(field) => (
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={field.state.value}
+                        onClick={() => field.handleChange(!field.state.value)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                          field.state.value ? 'bg-blue-600' : 'bg-slate-700'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            field.state.value ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                      <div>
+                        <span className="text-sm font-medium text-slate-200">Auto-reindex on startup</span>
+                        <p className="text-[10px] text-slate-500">Scan for new comics when the application opens.</p>
+                      </div>
+                    </div>
+                  )}
+                </form.Field>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-medium text-slate-200">Index Paths</h3>
+                  <p className="text-xs text-slate-500">Directories scanned for comics. Use patterns to extract metadata.</p>
+                  <div className="flex gap-4 mt-1">
+                    <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
+                      <span className="bg-slate-800 px-1 rounded font-mono text-blue-400">{"{author}"}</span>
+                      <span>Author</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
+                      <span className="bg-slate-800 px-1 rounded font-mono text-blue-400">{"{series}"}</span>
+                      <span>Series</span>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSelectFolder}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-medium text-slate-200 transition-colors"
+                >
+                  <RxPlus /> Add Path
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                {indexPaths.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-800 rounded-lg text-slate-600">
+                    <RxArchive size={32} className="mb-2 opacity-50" />
+                    <p className="text-sm">No index paths configured.</p>
+                  </div>
+                ) : (
+                  indexPaths.map((path) => (
+                    <div key={path.id} className="flex items-center justify-between p-3 bg-slate-800/50 border border-slate-800 rounded-lg">
+                      <div className="truncate flex-1 mr-4">
+                        <div className="text-sm text-slate-200 truncate">{path.path}</div>
+                        {editingPathId === path.id ? (
+                          <div className="flex items-center gap-2 mt-1">
+                            <input
+                              type="text"
+                              value={editingPattern}
+                              onChange={(e) => setEditingPattern(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleUpdatePattern(path.id!);
+                                if (e.key === 'Escape') setEditingPathId(null);
+                              }}
+                              className="bg-slate-900 border border-blue-500 rounded px-2 py-0.5 text-[10px] text-slate-200 font-mono w-full max-w-xs focus:outline-none"
+                              autoFocus
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleUpdatePattern(path.id!)}
+                              className="text-green-500 hover:text-green-400"
+                              title="Save pattern"
+                            >
+                              <RxCheck size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingPathId(null)}
+                              className="text-slate-500 hover:text-red-400"
+                              title="Cancel"
+                            >
+                              <RxCross2 size={14} />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingPathId(path.id!);
+                              setEditingPattern(path.pattern);
+                            }}
+                            className="text-[10px] text-slate-500 font-mono hover:text-blue-400 transition-colors block mt-1"
+                            title="Click to edit pattern"
+                          >
+                            {path.pattern}
+                          </button>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemovePath(path.id!)}
+                        className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                      >
+                        <RxTrash size={16} />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="pt-4 border-t border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="text-xs text-slate-500">
+                   {lastIndexedAt ? `Last indexed: ${new Date(lastIndexedAt).toLocaleString()}` : 'Never indexed'}
+                </div>
+                
+                {isIndexing && progress && (
+                  <div className="flex-1 max-w-md space-y-1">
+                    <div className="flex justify-between text-[10px] text-slate-400 uppercase">
+                      <span>{progress.status === 'scanning' ? 'Scanning...' : 'Indexing...'}</span>
+                      <span>{(progress.current ?? 0)} / {(progress.total ?? 0)}</span>
+                    </div>
+                    <div className="text-[10px] text-slate-400 truncate" title={progress.currentTask || ''}>
+                      {progress.currentTask || 'Working...'}
+                    </div>
+                    <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                      <div 
+                        className="bg-green-500 h-full transition-all duration-300"
+                        style={{ width: `${progress.percentage ?? (((progress.current ?? 0) / (progress.total ?? 1)) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={startIndexing}
+                  disabled={isIndexing}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600/10 hover:bg-green-600/20 border border-green-600/30 rounded-lg text-sm font-medium text-green-400 transition-all disabled:opacity-50"
+                >
+                  {isIndexing ? <RxSymbol className="animate-spin" /> : <RxReload />}
+                  {isIndexing ? 'Indexing...' : 'Force Re-index All'}
+                </button>
+              </div>
+            </div>
+          </section>
+
           {/* General Section */}
           <section className="space-y-6">
             <div className="flex items-center gap-2 text-blue-400">
@@ -165,35 +314,6 @@ function SettingsPage() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-slate-900/50 p-6 rounded-xl border border-slate-800">
-              <form.Field name="theme">
-                {(field) => (
-                  <div className="space-y-3">
-                    <label className="text-sm font-medium text-slate-300">Theme</label>
-                    <div className="flex gap-2">
-                      {[
-                        { value: 'light', icon: RxSun, label: 'Light' },
-                        { value: 'dark', icon: RxMoon, label: 'Dark' },
-                        { value: 'system', icon: RxDesktop, label: 'System' },
-                      ].map((opt) => (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          onClick={() => field.handleChange(opt.value as any)}
-                          className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border transition-all ${
-                            field.state.value === opt.value
-                              ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20'
-                              : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600'
-                          }`}
-                        >
-                          <opt.icon />
-                          <span>{opt.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </form.Field>
-
               <form.Field name="defaultViewMode">
                 {(field) => (
                   <div className="space-y-3">
@@ -356,169 +476,6 @@ function SettingsPage() {
               ))}
             </div>
             <p className="text-[10px] text-slate-500 italic">Hotkeys are automatically disabled when typing in input fields.</p>
-          </section>
-
-          {/* Indexing Section */}
-          <section className="space-y-6">
-            <div className="flex items-center gap-2 text-green-400">
-              <RxArchive size={20} />
-              <h2 className="text-xl font-semibold">Library & Indexing</h2>
-            </div>
-            
-            <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800 space-y-6">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                <form.Field name="autoReindex">
-                  {(field) => (
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={field.state.value}
-                        onClick={() => field.handleChange(!field.state.value)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
-                          field.state.value ? 'bg-blue-600' : 'bg-slate-700'
-                        }`}
-                      >
-                        <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            field.state.value ? 'translate-x-6' : 'translate-x-1'
-                          }`}
-                        />
-                      </button>
-                      <div>
-                        <span className="text-sm font-medium text-slate-200">Auto-reindex on startup</span>
-                        <p className="text-[10px] text-slate-500">Scan for new comics when the application opens.</p>
-                      </div>
-                    </div>
-                  )}
-                </form.Field>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-medium text-slate-200">Index Paths</h3>
-                  <p className="text-xs text-slate-500">Directories scanned for comics. Use patterns to extract metadata.</p>
-                  <div className="flex gap-4 mt-1">
-                    <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
-                      <span className="bg-slate-800 px-1 rounded font-mono text-blue-400">{"{author}"}</span>
-                      <span>Author</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
-                      <span className="bg-slate-800 px-1 rounded font-mono text-blue-400">{"{series}"}</span>
-                      <span>Series</span>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleSelectFolder}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-medium text-slate-200 transition-colors"
-                >
-                  <RxPlus /> Add Path
-                </button>
-              </div>
-
-              <div className="space-y-2">
-                {indexPaths.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-800 rounded-lg text-slate-600">
-                    <RxArchive size={32} className="mb-2 opacity-50" />
-                    <p className="text-sm">No index paths configured.</p>
-                  </div>
-                ) : (
-                  indexPaths.map((path) => (
-                    <div key={path.id} className="flex items-center justify-between p-3 bg-slate-800/50 border border-slate-800 rounded-lg">
-                      <div className="truncate flex-1 mr-4">
-                        <div className="text-sm text-slate-200 truncate">{path.path}</div>
-                        {editingPathId === path.id ? (
-                          <div className="flex items-center gap-2 mt-1">
-                            <input
-                              type="text"
-                              value={editingPattern}
-                              onChange={(e) => setEditingPattern(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleUpdatePattern(path.id!);
-                                if (e.key === 'Escape') setEditingPathId(null);
-                              }}
-                              className="bg-slate-900 border border-blue-500 rounded px-2 py-0.5 text-[10px] text-slate-200 font-mono w-full max-w-xs focus:outline-none"
-                              autoFocus
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleUpdatePattern(path.id!)}
-                              className="text-green-500 hover:text-green-400"
-                              title="Save pattern"
-                            >
-                              <RxCheck size={14} />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setEditingPathId(null)}
-                              className="text-slate-500 hover:text-red-400"
-                              title="Cancel"
-                            >
-                              <RxCross2 size={14} />
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingPathId(path.id!);
-                              setEditingPattern(path.pattern);
-                            }}
-                            className="text-[10px] text-slate-500 font-mono hover:text-blue-400 transition-colors block mt-1"
-                            title="Click to edit pattern"
-                          >
-                            {path.pattern}
-                          </button>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemovePath(path.id!)}
-                        className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
-                      >
-                        <RxTrash size={16} />
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              <div className="pt-4 border-t border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="text-xs text-slate-500">
-                   {lastIndexedAt ? `Last indexed: ${new Date(lastIndexedAt).toLocaleString()}` : 'Never indexed'}
-                </div>
-                
-                {isIndexing && progress && (
-                  <div className="flex-1 max-w-md space-y-1">
-                    <div className="flex justify-between text-[10px] text-slate-400 uppercase">
-                      <span>{progress.status === 'scanning' ? 'Scanning...' : 'Indexing...'}</span>
-                      <span>{(progress.current ?? 0)} / {(progress.total ?? 0)}</span>
-                    </div>
-                    <div className="text-[10px] text-slate-400 truncate" title={progress.currentTask || ''}>
-                      {progress.currentTask || 'Working...'}
-                    </div>
-                    <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                      <div 
-                        className="bg-green-500 h-full transition-all duration-300"
-                        style={{ width: `${progress.percentage ?? (((progress.current ?? 0) / (progress.total ?? 1)) * 100)}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  onClick={startIndexing}
-                  disabled={isIndexing}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600/10 hover:bg-green-600/20 border border-green-600/30 rounded-lg text-sm font-medium text-green-400 transition-all disabled:opacity-50"
-                >
-                  {isIndexing ? <RxSymbol className="animate-spin" /> : <RxReload />}
-                  {isIndexing ? 'Indexing...' : 'Force Re-index All'}
-                </button>
-              </div>
-            </div>
           </section>
         </form>
 

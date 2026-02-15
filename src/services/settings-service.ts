@@ -19,7 +19,6 @@ export type AppSettings = {
   defaultViewMode: 'single' | 'scroll' | 'overview';
   slideshowDelay: number;         // milliseconds
   slideshowAutoScroll: boolean;
-  theme: 'light' | 'dark' | 'system';
   autoReindex: boolean;
   lastIndexedAt: string | null;
 };
@@ -43,7 +42,6 @@ export const DEFAULT_SETTINGS: AppSettings = {
   defaultViewMode: 'single',
   slideshowDelay: 5000,
   slideshowAutoScroll: true,
-  theme: 'dark',
   autoReindex: true,
   lastIndexedAt: null,
 };

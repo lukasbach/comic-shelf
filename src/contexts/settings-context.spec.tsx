@@ -7,8 +7,8 @@ vi.mock('../services/settings-service', () => ({
   loadSettings: vi.fn(),
   saveSettings: vi.fn(),
   DEFAULT_SETTINGS: {
-    theme: 'dark',
     hotkeys: {},
+    defaultZoomLevel: 100,
   },
 }));
 
@@ -17,8 +17,8 @@ const TestComponent = () => {
   if (isLoading) return <div>Loading...</div>;
   return (
     <div>
-      <div data-testid="theme">{settings.theme}</div>
-      <button onClick={() => updateSettings({ theme: 'light' })}>Change Theme</button>
+      <div data-testid="zoom">{settings.defaultZoomLevel}</div>
+      <button onClick={() => updateSettings({ defaultZoomLevel: 150 })}>Change Zoom</button>
     </div>
   );
 };
@@ -28,7 +28,7 @@ describe('settings-context', () => {
     vi.clearAllMocks();
     (settingsService.loadSettings as any).mockResolvedValue({
       ...settingsService.DEFAULT_SETTINGS,
-      theme: 'dark',
+      defaultZoomLevel: 100,
     });
     (settingsService.saveSettings as any).mockResolvedValue(undefined);
   });
@@ -47,11 +47,11 @@ describe('settings-context', () => {
     expect(screen.getByText('Loading...')).toBeTruthy();
 
     await waitFor(() => expect(screen.queryByText('Loading...')).toBeNull());
-    expect(screen.getByTestId('theme').textContent).toBe('dark');
+    expect(screen.getByTestId('zoom').textContent).toBe('100');
     expect(addSpy).toHaveBeenCalledWith('dark');
   });
 
-  it('updates settings and applies theme', async () => {
+  it('updates settings', async () => {
     render(
       <SettingsProvider>
         <TestComponent />
@@ -60,11 +60,10 @@ describe('settings-context', () => {
 
     await waitFor(() => expect(screen.queryByText('Loading...')).toBeNull());
     
-    const button = screen.getByText('Change Theme');
+    const button = screen.getByText('Change Zoom');
     button.click();
 
-    await waitFor(() => expect(screen.getByTestId('theme').textContent).toBe('light'));
-    expect(settingsService.saveSettings).toHaveBeenCalledWith(expect.objectContaining({ theme: 'light' }));
-    expect(document.documentElement.classList.contains('light')).toBe(true);
+    await waitFor(() => expect(screen.getByTestId('zoom').textContent).toBe('150'));
+    expect(settingsService.saveSettings).toHaveBeenCalledWith(expect.objectContaining({ defaultZoomLevel: 150 }));
   });
 });

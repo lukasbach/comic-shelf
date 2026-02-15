@@ -18,7 +18,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       try {
         const loadedSettings = await loadSettings();
         setSettings(loadedSettings);
-        applyTheme(loadedSettings.theme);
+        applyTheme();
       } catch (error) {
         console.error('Failed to load settings:', error);
       } finally {
@@ -28,39 +28,21 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     initSettings();
   }, []);
 
-  const applyTheme = useCallback((theme: 'light' | 'dark' | 'system') => {
+  const applyTheme = useCallback(() => {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
-
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      root.classList.add(systemTheme);
-    } else {
-      root.classList.add(theme);
-    }
+    root.classList.add('dark');
   }, []);
 
-  useEffect(() => {
-    if (settings.theme === 'system') {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handleChange = () => applyTheme('system');
-      
-      mediaQuery.addEventListener('change', handleChange);
-      return () => mediaQuery.removeEventListener('change', handleChange);
-    }
-  }, [settings.theme, applyTheme]);
-
   const updateSettings = useCallback(async (newSettings: Partial<AppSettings>) => {
-    setSettings((prev) => {
-      const updated = { ...prev, ...newSettings };
-      saveSettings(updated).catch((err) => console.error('Failed to save settings:', err));
-      
-      if (newSettings.theme) {
-        applyTheme(newSettings.theme);
-      }
-      
-      return updated;
+    const updated = await new Promise<AppSettings>((resolve) => {
+      setSettings((prev) => {
+        const next = { ...prev, ...newSettings };
+        resolve(next);
+        return next;
+      });
     });
+    await saveSettings(updated);
   }, []);
 
   return (

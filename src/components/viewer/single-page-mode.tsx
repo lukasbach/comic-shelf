@@ -41,8 +41,8 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
   const activeTab = tabs.find((t: Tab) => t.id === activeTabId);
   
   const currentPage = activeTab?.currentPage ?? 0;
-  const zoomLevel = activeTab?.zoomLevel ?? 100;
-  const fitMode = activeTab?.fitMode ?? 'width';
+  const zoomLevel = activeTab?.zoomLevel ?? settings.defaultZoomLevel ?? 100;
+  const fitMode = activeTab?.fitMode ?? settings.defaultFitMode ?? 'width';
   const viewMode = activeTab?.viewMode ?? 'single';
   const isSidebarCollapsed = activeTab?.sidebarCollapsed ?? false;
   

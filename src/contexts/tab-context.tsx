@@ -41,10 +41,12 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const { location } = useRouterState();
   const navigate = useNavigate();
   const router = useRouter();
-  const { settings } = useSettings();
+  const { settings, isLoading: isLoadingSettings } = useSettings();
 
   // Sync current route with tabs
   useEffect(() => {
+    if (isLoadingSettings) return;
+    
     const currentPath = location.pathname + (location.searchStr ? `?${location.searchStr}` : '');
     
     if (tabs.length === 0) {
@@ -130,7 +132,7 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
       }
     }
-  }, [location.pathname, location.searchStr, activeTabId, tabs, isSwitchingTab, settings]);
+  }, [location.pathname, location.searchStr, activeTabId, tabs, isSwitchingTab, settings, isLoadingSettings]);
 
   const openTab = useCallback((
     comic: { id: number; path: string; title: string }, 

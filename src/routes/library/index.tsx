@@ -2,13 +2,16 @@ import { useMemo } from 'react';
 import { useNavigate, createFileRoute } from '@tanstack/react-router';
 import { useComics } from '../../hooks/use-comics';
 import { useIndexPaths } from '../../hooks/use-index-paths';
+import { useIndexing } from '../../contexts/indexing-context';
 import { useOpenComic } from '../../hooks/use-open-comic';
 import { useTabs } from '../../contexts/tab-context';
-import { RxSymbol } from 'react-icons/rx';
+import { RxSymbol, RxPlus, RxArchive } from 'react-icons/rx';
 import { VirtualizedGrid } from '../../components/virtualized-grid';
 import { ComicCard } from '../../components/comic-card';
 import { FolderCard } from '../../components/folder-card';
 import { normalizePath, naturalSortComparator } from '../../utils/image-utils';
+import * as indexPathService from '../../services/index-path-service';
+import { open } from '@tauri-apps/plugin-dialog';
 import type { Comic } from '../../types/comic';
 
 export const Route = createFileRoute('/library/')({
@@ -34,9 +37,29 @@ function LibraryExplorer() {
   const { path: currentPath = '' } = Route.useSearch();
   const navigate = useNavigate();
   const { comics, loading: loadingComics } = useComics();
-  const { indexPaths, loading: loadingPaths } = useIndexPaths();
+  const { indexPaths, loading: loadingPaths, refresh: refreshPaths } = useIndexPaths();
+  const { startIndexing } = useIndexing();
   const openComic = useOpenComic();
   const { openLibraryTab } = useTabs();
+
+  const handleSelectFolder = async () => {
+    try {
+      const selected = await open({
+        directory: true,
+        multiple: false,
+        title: 'Select Comic Library Folder'
+      });
+      
+      if (selected && typeof selected === 'string') {
+        await indexPathService.addIndexPath(selected, '{artist}/{series}/{issue}');
+        await refreshPaths();
+        // Trigger indexing for new path
+        startIndexing();
+      }
+    } catch (error) {
+      console.error('Failed to select folder:', error);
+    }
+  };
 
   const setCurrentPath = (path: string) => {
     navigate({
@@ -138,9 +161,21 @@ function LibraryExplorer() {
 
   if (indexPaths.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-4 text-center">
-        <p className="text-lg font-medium">No library paths configured.</p>
-        <p className="text-sm">Add indexing paths in Settings to see your comics.</p>
+      <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-6 text-center p-8">
+        <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500">
+          <RxArchive size={40} />
+        </div>
+        <div className="space-y-2">
+          <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">Your library is empty</p>
+          <p className="text-sm max-w-xs mx-auto">Add a folder containing your comics to start building your library.</p>
+        </div>
+        <button
+          onClick={handleSelectFolder}
+          className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-all shadow-lg shadow-blue-900/20 active:scale-95 cursor-pointer"
+        >
+          <RxPlus size={20} />
+          <span>Add Comic Folder</span>
+        </button>
       </div>
     );
   }

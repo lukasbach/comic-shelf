@@ -6,9 +6,12 @@ import {
   RxPerson,
   RxStar,
   RxFileText,
-  RxCounterClockwiseClock
+  RxCounterClockwiseClock,
+  RxPlus
 } from 'react-icons/rx'
 import { useTabs } from '../contexts/tab-context'
+import { useIndexing } from '../contexts/indexing-context'
+import { useIndexPaths } from '../hooks/use-index-paths'
 import { IndexingStatus } from './indexing-status'
 import { useFavoriteComics } from '../hooks/use-favorite-comics'
 import { useRecentlyOpened } from '../hooks/use-recently-opened'
@@ -16,6 +19,8 @@ import { useOpenComic } from '../hooks/use-open-comic'
 import { useOpenComicPage } from '../hooks/use-open-comic-page'
 import { ComicContextMenu } from './comic-context-menu'
 import { getImageUrl } from '../utils/image-utils'
+import * as indexPathService from '../services/index-path-service'
+import { open } from '@tauri-apps/plugin-dialog'
 import type { Comic } from '../types/comic'
 import type { RecentlyOpenedPage } from '../hooks/use-recently-opened'
 
@@ -101,9 +106,30 @@ export function LibrarySidebar() {
   const { openLibraryTab } = useTabs()
   const { comics: favoriteComics, refetch: refetchFavorites } = useFavoriteComics()
   const { comics: recentComics, pages: recentPages, refetch: refetchRecent } = useRecentlyOpened(6)
+  const { refresh: refreshPaths } = useIndexPaths()
+  const { startIndexing } = useIndexing()
   const openComic = useOpenComic()
   const openComicPage = useOpenComicPage()
   const { location } = useRouterState()
+
+  const handleSelectFolder = async () => {
+    try {
+      const selected = await open({
+        directory: true,
+        multiple: false,
+        title: 'Select Comic Library Folder'
+      });
+      
+      if (selected && typeof selected === 'string') {
+        await indexPathService.addIndexPath(selected, '{artist}/{series}/{issue}');
+        await refreshPaths();
+        // Trigger indexing for new path
+        startIndexing();
+      }
+    } catch (error) {
+      console.error('Failed to select folder:', error);
+    }
+  };
 
   const handleUpdate = () => {
     refetchFavorites()
@@ -137,6 +163,14 @@ export function LibrarySidebar() {
             {item.name}
           </Link>
         ))}
+
+        <button
+          onClick={handleSelectFolder}
+          className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 mt-2 cursor-pointer"
+        >
+          <RxPlus className="w-5 h-5 shrink-0" />
+          Add Folder
+        </button>
 
         {favoriteComics.length > 0 && (
           <div className="pt-4 border-t border-gray-200 dark:border-gray-800 mt-4">

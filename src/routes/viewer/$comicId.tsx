@@ -32,7 +32,7 @@ function ComicViewerPage() {
   const search = Route.useSearch();
   const { tabs, activeTabId, updateTab } = useTabs();
   const { settings } = useSettings();
-  const { scrollContainerRef } = useViewerRef();
+  const { scrollContainerRef, scrollToPage, registerNextPage, registerPrevPage } = useViewerRef();
   const activeTab = tabs.find((t: Tab) => t.id === activeTabId);
   const [showBookmarkPrompt, setShowBookmarkPrompt] = React.useState(false);
   const [promptHandled, setPromptHandled] = React.useState(false);
@@ -82,14 +82,37 @@ function ComicViewerPage() {
   const nextPage = React.useCallback(() => {
     if (activeTabId && activeTab && activeTab.currentPage !== undefined) {
       const nextPageIndex = activeTab.currentPage + 1;
-      if (nextPageIndex < pages.length) {
-        updateTab(activeTabId, { currentPage: nextPageIndex });
+      const targetIndex = nextPageIndex < pages.length ? nextPageIndex : 0;
+      
+      if (activeTab.viewMode === 'scroll') {
+        scrollToPage(targetIndex, 'smooth');
       } else {
-        // Loop back to start if at the end
-        updateTab(activeTabId, { currentPage: 0 });
+        updateTab(activeTabId, { currentPage: targetIndex });
       }
     }
-  }, [activeTabId, activeTab, pages.length]);
+  }, [activeTabId, activeTab, pages.length, scrollToPage, updateTab]);
+
+  const prevPage = React.useCallback(() => {
+    if (activeTabId && activeTab && activeTab.currentPage !== undefined) {
+      const prevPageIndex = activeTab.currentPage - 1;
+      const targetIndex = prevPageIndex >= 0 ? prevPageIndex : pages.length - 1;
+      
+      if (activeTab.viewMode === 'scroll') {
+        scrollToPage(targetIndex, 'smooth');
+      } else {
+        updateTab(activeTabId, { currentPage: targetIndex });
+      }
+    }
+  }, [activeTabId, activeTab, pages.length, scrollToPage, updateTab]);
+
+  useEffect(() => {
+    registerNextPage(nextPage);
+    registerPrevPage(prevPage);
+    return () => {
+      registerNextPage(() => {});
+      registerPrevPage(() => {});
+    };
+  }, [registerNextPage, registerPrevPage, nextPage, prevPage]);
 
   const handleJumpToBookmark = () => {
     if (activeTabId && comic && comic.bookmark_page !== null) {

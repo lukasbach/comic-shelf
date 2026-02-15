@@ -16,6 +16,10 @@ vi.mock('../../contexts/viewer-ref-context', () => ({
     scrollContainerRef: { current: null },
     scrollToPage: vi.fn(),
     registerScrollToPage: vi.fn(),
+    nextPage: vi.fn(),
+    prevPage: vi.fn(),
+    registerNextPage: vi.fn(),
+    registerPrevPage: vi.fn(),
   })),
 }));
 
@@ -108,6 +112,38 @@ describe('SinglePageMode', () => {
     const prevButton = screen.getByLabelText('Previous Page');
     fireEvent.click(prevButton);
     expect(updateTab).toHaveBeenCalledWith('tab1', { currentPage: 0 });
+  });
+
+  it('wraps around to first page when clicking next on last page', () => {
+    (useTabs as any).mockReturnValue({
+      tabs: [{ id: 'tab1', currentPage: 2, zoomLevel: 100, fitMode: 'width', viewMode: 'single', sidebarCollapsed: false }],
+      activeTabId: 'tab1',
+      updateTab,
+    });
+    render(
+      <ViewerRefProvider>
+        <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} onDecrementPageViewCount={vi.fn()} />
+      </ViewerRefProvider>
+    );
+    const nextButton = screen.getByLabelText('Next Page');
+    fireEvent.click(nextButton);
+    expect(updateTab).toHaveBeenCalledWith('tab1', { currentPage: 0 });
+  });
+
+  it('wraps around to last page when clicking prev on first page', () => {
+    (useTabs as any).mockReturnValue({
+      tabs: [{ id: 'tab1', currentPage: 0, zoomLevel: 100, fitMode: 'width', viewMode: 'single', sidebarCollapsed: false }],
+      activeTabId: 'tab1',
+      updateTab,
+    });
+    render(
+      <ViewerRefProvider>
+        <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} onDecrementPageViewCount={vi.fn()} />
+      </ViewerRefProvider>
+    );
+    const prevButton = screen.getByLabelText('Previous Page');
+    fireEvent.click(prevButton);
+    expect(updateTab).toHaveBeenCalledWith('tab1', { currentPage: 2 });
   });
 
   it('toggles sidebar', () => {

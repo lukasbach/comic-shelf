@@ -67,7 +67,6 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
     <div className="flex items-center justify-center gap-4 py-2 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800">
       <button
         onClick={onPrevPage}
-        disabled={currentPage <= 0}
         className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         aria-label="Previous Page"
       >
@@ -100,7 +99,6 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
 
       <button
         onClick={onNextPage}
-        disabled={currentPage >= totalPages - 1}
         className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         aria-label="Next Page"
       >

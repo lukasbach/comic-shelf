@@ -185,16 +185,14 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
           <h4 className="text-xs font-bold mb-3 text-gray-400 uppercase">Navigation</h4>
           <div className="flex gap-2">
             <button
-              onClick={() => onPageSelect(Math.max(0, currentPage - 1))}
-              disabled={currentPage <= 0}
+              onClick={() => onPageSelect(currentPage - 1 < 0 ? pages.length - 1 : currentPage - 1)}
               className="flex-1 flex items-center justify-center gap-2 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-30 rounded transition-colors"
             >
               <RxChevronLeft className="w-5 h-5" />
               <span>Prev</span>
             </button>
             <button
-              onClick={() => onPageSelect(Math.min(pages.length - 1, currentPage + 1))}
-              disabled={currentPage >= pages.length - 1}
+              onClick={() => onPageSelect(currentPage + 1 >= pages.length ? 0 : currentPage + 1)}
               className="flex-1 flex items-center justify-center gap-2 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-30 rounded transition-colors"
             >
               <span>Next</span>

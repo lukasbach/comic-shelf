@@ -7,7 +7,7 @@ import { useViewerRef } from '../contexts/viewer-ref-context';
 export const useAppHotkeys = () => {
   const { settings } = useSettings();
   const { activeTabId, tabs, updateTab, closeTab, nextTab, prevTab } = useTabs();
-  const { scrollContainerRef, scrollToPage } = useViewerRef();
+  const { scrollContainerRef, scrollToPage, nextPage, prevPage } = useViewerRef();
   const activeTab = tabs.find(t => t.id === activeTabId);
   
   const scrollIntervalRef = useRef<number | null>(null);
@@ -88,23 +88,10 @@ export const useAppHotkeys = () => {
         // Navigation
         if (key === hotkeys.nextPage) {
           e.preventDefault();
-          if (activeTab.currentPage !== undefined) {
-            if (isScrollMode) {
-              scrollToPage(activeTab.currentPage + 1, 'smooth');
-            } else {
-              updateTab(activeTab.id, { currentPage: activeTab.currentPage + 1 });
-            }
-          }
+          nextPage();
         } else if (key === hotkeys.prevPage) {
           e.preventDefault();
-          if (activeTab.currentPage !== undefined) {
-             const prevPageIndex = Math.max(0, activeTab.currentPage - 1);
-             if (isScrollMode) {
-               scrollToPage(prevPageIndex, 'smooth');
-             } else {
-               updateTab(activeTab.id, { currentPage: prevPageIndex });
-             }
-          }
+          prevPage();
         }
 
         // Zoom

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Comic, ComicPage } from '../../types/comic';
 import { PageImage } from './page-image';
 import { PageNavigation } from './page-navigation';
@@ -57,14 +57,16 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
   const currentPageData = pages[currentPage];
 
   const handleNextPage = () => {
-    if (currentPage < pages.length - 1 && activeTabId) {
-      updateTab(activeTabId, { currentPage: currentPage + 1 });
+    if (activeTabId) {
+      const nextPageIndex = currentPage + 1;
+      updateTab(activeTabId, { currentPage: nextPageIndex < pages.length ? nextPageIndex : 0 });
     }
   };
 
   const handlePrevPage = () => {
-    if (currentPage > 0 && activeTabId) {
-      updateTab(activeTabId, { currentPage: currentPage - 1 });
+    if (activeTabId) {
+      const prevPageIndex = currentPage - 1;
+      updateTab(activeTabId, { currentPage: prevPageIndex >= 0 ? prevPageIndex : pages.length - 1 });
     }
   };
 

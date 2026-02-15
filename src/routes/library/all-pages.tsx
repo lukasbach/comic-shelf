@@ -1,18 +1,18 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useMemo } from 'react';
-import { VirtualizedGrid } from '../../components/virtualized-grid';
+import { GridView } from '../../components/grid-view';
 import { PageCard } from '../../components/page-card';
 import { useAllPages } from '../../hooks/use-all-pages';
 import { useOpenComicPage } from '../../hooks/use-open-comic-page';
 import {
-  RxSymbol,
-  RxArrowDown,
-  RxArrowUp,
-  RxMagnifyingGlass,
-  RxEyeOpen,
-  RxEyeClosed,
-  RxStar,
-  RxStarFilled
+    RxSymbol,
+    RxArrowDown,
+    RxArrowUp,
+    RxMagnifyingGlass,
+    RxEyeOpen,
+    RxEyeClosed,
+    RxStar,
+    RxStarFilled
 } from 'react-icons/rx';
 import { naturalSortComparator } from '../../utils/image-utils';
 
@@ -212,15 +212,12 @@ function AllPagesList() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden">
-        {filteredAndSortedPages.length > 0 ? (
-          <VirtualizedGrid
-            items={filteredAndSortedPages}
-            renderItem={(page) => (
-              <PageCard key={page.id} page={page} onOpen={openComicPage} onUpdate={refetch} />
-            )}
-          />
-        ) : (
+      <GridView
+        items={filteredAndSortedPages}
+        renderItem={(page) => (
+          <PageCard key={page.id} page={page} onOpen={openComicPage} onUpdate={refetch} />
+        )}
+        emptyMessage={
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-2">
             <p>No pages match your filters.</p>
             <button 
@@ -234,8 +231,8 @@ function AllPagesList() {
               Clear all filters
             </button>
           </div>
-        )}
-      </div>
+        }
+      />
     </div>
   );
 }

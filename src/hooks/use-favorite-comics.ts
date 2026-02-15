@@ -20,5 +20,5 @@ export const useFavoriteComics = () => {
     return () => window.removeEventListener('favorites-updated', fetchComics);
   }, []);
 
-  return { comics, loading, refetch: fetchComics };
+  return { comics, loading, refresh: fetchComics };
 };

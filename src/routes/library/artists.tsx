@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { ArtistCard } from '../../components/artist-card';
-import { VirtualizedGrid } from '../../components/virtualized-grid';
+import { GridView } from '../../components/grid-view';
 import { useArtists } from '../../hooks/use-artists';
 import { RxSymbol, RxMagnifyingGlass } from 'react-icons/rx';
 import { useState, useMemo } from 'react';
@@ -45,8 +45,8 @@ function LibraryArtists() {
   }
 
   return (
-    <div className="flex flex-col h-full gap-4 p-6 overflow-hidden">
-      <div className="flex items-center justify-between gap-4">
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex items-center justify-between gap-4 p-6 pb-2">
         <h1 className="text-2xl font-bold whitespace-nowrap">Artists ({artists.length})</h1>
         
         <div className="relative flex-1 max-w-sm">
@@ -61,18 +61,17 @@ function LibraryArtists() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden">
-        <VirtualizedGrid
-          items={filteredArtists}
-          renderItem={(artist) => (
-            <ArtistCard 
-              key={artist.artist || 'unknown'} 
-              artist={artist} 
-              onClick={handleArtistClick} 
-            />
-          )}
-        />
-      </div>
+      <GridView
+        items={filteredArtists}
+        renderItem={(artist) => (
+          <ArtistCard 
+            key={artist.artist || 'unknown'} 
+            artist={artist} 
+            onClick={handleArtistClick} 
+          />
+        )}
+        emptyMessage="No artists found matching your search."
+      />
     </div>
   );
 }

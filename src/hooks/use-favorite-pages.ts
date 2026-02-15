@@ -8,9 +8,14 @@ export const useFavoritePages = () => {
   const [pages, setPages] = useState<FavoritePage[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchPages = () => {
+    setLoading(true);
     pageService.getFavoritePages().then(setPages).finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchPages();
   }, []);
 
-  return { pages, loading };
+  return { pages, loading, refresh: fetchPages };
 };

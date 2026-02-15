@@ -1,6 +1,7 @@
 import React from 'react';
 import { RxArchive } from 'react-icons/rx';
 import { getImageUrl } from '../utils/image-utils';
+import { CardItem } from './card-item';
 
 type FolderCardProps = {
   name: string;
@@ -20,30 +21,16 @@ export const FolderCard: React.FC<FolderCardProps> = ({
   const coverUrl = thumbnailPath ? getImageUrl(thumbnailPath) : '';
 
   return (
-    <div 
-      className="group flex flex-col bg-card rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all cursor-pointer relative"
-      onClick={(e) => onClick(path, e)}
-      onAuxClick={(e) => {
-        if (e.button === 1) {
-          onClick(path, e);
-        }
-      }}
-    >
-      <div className="relative aspect-3/4 overflow-hidden bg-muted flex items-center justify-center">
-        {coverUrl ? (
-          <img 
-            src={coverUrl} 
-            alt={name} 
-            className="w-full h-full object-cover transition-transform group-hover:scale-105 opacity-60 group-hover:opacity-80"
-            loading="lazy"
-          />
-        ) : null}
-        
-        <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors pointer-events-none" />
-
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center">
-          <RxArchive size={48} className="text-blue-500 drop-shadow-md" />
-          <span className="font-bold text-lg text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] line-clamp-3">
+    <CardItem
+      title={name}
+      imageUrl={coverUrl}
+      onOpen={(e) => onClick(path, e)}
+      imageClassName="opacity-60 group-hover:opacity-80"
+      fallbackIcon={<RxArchive size={48} className="text-blue-500 drop-shadow-md" />}
+      subtitle={
+        <div className="flex flex-col gap-1 items-center justify-center absolute inset-0 pointer-events-none">
+           <RxArchive size={48} className="text-blue-500 drop-shadow-md" />
+           <span className="font-bold text-lg text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] line-clamp-3 text-center px-4">
             {name}
           </span>
           {comicCount > 0 && (
@@ -52,7 +39,7 @@ export const FolderCard: React.FC<FolderCardProps> = ({
             </span>
           )}
         </div>
-      </div>
-    </div>
+      }
+    />
   );
 };

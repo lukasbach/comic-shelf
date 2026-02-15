@@ -25,6 +25,26 @@ export const getGalleryById = async (id: number): Promise<Gallery | null> => {
   return results.length > 0 ? results[0] : null;
 };
 
+export const toggleGalleryFavorite = async (id: number): Promise<void> => {
+  const db = await getDb();
+  await db.execute(`UPDATE galleries SET is_favorite = NOT is_favorite WHERE id = $1`, [id]);
+};
+
+export const incrementGalleryViewCount = async (id: number): Promise<void> => {
+  const db = await getDb();
+  await db.execute(`UPDATE galleries SET view_count = view_count + 1, is_viewed = 1 WHERE id = $1`, [id]);
+};
+
+export const decrementGalleryViewCount = async (id: number): Promise<void> => {
+  const db = await getDb();
+  await db.execute(`UPDATE galleries SET view_count = MAX(0, view_count - 1) WHERE id = $1`, [id]);
+};
+
+export const toggleGalleryViewed = async (id: number): Promise<void> => {
+  const db = await getDb();
+  await db.execute(`UPDATE galleries SET is_viewed = NOT is_viewed WHERE id = $1`, [id]);
+};
+
 export const getGalleryPages = async (galleryId: number): Promise<ComicPage[]> => {
   const db = await getDb();
   return await db.select<ComicPage[]>(`

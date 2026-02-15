@@ -1,56 +1,162 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Gallery } from '../types/gallery';
-import { RxLayers, RxTrash, RxPencil1 } from 'react-icons/rx';
+import { RxLayers, RxTrash, RxPencil1, RxEyeOpen, RxEyeClosed } from 'react-icons/rx';
+import { CardItem } from './card-item';
+import { ComicContextMenu, ComicDropdownMenu } from './comic-context-menu';
+import { FavoriteButton } from './favorite-button';
+import { ViewCounter } from './view-counter';
+import * as galleryService from '../services/gallery-service';
 
 interface GalleryCardProps {
   gallery: Gallery;
   onClick: () => void;
   onDelete?: () => void;
   onRename?: () => void;
+  onUpdate?: () => void;
 }
 
-export const GalleryCard: React.FC<GalleryCardProps> = ({ gallery, onClick, onDelete, onRename }) => {
-  return (
-    <div 
-      className="group relative bg-slate-900 rounded-xl overflow-hidden border border-slate-800 hover:border-pink-500/50 transition-all cursor-pointer aspect-3/4 flex flex-col shadow-lg hover:shadow-pink-900/10"
-      onClick={onClick}
-    >
-      {/* Stack Effect Placeholder */}
-      <div className="flex-1 bg-slate-800 flex items-center justify-center relative">
-        <RxLayers size={48} className="text-slate-700 group-hover:text-pink-500/50 transition-colors" />
-        
-        {/* Info Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent flex flex-col justify-end p-4">
-          <h3 className="text-sm font-bold text-slate-100 truncate group-hover:text-pink-400 transition-colors" title={gallery.name}>
-            {gallery.name}
-          </h3>
-          <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-tight">
-             <span>{gallery.page_count} Pages</span>
-          </div>
-        </div>
-      </div>
+export const GalleryCard: React.FC<GalleryCardProps> = ({ gallery, onClick, onDelete, onRename, onUpdate }) => {
+  const [isFavorite, setIsFavorite] = useState(gallery.is_favorite === 1);
+  const [isViewed, setIsViewed] = useState(gallery.is_viewed === 1);
+  const [viewCount, setViewCount] = useState(gallery.view_count || 0);
 
-      {/* Quick Actions */}
-      <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-        {onRename && (
+  const handleToggleFavorite = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    try {
+      setIsFavorite(!isFavorite);
+      await galleryService.toggleGalleryFavorite(gallery.id);
+      onUpdate?.();
+    } catch (error) {
+      console.error('Failed to toggle gallery favorite:', error);
+      setIsFavorite(isFavorite);
+    }
+  };
+
+  const handleToggleViewed = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    try {
+      setIsViewed(!isViewed);
+      await galleryService.toggleGalleryViewed(gallery.id);
+      onUpdate?.();
+    } catch (error) {
+      console.error('Failed to toggle gallery viewed:', error);
+      setIsViewed(isViewed);
+    }
+  };
+
+  const handleIncrementViewCount = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    try {
+      setViewCount(viewCount + 1);
+      await galleryService.incrementGalleryViewCount(gallery.id);
+      onUpdate?.();
+    } catch (error) {
+      console.error('Failed to increment gallery view count:', error);
+      setViewCount(viewCount);
+    }
+  };
+
+  const handleDecrementViewCount = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    try {
+      setViewCount(Math.max(0, viewCount - 1));
+      await galleryService.decrementGalleryViewCount(gallery.id);
+      onUpdate?.();
+    } catch (error) {
+      console.error('Failed to decrement gallery view count:', error);
+      setViewCount(viewCount);
+    }
+  };
+
+  const extraItems = (
+    <>
+      {onRename && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onRename(); }}
+          className="flex items-center gap-2 px-2 py-1.5 text-sm outline-none cursor-default hover:bg-gray-100 dark:hover:bg-gray-800 rounded-sm transition-colors text-gray-700 dark:text-gray-200 w-full"
+        >
+          <RxPencil1 className="w-4 h-4" />
+          <span>Rename Gallery</span>
+        </button>
+      )}
+      {onDelete && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          className="flex items-center gap-2 px-2 py-1.5 text-sm outline-none cursor-default hover:bg-red-100 dark:hover:bg-red-900/30 rounded-sm transition-colors text-red-600 dark:text-red-400 w-full"
+        >
+          <RxTrash className="w-4 h-4" />
+          <span>Delete Gallery</span>
+        </button>
+      )}
+    </>
+  );
+
+  return (
+    <CardItem
+      title={gallery.name}
+      onOpen={onClick}
+      fallbackIcon={<RxLayers size={48} className="text-slate-700 group-hover:text-pink-500/50 transition-colors" />}
+      footer={
+        <div className="flex items-center justify-between w-full text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-tight">
+          <span>{gallery.page_count} Pages</span>
+        </div>
+      }
+      topRightIcons={
+        <div className="flex flex-row-reverse items-center gap-1.5">
+          <FavoriteButton 
+            isFavorite={isFavorite} 
+            onToggle={handleToggleFavorite} 
+            size="sm"
+            className={`w-7 h-7 bg-black/60 backdrop-blur-md rounded-full text-white shadow-lg transition-all ${isFavorite ? 'opacity-100 scale-100' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100'}`}
+          />
           <button
-            onClick={(e) => { e.stopPropagation(); onRename(); }}
-            className="p-1.5 bg-slate-900/80 hover:bg-blue-600 rounded-lg text-slate-200 transition-all border border-slate-700"
-            title="Rename Gallery"
+            onClick={handleToggleViewed}
+            className={`w-7 h-7 flex items-center justify-center bg-black/60 backdrop-blur-md rounded-full shadow-lg transition-all ${isViewed ? 'opacity-100 scale-100 text-blue-400' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 text-white'} hover:bg-black/80`}
           >
-            <RxPencil1 size={14} />
+            {isViewed ? <RxEyeOpen size={16} /> : <RxEyeClosed size={16} />}
           </button>
-        )}
-        {onDelete && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onDelete(); }}
-            className="p-1.5 bg-slate-900/80 hover:bg-red-600 rounded-lg text-slate-200 transition-all border border-slate-700"
-            title="Delete Gallery"
-          >
-            <RxTrash size={14} />
-          </button>
-        )}
-      </div>
-    </div>
+          <ComicDropdownMenu 
+            gallery={gallery}
+            isFavorite={isFavorite}
+            setIsFavorite={setIsFavorite}
+            isViewed={isViewed}
+            setIsViewed={setIsViewed}
+            viewCount={viewCount}
+            setViewCount={setViewCount}
+            onToggleFavorite={handleToggleFavorite}
+            onToggleViewed={handleToggleViewed}
+            onIncrementViewCount={handleIncrementViewCount}
+            onDecrementViewCount={handleDecrementViewCount}
+            extraItems={extraItems}
+            className="w-7 h-7 bg-black/60 backdrop-blur-md rounded-full text-white shadow-lg opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all hover:bg-black/90"
+          />
+        </div>
+      }
+      bottomLeftIcons={
+        <ViewCounter 
+          count={viewCount} 
+          onIncrement={handleIncrementViewCount} 
+          size="sm"
+        />
+      }
+      contextMenu={(children) => (
+        <ComicContextMenu 
+          gallery={gallery}
+          isFavorite={isFavorite}
+          setIsFavorite={setIsFavorite}
+          isViewed={isViewed}
+          setIsViewed={setIsViewed}
+          viewCount={viewCount}
+          setViewCount={setViewCount}
+          onToggleFavorite={handleToggleFavorite}
+          onToggleViewed={handleToggleViewed}
+          onIncrementViewCount={handleIncrementViewCount}
+          onDecrementViewCount={handleDecrementViewCount}
+          extraItems={extraItems}
+        >
+          {children}
+        </ComicContextMenu>
+      )}
+    />
   );
 };

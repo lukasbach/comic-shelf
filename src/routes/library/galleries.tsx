@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 import { useGalleries } from '../../hooks/use-galleries';
 import { GalleryCard } from '../../components/gallery-card';
-import { VirtualizedGrid } from '../../components/virtualized-grid';
+import { GridView } from '../../components/grid-view';
 import { useSettings } from '../../contexts/settings-context';
 import { RxSymbol, RxPlus, RxMagnifyingGlass, RxArrowDown, RxArrowUp, RxLayers } from 'react-icons/rx';
 import * as galleryService from '../../services/gallery-service';
@@ -185,23 +185,26 @@ function GalleriesPage() {
       <div className="flex-1 min-h-0 relative">
         {loading ? (
           <div className="flex items-center justify-center h-full">
-            <RxSymbol className="animate-spin text-pink-500" size={32} />
+            <RxSymbol className="animate-spin text-primary" size={32} />
           </div>
         ) : filteredAndSortedGalleries.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-slate-500">
+          <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8 text-center">
             <RxLayers size={48} className="mb-4 opacity-20" />
-            <p className="text-lg">No galleries found</p>
+            <p className="text-lg font-semibold">No galleries found</p>
             {searchQuery && <p className="text-sm">Try adjusting your search</p>}
           </div>
         ) : (
-          <VirtualizedGrid
+          <GridView
             items={filteredAndSortedGalleries}
+            padding={24}
             renderItem={(g) => (
               <GalleryCard
+                key={g.id}
                 gallery={g}
                 onClick={() => navigate({ to: `/viewer/gallery-${g.id}` as any })}
                 onDelete={() => handleDeleteGallery(g.id, g.name)}
                 onRename={() => handleRenameGallery(g.id, g.name)}
+                onUpdate={refresh}
               />
             )}
           />

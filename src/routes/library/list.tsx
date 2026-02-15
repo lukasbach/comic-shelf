@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useMemo } from 'react';
-import { VirtualizedGrid } from '../../components/virtualized-grid';
+import { GridView } from '../../components/grid-view';
 import { ComicCard } from '../../components/comic-card';
 import { useComics } from '../../hooks/use-comics';
 import { useOpenComic } from '../../hooks/use-open-comic';
@@ -220,7 +220,7 @@ function LibraryList() {
 
       <div className="flex-1 overflow-hidden">
         {filteredAndSortedComics.length > 0 ? (
-          <VirtualizedGrid
+          <GridView
             items={filteredAndSortedComics}
             renderItem={(comic) => (
               <ComicCard key={comic.id} comic={comic} onOpen={openComic} />

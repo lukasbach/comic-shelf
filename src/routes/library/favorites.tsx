@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { VirtualizedGrid } from '../../components/virtualized-grid';
+import { GridView } from '../../components/grid-view';
 import { ComicCard } from '../../components/comic-card';
-import { FavoriteImageCard } from '../../components/favorite-image-card';
+import { PageCard } from '../../components/page-card';
 import { useFavoriteComics } from '../../hooks/use-favorite-comics';
 import { useFavoritePages } from '../../hooks/use-favorite-pages';
 import { useOpenComic } from '../../hooks/use-open-comic';
@@ -22,8 +22,8 @@ export const Route = createFileRoute('/library/favorites')({
 function LibraryFavorites() {
   const { tab: activeTab } = Route.useSearch();
   const navigate = useNavigate();
-  const { comics: favoriteComics, loading: loadingComics } = useFavoriteComics();
-  const { pages: favoritePages, loading: loadingPages } = useFavoritePages();
+  const { comics: favoriteComics, loading: loadingComics, refresh: refreshComics } = useFavoriteComics();
+  const { pages: favoritePages, loading: loadingPages, refresh: refreshPages } = useFavoritePages();
   const openComic = useOpenComic();
   const openComicPage = useOpenComicPage();
 
@@ -52,7 +52,7 @@ function LibraryFavorites() {
 
   useEffect(() => {
     if (!loadingComics && !loadingPages) {
-      if (favoriteComics.length === 0 && favoritePages.length > 0) {
+      if (favoriteComics.length === 0 && favoritePages.length > 0 && activeTab === 'comics') {
         setActiveTab('pages');
       }
     }
@@ -80,54 +80,46 @@ function LibraryFavorites() {
   }
 
   return (
-    <div className="flex flex-col h-full gap-6 p-6 overflow-hidden">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex items-center justify-between p-6 pb-4">
         <h1 className="text-2xl font-bold">Favorites</h1>
       </div>
 
-      <Tabs 
-        items={tabItems} 
-        activeId={activeTab} 
-        onChange={(id) => setActiveTab(id)} 
-      />
-
-      <div className="flex-1 overflow-hidden">
-        {activeTab === 'comics' ? (
-          <div className="h-full">
-            {favoriteComics.length > 0 ? (
-              <VirtualizedGrid
-                items={favoriteComics}
-                renderItem={(comic) => (
-                  <ComicCard key={comic.id} comic={comic} onOpen={openComic} />
-                )}
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                <p>No favorite comics yet.</p>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="h-full">
-            {favoritePages.length > 0 ? (
-              <VirtualizedGrid
-                items={favoritePages}
-                renderItem={(page) => (
-                  <FavoriteImageCard 
-                    key={page.id} 
-                    page={page} 
-                    onOpen={openComicPage} 
-                  />
-                )}
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                <p>No favorite pages yet.</p>
-              </div>
-            )}
-          </div>
-        )}
+      <div className="px-6 mb-2">
+        <Tabs 
+          items={tabItems} 
+          activeId={activeTab} 
+          onChange={(id) => setActiveTab(id)} 
+        />
       </div>
+
+      {activeTab === 'comics' ? (
+        <GridView
+          items={favoriteComics}
+          renderItem={(comic) => (
+            <ComicCard 
+              key={comic.id} 
+              comic={comic} 
+              onOpen={openComic} 
+              onUpdate={refreshComics}
+            />
+          )}
+          emptyMessage="No favorite comics yet."
+        />
+      ) : (
+        <GridView
+          items={favoritePages}
+          renderItem={(page) => (
+            <PageCard 
+              key={page.id} 
+              page={page as any} 
+              onOpen={openComicPage} 
+              onUpdate={refreshPages}
+            />
+          )}
+          emptyMessage="No favorite pages yet."
+        />
+      )}
     </div>
   );
 }

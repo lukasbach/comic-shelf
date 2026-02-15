@@ -3,7 +3,7 @@ import { Comic, ComicPage } from '../../types/comic';
 import { PageThumbnail } from './page-thumbnail';
 import { useTabs } from '../../contexts/tab-context';
 import { Tab } from '../../stores/tab-store';
-import { VirtualizedGrid } from '../virtualized-grid';
+import { GridView } from '../grid-view';
 import { useSettings } from '../../contexts/settings-context';
 
 type OverviewModeProps = {
@@ -50,7 +50,7 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
 
   return (
     <div className="h-full overflow-hidden">
-      <VirtualizedGrid
+      <GridView
         items={pages}
         itemHeight={300} // Pages thumbnails are usually smaller
         padding={24}

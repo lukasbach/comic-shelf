@@ -6,7 +6,7 @@ import { useIndexing } from '../../contexts/indexing-context';
 import { useOpenComic } from '../../hooks/use-open-comic';
 import { useTabs } from '../../contexts/tab-context';
 import { RxSymbol, RxPlus, RxArchive } from 'react-icons/rx';
-import { VirtualizedGrid } from '../../components/virtualized-grid';
+import { GridView } from '../../components/grid-view';
 import { ComicCard } from '../../components/comic-card';
 import { FolderCard } from '../../components/folder-card';
 import { normalizePath, naturalSortComparator } from '../../utils/image-utils';
@@ -188,7 +188,7 @@ function LibraryExplorer() {
             No items found.
           </div>
         ) : (
-          <VirtualizedGrid
+          <GridView
             items={currentItems}
             padding={24}
             renderItem={(item) => (

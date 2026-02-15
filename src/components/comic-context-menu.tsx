@@ -21,9 +21,13 @@ import { useOpenComicPage } from '../hooks/use-open-comic-page';
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 
+import { Gallery } from '../types/gallery';
+import * as galleryService from '../services/gallery-service';
+
 export interface ComicMenuProps {
   comic?: Comic;
   page?: ComicPage;
+  gallery?: Gallery;
   onOpen?: () => void;
   // State for optimistic updates if provided
   isFavorite?: boolean;
@@ -38,11 +42,14 @@ export interface ComicMenuProps {
   onIncrementViewCount?: () => void;
   onDecrementViewCount?: () => void;
   onUpdate?: () => void;
+  // Extra items
+  extraItems?: React.ReactNode;
 }
 
 const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({ 
   comic, 
   page, 
+  gallery,
   onOpen,
   isFavorite: controlledIsFavorite,
   setIsFavorite: controlledSetIsFavorite,
@@ -55,18 +62,32 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
   onIncrementViewCount: manualIncrement,
   onDecrementViewCount: manualDecrement,
   onUpdate,
-  isDropdown = false
+  isDropdown = false,
+  extraItems
 }) => {
   const openComic = useOpenComic();
   const openComicPage = useOpenComicPage();
 
-  const id = comic?.id || page?.comic_id;
+  const id = comic?.id || page?.comic_id || gallery?.id;
   const path = comic?.path || page?.file_path;
   const isComic = !!comic;
+  const isGallery = !!gallery;
   
-  const [localIsFavorite, setLocalIsFavorite] = useState(isComic ? comic?.is_favorite === 1 : page?.is_favorite === 1);
-  const [localIsViewed, setLocalIsViewed] = useState(isComic ? comic?.is_viewed === 1 : page?.is_viewed === 1);
-  const [localViewCount, setLocalViewCount] = useState(isComic ? comic?.view_count : page?.view_count || 0);
+  const [localIsFavorite, setLocalIsFavorite] = useState(
+    isComic ? comic?.is_favorite === 1 : 
+    isGallery ? gallery?.is_favorite === 1 : 
+    page?.is_favorite === 1
+  );
+  const [localIsViewed, setLocalIsViewed] = useState(
+    isComic ? comic?.is_viewed === 1 : 
+    isGallery ? gallery?.is_viewed === 1 : 
+    page?.is_viewed === 1
+  );
+  const [localViewCount, setLocalViewCount] = useState(
+    isComic ? comic?.view_count : 
+    isGallery ? gallery?.view_count : 
+    page?.view_count || 0
+  );
 
   const fav = controlledIsFavorite ?? localIsFavorite;
   const setFav = controlledSetIsFavorite ?? setLocalIsFavorite;
@@ -102,6 +123,8 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
         path: (page as any).comic_path
       } : undefined;
       openComicPage(page.comic_id, page.page_number, { ctrlKey: true } as any, comicInfo);
+    } else if (gallery) {
+      if (onOpen) onOpen();
     }
   };
 
@@ -110,6 +133,14 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
       console.warn('Cannot open in new window: No comic or page ID found');
       return;
     }
+
+    if (isGallery) {
+      // Galleries don't have a direct viewer URL exactly, but they might in the future.
+      // For now we just use the onOpen.
+      if (onOpen) onOpen();
+      return;
+    }
+
     const label = `viewer-${id}-${Date.now()}`;
     const url = `/viewer/${id}${!isComic && page ? `?page=${page.page_number}` : ''}`;
     
@@ -146,6 +177,15 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
             console.error('Failed to toggle favorite:', error);
             setFav(fav);
         }
+    } else if (isGallery && gallery) {
+        try {
+            setFav(!fav);
+            await galleryService.toggleGalleryFavorite(gallery.id);
+            onUpdate?.();
+        } catch (error) {
+            console.error('Failed to toggle gallery favorite:', error);
+            setFav(fav);
+        }
     } else if (page) {
         try {
             setFav(!fav);
@@ -172,6 +212,15 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
             console.error('Failed to toggle viewed:', error);
             setViewed(viewed);
         }
+    } else if (isGallery && gallery) {
+      try {
+          setViewed(!viewed);
+          await galleryService.toggleGalleryViewed(gallery.id);
+          onUpdate?.();
+      } catch (error) {
+          console.error('Failed to toggle gallery viewed:', error);
+          setViewed(viewed);
+      }
     } else if (page) {
         try {
             setViewed(!viewed);
@@ -198,6 +247,15 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
             console.error('Failed to increment view count:', error);
             setCount(count);
         }
+    } else if (isGallery && gallery) {
+      try {
+          setCount(count + 1);
+          await galleryService.incrementGalleryViewCount(gallery.id);
+          onUpdate?.();
+      } catch (error) {
+          console.error('Failed to increment gallery view count:', error);
+          setCount(count);
+      }
     } else if (page) {
         try {
             setCount(count + 1);
@@ -224,6 +282,15 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
             console.error('Failed to decrement view count:', error);
             setCount(count);
         }
+    } else if (isGallery && gallery) {
+      try {
+          setCount(Math.max(0, count - 1));
+          await galleryService.decrementGalleryViewCount(gallery.id);
+          onUpdate?.();
+      } catch (error) {
+          console.error('Failed to decrement gallery view count:', error);
+          setCount(count);
+      }
     } else if (page) {
         try {
             setCount(Math.max(0, count - 1));
@@ -254,14 +321,19 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
         <RxExternalLink className="w-4 h-4" />
         <span>Open</span>
       </MenuItem>
-      <MenuItem className={itemClass} onSelect={handleOpenInNewTab}>
-        <RxExternalLink className="w-4 h-4" />
-        <span>Open in new tab</span>
-      </MenuItem>
-      <MenuItem className={itemClass} onSelect={handleOpenInNewWindow}>
-        <RxOpenInNewWindow className="w-4 h-4" />
-        <span>Open in new window</span>
-      </MenuItem>
+      
+      {!isGallery && (
+        <>
+          <MenuItem className={itemClass} onSelect={handleOpenInNewTab}>
+            <RxExternalLink className="w-4 h-4" />
+            <span>Open in new tab</span>
+          </MenuItem>
+          <MenuItem className={itemClass} onSelect={handleOpenInNewWindow}>
+            <RxOpenInNewWindow className="w-4 h-4" />
+            <span>Open in new window</span>
+          </MenuItem>
+        </>
+      )}
       
       <MenuSeparator className={separatorClass} />
       
@@ -284,12 +356,22 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
         <span>{viewed ? 'Mark as unviewed' : 'Mark as viewed'}</span>
       </MenuItem>
       
-      <MenuSeparator className={separatorClass} />
-      
-      <MenuItem className={itemClass} onSelect={handleShowInExplorer}>
-        <RxArchive className="w-4 h-4" />
-        <span>Show in Explorer</span>
-      </MenuItem>
+      {extraItems && (
+        <>
+          <MenuSeparator className={separatorClass} />
+          {extraItems}
+        </>
+      )}
+
+      {path && (
+        <>
+          <MenuSeparator className={separatorClass} />
+          <MenuItem className={itemClass} onSelect={handleShowInExplorer}>
+            <RxArchive className="w-4 h-4" />
+            <span>Show in Explorer</span>
+          </MenuItem>
+        </>
+      )}
     </>
   );
 };

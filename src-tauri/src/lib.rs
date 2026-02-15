@@ -88,6 +88,13 @@ struct BuildIndexPayloadResult {
     errors: Vec<IndexingErrorPayload>,
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ScanResult {
+    candidates: Vec<ComicCandidate>,
+    errors: Vec<IndexingErrorPayload>,
+}
+
 #[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct IndexingProgressEventPayload {
@@ -188,15 +195,33 @@ fn is_image_entry_name(path: &str) -> bool {
     IMAGE_EXTENSIONS.iter().any(|ext| lower.ends_with(&format!(".{}", ext)))
 }
 
-fn walk_for_candidates(dir: &Path, out: &mut Vec<ComicCandidate>) -> Result<(), String> {
-    let entries = fs::read_dir(dir).map_err(|e| format!("Failed to read dir {}: {e}", dir.display()))?;
+fn walk_for_candidates(dir: &Path, out: &mut Vec<ComicCandidate>, errors: &mut Vec<IndexingErrorPayload>) {
+    let entries = match fs::read_dir(dir) {
+        Ok(e) => e,
+        Err(e) => {
+            errors.push(IndexingErrorPayload {
+                path: to_forward_slash_path(dir),
+                message: format!("Failed to read directory {}: {e}", dir.display()),
+            });
+            return;
+        }
+    };
     let mut contains_images = false;
 
     for entry in entries {
-        let entry = entry.map_err(|e| format!("Failed to read dir entry in {}: {e}", dir.display()))?;
+        let entry = match entry {
+            Ok(e) => e,
+            Err(e) => {
+                errors.push(IndexingErrorPayload {
+                    path: to_forward_slash_path(dir),
+                    message: format!("Failed to read directory entry in {}: {e}", dir.display()),
+                });
+                continue;
+            }
+        };
         let path = entry.path();
         if path.is_dir() {
-            walk_for_candidates(&path, out)?;
+            walk_for_candidates(&path, out, errors);
             continue;
         }
 
@@ -241,8 +266,6 @@ fn walk_for_candidates(dir: &Path, out: &mut Vec<ComicCandidate>) -> Result<(), 
             source_type: "image".to_string(),
         });
     }
-
-    Ok(())
 }
 
 fn ensure_thumb_dir(app: &AppHandle) -> Result<PathBuf, String> {
@@ -664,7 +687,9 @@ fn build_index_payload_for_path_impl(
         "[Indexing][Rust] Starting payload build for base path '{}' with pattern '{}'",
         base_path, pattern
     );
-    let candidates = scan_comic_candidates(base_path.to_string())?;
+    let scan_result = scan_comic_candidates(base_path.to_string())?;
+    let candidates = scan_result.candidates;
+    let mut errors = scan_result.errors;
     let total_candidates = candidates.len();
     println!(
         "[Indexing][Rust] Found {} candidate comics in '{}'",
@@ -674,7 +699,6 @@ fn build_index_payload_for_path_impl(
     let base_path_buf = PathBuf::from(base_path);
     let mut comics = Vec::new();
     let mut active_comic_paths = Vec::new();
-    let mut errors = Vec::new();
 
     for (index, candidate) in candidates.into_iter().enumerate() {
         let comic_path = candidate.path.clone();
@@ -859,16 +883,17 @@ fn write_resized_thumbnail_bytes(bytes: &[u8], target_path: &Path) -> Result<(),
 }
 
 #[tauri::command]
-fn scan_comic_candidates(base_path: String) -> Result<Vec<ComicCandidate>, String> {
+fn scan_comic_candidates(base_path: String) -> Result<ScanResult, String> {
     let base = PathBuf::from(base_path);
     if !base.exists() || !base.is_dir() {
         return Err(format!("Base path is not a readable directory: {}", base.display()));
     }
 
     let mut candidates = Vec::new();
-    walk_for_candidates(&base, &mut candidates)?;
+    let mut errors = Vec::new();
+    walk_for_candidates(&base, &mut candidates, &mut errors);
     candidates.sort_by(|a, b| natural_cmp(&a.path, &b.path));
-    Ok(candidates)
+    Ok(ScanResult { candidates, errors })
 }
 
 #[tauri::command]
@@ -1273,6 +1298,16 @@ fn get_migrations() -> Vec<Migration> {
                     FOREIGN KEY (comic_page_id) REFERENCES comic_pages(id) ON DELETE CASCADE,
                     UNIQUE(gallery_id, comic_page_id)
                 );
+            ",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 8,
+            description: "add_gallery_favorite_and_view_count",
+            sql: "
+                ALTER TABLE galleries ADD COLUMN is_favorite INTEGER NOT NULL DEFAULT 0;
+                ALTER TABLE galleries ADD COLUMN view_count INTEGER NOT NULL DEFAULT 0;
+                ALTER TABLE galleries ADD COLUMN is_viewed INTEGER NOT NULL DEFAULT 0;
             ",
             kind: MigrationKind::Up,
         },

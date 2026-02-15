@@ -51,8 +51,13 @@ export type RustIndexingProgressEvent = {
   currentTask: string;
 };
 
-export const scanComicCandidates = async (basePath: string): Promise<ComicCandidate[]> => {
-  return await invoke<ComicCandidate[]>('scan_comic_candidates', { basePath });
+export type ScanResult = {
+  candidates: ComicCandidate[];
+  errors: { path: string; message: string }[];
+};
+
+export const scanComicCandidates = async (basePath: string): Promise<ScanResult> => {
+  return await invoke<ScanResult>('scan_comic_candidates', { basePath });
 };
 
 export const buildIndexPayloadForPath = async (

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Comic } from '../../types/comic';
-import { RxGrid, RxFile, RxRows, RxPlay, RxStop } from 'react-icons/rx';
+import { RxGrid, RxFile, RxRows, RxPlay, RxStop, RxBookmark, RxBookmarkFilled, RxTrash } from 'react-icons/rx';
 import { FavoriteButton } from '../favorite-button';
 import { ViewCounter } from '../view-counter';
 import { ComicContextMenu } from '../comic-context-menu';
@@ -15,6 +15,10 @@ type ViewerHeaderProps = {
   onToggleFavorite: () => void;
   onIncrementViewCount: () => void;
   onDecrementViewCount: () => void;
+  onSetBookmark?: () => void;
+  onJumpToBookmark?: () => void;
+  onClearBookmark?: () => void;
+  currentPage?: number;
 };
 
 export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
@@ -27,7 +31,13 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
   onToggleFavorite,
   onIncrementViewCount,
   onDecrementViewCount,
+  onSetBookmark,
+  onJumpToBookmark,
+  onClearBookmark,
+  currentPage,
 }) => {
+  const isBookmarkedOnCurrentPage = comic.bookmark_page === currentPage;
+
   return (
     <ComicContextMenu
       comic={comic}
@@ -57,9 +67,43 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
               size="sm"
             />
           </div>
+          {comic.bookmark_page !== null && (
+            <div className="flex items-center gap-1 border-l border-gray-200 dark:border-gray-800 ml-2 pl-3">
+              <button
+                onClick={onJumpToBookmark}
+                className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors"
+                title={`Jump to bookmarked page ${comic.bookmark_page + 1}`}
+              >
+                <RxBookmarkFilled className="w-3 h-3" />
+                P{comic.bookmark_page + 1}
+              </button>
+              <button
+                onClick={onClearBookmark}
+                className="p-1 rounded text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                title="Clear Bookmark"
+              >
+                <RxTrash className="w-3 h-3" />
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
+          {onSetBookmark && currentMode !== 'overview' && currentPage !== undefined && (
+            <button
+              onClick={onSetBookmark}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                isBookmarkedOnCurrentPage
+                  ? 'bg-amber-500 text-white shadow-sm'
+                  : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700'
+              }`}
+              title={isBookmarkedOnCurrentPage ? 'Bookmark Set Here' : 'Set Bookmark at Current Page'}
+            >
+              {isBookmarkedOnCurrentPage ? <RxBookmarkFilled className="w-4 h-4" /> : <RxBookmark className="w-4 h-4" />}
+              <span className="hidden md:inline">{isBookmarkedOnCurrentPage ? 'Bookmarked' : 'Set Bookmark'}</span>
+            </button>
+          )}
+
           {onToggleSlideshow && currentMode !== 'overview' && (
             <button
               onClick={onToggleSlideshow}

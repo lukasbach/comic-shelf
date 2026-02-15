@@ -94,6 +94,29 @@ export const updateComicLastOpened = async (id: number): Promise<void> => {
   window.dispatchEvent(new CustomEvent('comic-opened'));
 };
 
+export const setBookmark = async (id: number, pageNumber: number): Promise<void> => {
+  const db = await getDb();
+  await db.execute('UPDATE comics SET bookmark_page = $1, updated_at = datetime(\'now\') WHERE id = $2', [pageNumber, id]);
+  window.dispatchEvent(new CustomEvent('favorites-updated'));
+};
+
+export const clearBookmark = async (id: number): Promise<void> => {
+  const db = await getDb();
+  await db.execute('UPDATE comics SET bookmark_page = NULL, updated_at = datetime(\'now\') WHERE id = $1', [id]);
+  window.dispatchEvent(new CustomEvent('favorites-updated'));
+};
+
+export const getBookmarkedComics = async (): Promise<Comic[]> => {
+  const db = await getDb();
+  return await db.select<Comic[]>(`
+    SELECT c.*, p.thumbnail_path 
+    FROM comics c 
+    LEFT JOIN comic_pages p ON c.id = p.comic_id AND p.page_number = 1
+    WHERE c.bookmark_page IS NOT NULL
+    ORDER BY c.updated_at DESC
+  `);
+};
+
 export const getFavoriteComics = async (): Promise<Comic[]> => {
   const db = await getDb();
   return await db.select<Comic[]>(`

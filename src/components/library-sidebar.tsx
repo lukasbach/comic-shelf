@@ -7,6 +7,7 @@ import {
   RxStar,
   RxFileText,
   RxCounterClockwiseClock,
+  RxBookmark,
   RxPlus
 } from 'react-icons/rx'
 import { useTabs } from '../contexts/tab-context'
@@ -14,6 +15,7 @@ import { useIndexing } from '../contexts/indexing-context'
 import { useIndexPaths } from '../hooks/use-index-paths'
 import { IndexingStatus } from './indexing-status'
 import { useFavoriteComics } from '../hooks/use-favorite-comics'
+import { useBookmarkedComics } from '../hooks/use-bookmarked-comics'
 import { useRecentlyOpened } from '../hooks/use-recently-opened'
 import { useOpenComic } from '../hooks/use-open-comic'
 import { useOpenComicPage } from '../hooks/use-open-comic-page'
@@ -105,6 +107,7 @@ const navItems = [
 export function LibrarySidebar() {
   const { openLibraryTab } = useTabs()
   const { comics: favoriteComics, refetch: refetchFavorites } = useFavoriteComics()
+  const { comics: bookmarkedComics } = useBookmarkedComics()
   const { comics: recentComics, pages: recentPages, refetch: refetchRecent } = useRecentlyOpened(6)
   const { refresh: refreshPaths } = useIndexPaths()
   const { startIndexing } = useIndexing()
@@ -134,6 +137,7 @@ export function LibrarySidebar() {
   const handleUpdate = () => {
     refetchFavorites()
     refetchRecent()
+    // Bookmarks refresh automatically via custom event listener if we didn't export refetch
   }
 
   return (
@@ -171,6 +175,35 @@ export function LibrarySidebar() {
           <RxPlus className="w-5 h-5 shrink-0" />
           Add Folder
         </button>
+
+        {bookmarkedComics.length > 0 && (
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-800 mt-4">
+            <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+              <RxBookmark className="w-3.5 h-3.5" />
+              Bookmarks
+            </div>
+            <div className="grid grid-cols-3 gap-2 px-2 mt-1 pb-4">
+              {bookmarkedComics.slice(0, 6).map((comic) => (
+                <SmallCard
+                  key={`bookmark-${comic.id}`}
+                  comic={comic}
+                  title={comic.title}
+                  thumbnail={comic.thumbnail_path}
+                  isActive={location.pathname === `/viewer/${comic.id}`}
+                  subBadge={comic.bookmark_page !== null ? `P${comic.bookmark_page + 1}` : undefined}
+                  onClick={(e) => {
+                    if (comic.bookmark_page !== null) {
+                      openComicPage(comic.id, comic.bookmark_page + 1, e)
+                    } else {
+                      openComic(comic, e)
+                    }
+                  }}
+                  onUpdate={handleUpdate}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {favoriteComics.length > 0 && (
           <div className="pt-4 border-t border-gray-200 dark:border-gray-800 mt-4">

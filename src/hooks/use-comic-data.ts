@@ -151,6 +151,26 @@ export const useComicData = (comicId: number) => {
     }
   }, []);
 
+  const setBookmark = useCallback(async (pageNumber: number) => {
+    if (!comic) return;
+    try {
+      setComic(prev => prev ? { ...prev, bookmark_page: pageNumber } : null);
+      await comicService.setBookmark(comic.id, pageNumber);
+    } catch (err) {
+      console.error('Failed to set bookmark:', err);
+    }
+  }, [comic]);
+
+  const clearBookmark = useCallback(async () => {
+    if (!comic) return;
+    try {
+      setComic(prev => prev ? { ...prev, bookmark_page: null } : null);
+      await comicService.clearBookmark(comic.id);
+    } catch (err) {
+      console.error('Failed to clear bookmark:', err);
+    }
+  }, [comic]);
+
   return { 
     comic, 
     pages, 
@@ -164,6 +184,8 @@ export const useComicData = (comicId: number) => {
     togglePageViewed,
     incrementPageViewCount,
     decrementPageViewCount,
-    markPageAsOpened
+    markPageAsOpened,
+    setBookmark,
+    clearBookmark
   };
 };

@@ -1112,6 +1112,14 @@ fn get_migrations() -> Vec<Migration> {
             ",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 5,
+            description: "add_bookmark_page",
+            sql: "
+                ALTER TABLE comics ADD COLUMN bookmark_page INTEGER;
+            ",
+            kind: MigrationKind::Up,
+        },
     ]
 }
 

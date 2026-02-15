@@ -34,6 +34,8 @@ function ComicViewerPage() {
   const { settings } = useSettings();
   const { scrollContainerRef } = useViewerRef();
   const activeTab = tabs.find((t: Tab) => t.id === activeTabId);
+  const [showBookmarkPrompt, setShowBookmarkPrompt] = React.useState(false);
+  const [promptHandled, setPromptHandled] = React.useState(false);
   
   // Default to overview if no mode is set in tab
   const viewMode = activeTab?.viewMode ?? 'overview';
@@ -49,8 +51,22 @@ function ComicViewerPage() {
     togglePageFavorite,
     incrementPageViewCount,
     decrementPageViewCount,
-    markPageAsOpened
+    markPageAsOpened,
+    setBookmark,
+    clearBookmark
   } = useComicData(Number(comicId));
+
+  // Show prompt if bookmark exists and not already handled or explicitly requested via search
+  useEffect(() => {
+    if (!loading && comic && comic.bookmark_page !== null && !promptHandled && search.page === undefined) {
+      // Check if current page is already at the bookmark or if we just opened this tab
+      // If currentPage is 0 (default) and we have a bookmark, show prompt
+      if (activeTab?.currentPage === 0) {
+        setShowBookmarkPrompt(true);
+      }
+      setPromptHandled(true);
+    }
+  }, [loading, comic, promptHandled, search.page, activeTab?.currentPage]);
 
   // Update page last opened timestamp
   useEffect(() => {
@@ -73,6 +89,27 @@ function ComicViewerPage() {
       }
     }
   }, [activeTabId, activeTab, pages.length]);
+
+  const handleJumpToBookmark = () => {
+    if (activeTabId && comic?.bookmark_page !== null) {
+      updateTab(activeTabId, { 
+        currentPage: comic.bookmark_page,
+        viewMode: 'single'
+      });
+      setShowBookmarkPrompt(false);
+    }
+  };
+
+  const handleClearBookmark = async () => {
+    await clearBookmark();
+    setShowBookmarkPrompt(false);
+  };
+
+  const handleSetBookmark = async () => {
+    if (activeTab && activeTab.currentPage !== undefined) {
+      await setBookmark(activeTab.currentPage);
+    }
+  };
 
   const slideshow = useSlideshow({
     delay: settings.slideshowDelay,
@@ -190,10 +227,45 @@ function ComicViewerPage() {
         onToggleFavorite={toggleComicFavorite}
         onIncrementViewCount={incrementComicViewCount}
         onDecrementViewCount={decrementComicViewCount}
+        onSetBookmark={handleSetBookmark}
+        onJumpToBookmark={handleJumpToBookmark}
+        onClearBookmark={handleClearBookmark}
+        currentPage={activeTab?.currentPage}
       />
       <div className="flex-1 overflow-hidden" ref={scrollContainerRef}>
         {renderContent()}
       </div>
+
+      {showBookmarkPrompt && (
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-sm w-full p-6 animate-in fade-in zoom-in duration-200">
+            <h3 className="text-lg font-bold mb-2">Continue reading?</h3>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
+              You have a bookmark on page {comic.bookmark_page! + 1}. Would you like to jump there?
+            </p>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleJumpToBookmark}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition-colors"
+              >
+                Jump to Page {comic.bookmark_page! + 1}
+              </button>
+              <button
+                onClick={() => setShowBookmarkPrompt(false)}
+                className="w-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 font-semibold py-2 px-4 rounded transition-colors"
+              >
+                Start from Beginning
+              </button>
+              <button
+                onClick={handleClearBookmark}
+                className="w-full text-red-600 dark:text-red-400 text-sm py-2 hover:underline"
+              >
+                Clear Bookmark
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <SlideshowIndicator 
         isActive={slideshow.isActive}

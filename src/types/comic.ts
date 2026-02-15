@@ -14,6 +14,7 @@ export type Comic = {
   created_at: string;
   updated_at: string;
   last_opened_at: string | null;
+  bookmark_page: number | null;
   thumbnail_path?: string | null;
 };
 

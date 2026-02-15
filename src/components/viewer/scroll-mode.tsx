@@ -137,6 +137,8 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
     }
   };
 
+  const currentPageData = pages[currentPage];
+
   return (
     <div className="flex h-full w-full overflow-hidden bg-gray-50 dark:bg-gray-950">
       <div className="flex-1 flex flex-col min-w-0 relative">
@@ -168,15 +170,18 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
           </div>
         </div>
 
-        <ScrollPageIndicator 
-          currentPage={currentPage}
-          totalPages={pages.length}
-          isScrolling={isScrolling}
-        />
+        {isSidebarCollapsed && (
+          <ScrollPageIndicator 
+            currentPage={currentPage}
+            totalPages={pages.length}
+            isScrolling={isScrolling}
+          />
+        )}
       </div>
 
       <ViewerSidebar
         pages={pages}
+        page={currentPageData}
         currentPage={currentPage}
         onPageSelect={handleGoToPage}
         zoomLevel={zoomLevel}
@@ -187,6 +192,15 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
         onViewModeChange={handleModeChange}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={handleToggleSidebar}
+        isFavorite={currentPageData?.is_favorite === 1}
+        viewCount={currentPageData?.view_count}
+        onToggleFavorite={() => currentPageData && onTogglePageFavorite(currentPageData.id)}
+        onIncrementViewCount={() => currentPageData && onIncrementPageViewCount(currentPageData.id)}
+        onDecrementViewCount={() => currentPageData && onDecrementPageViewCount(currentPageData.id)}
+        isGallery={isGallery}
+        onRemoveFromGallery={() => currentPageData && onRemoveFromGallery?.(currentPageData.id)}
+        onAddToGallery={() => currentPageData && onAddToGallery?.(currentPageData.id)}
+        enableGalleries={settings.enableGalleries}
       />
     </div>
   );

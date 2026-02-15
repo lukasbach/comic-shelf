@@ -4,9 +4,12 @@ import {
     RxGrid, RxFile, RxRows,
     RxChevronLeft, RxChevronRight,
     RxDoubleArrowLeft, RxDoubleArrowRight,
-    RxStarFilled
+    RxStarFilled, RxLayers, RxCross2
 } from 'react-icons/rx';
 import { RenderedPageImage } from './rendered-page-image';
+import { FavoriteButton } from '../favorite-button';
+import { ViewCounter } from '../view-counter';
+import { ComicContextMenu } from '../comic-context-menu';
 
 type ViewerSidebarProps = {
   pages: ComicPage[];
@@ -20,6 +23,16 @@ type ViewerSidebarProps = {
   onViewModeChange: (mode: 'overview' | 'single' | 'scroll') => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  page?: ComicPage;
+  isFavorite?: boolean;
+  viewCount?: number;
+  onToggleFavorite?: () => void;
+  onIncrementViewCount?: () => void;
+  onDecrementViewCount?: () => void;
+  isGallery?: boolean;
+  onRemoveFromGallery?: () => void;
+  onAddToGallery?: () => void;
+  enableGalleries?: boolean;
 };
 
 export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
@@ -34,6 +47,16 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
   onViewModeChange,
   isCollapsed,
   onToggleCollapse,
+  page,
+  isFavorite = false,
+  viewCount = 0,
+  onToggleFavorite,
+  onIncrementViewCount,
+  onDecrementViewCount,
+  isGallery,
+  onRemoveFromGallery,
+  onAddToGallery,
+  enableGalleries,
 }) => {
   // Show next ~6 pages
   const upcomingPages = pages.slice(
@@ -179,8 +202,13 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
 
         {/* Navigation Buttons (Duplicate of bottom bar) */}
         <section>
-          <h4 className="text-xs font-bold mb-3 text-gray-400 uppercase">Navigation</h4>
-          <div className="flex gap-2">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-xs font-bold text-gray-400 uppercase">Navigation</h4>
+            <span className="text-xs font-medium text-gray-500">
+              Page {currentPage + 1} / {pages.length}
+            </span>
+          </div>
+          <div className="flex gap-2 mb-4">
             <button
               onClick={() => onPageSelect(currentPage - 1 < 0 ? pages.length - 1 : currentPage - 1)}
               className="flex-1 flex items-center justify-center gap-2 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-30 rounded transition-colors"
@@ -196,6 +224,57 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
               <RxChevronRight className="w-5 h-5" />
             </button>
           </div>
+
+          {(onToggleFavorite || onIncrementViewCount) && (
+            <div className="flex items-center justify-center py-2 border-t border-gray-100 dark:border-gray-900 pt-4">
+              <ComicContextMenu
+                page={page}
+                isFavorite={isFavorite}
+                viewCount={viewCount}
+                onToggleFavorite={onToggleFavorite}
+                onIncrementViewCount={onIncrementViewCount}
+                onDecrementViewCount={onDecrementViewCount}
+              >
+                <div className="flex items-center gap-6">
+                  {enableGalleries && (
+                    <>
+                      {isGallery ? (
+                        <button
+                          onClick={onRemoveFromGallery}
+                          className="p-1.5 bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white rounded-lg transition-all border border-red-500/30"
+                          title="Remove from Gallery"
+                        >
+                          <RxCross2 size={18} />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={onAddToGallery}
+                          className="p-1.5 bg-pink-600/10 text-pink-500 hover:bg-pink-600 hover:text-white rounded-lg transition-all border border-pink-500/30"
+                          title="Add to Gallery"
+                        >
+                          <RxLayers size={18} />
+                        </button>
+                      )}
+                    </>
+                  )}
+                  {onToggleFavorite && (
+                    <FavoriteButton 
+                      isFavorite={isFavorite} 
+                      onToggle={onToggleFavorite} 
+                      size="md"
+                    />
+                  )}
+                  {onIncrementViewCount && (
+                    <ViewCounter 
+                      count={viewCount} 
+                      onIncrement={onIncrementViewCount} 
+                      size="md"
+                    />
+                  )}
+                </div>
+              </ComicContextMenu>
+            </div>
+          )}
         </section>
 
         {/* Upcoming Pages */}

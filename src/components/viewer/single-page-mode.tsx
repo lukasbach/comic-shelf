@@ -125,25 +125,30 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
             containerRef={containerRef}
           />
         </div>
-        <PageNavigation
-          page={currentPageData}
-          currentPage={currentPage}
-          totalPages={pages.length}
-          onPrevPage={handlePrevPage}
-          onNextPage={handleNextPage}
-          onGoToPage={handleGoToPage}
-          isFavorite={currentPageData.is_favorite === 1}
-          viewCount={currentPageData.view_count}
-          onToggleFavorite={() => onTogglePageFavorite(currentPageData.id)}
-          onIncrementViewCount={() => onIncrementPageViewCount(currentPageData.id)}
-          onDecrementViewCount={() => onDecrementPageViewCount(currentPageData.id)}          isGallery={isGallery}
-          onRemoveFromGallery={() => onRemoveFromGallery?.(currentPageData.id)}
-          onAddToGallery={() => onAddToGallery?.(currentPageData.id)}
-          enableGalleries={settings.enableGalleries}        />
+        {isSidebarCollapsed && (
+          <PageNavigation
+            page={currentPageData}
+            currentPage={currentPage}
+            totalPages={pages.length}
+            onPrevPage={handlePrevPage}
+            onNextPage={handleNextPage}
+            onGoToPage={handleGoToPage}
+            isFavorite={currentPageData.is_favorite === 1}
+            viewCount={currentPageData.view_count}
+            onToggleFavorite={() => onTogglePageFavorite(currentPageData.id)}
+            onIncrementViewCount={() => onIncrementPageViewCount(currentPageData.id)}
+            onDecrementViewCount={() => onDecrementPageViewCount(currentPageData.id)}
+            isGallery={isGallery}
+            onRemoveFromGallery={() => onRemoveFromGallery?.(currentPageData.id)}
+            onAddToGallery={() => onAddToGallery?.(currentPageData.id)}
+            enableGalleries={settings.enableGalleries}
+          />
+        )}
       </div>
 
       <ViewerSidebar
         pages={pages}
+        page={currentPageData}
         currentPage={currentPage}
         onPageSelect={handleGoToPage}
         zoomLevel={zoomLevel}
@@ -154,6 +159,15 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
         onViewModeChange={handleModeChange}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={handleToggleSidebar}
+        isFavorite={currentPageData.is_favorite === 1}
+        viewCount={currentPageData.view_count}
+        onToggleFavorite={() => onTogglePageFavorite(currentPageData.id)}
+        onIncrementViewCount={() => onIncrementPageViewCount(currentPageData.id)}
+        onDecrementViewCount={() => onDecrementPageViewCount(currentPageData.id)}
+        isGallery={isGallery}
+        onRemoveFromGallery={() => onRemoveFromGallery?.(currentPageData.id)}
+        onAddToGallery={() => onAddToGallery?.(currentPageData.id)}
+        enableGalleries={settings.enableGalleries}
       />
     </div>
   );

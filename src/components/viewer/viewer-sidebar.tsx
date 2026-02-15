@@ -206,11 +206,11 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
           <section>
             <h4 className="text-xs font-bold mb-3 text-gray-400 uppercase">Up Next</h4>
             <div className="grid grid-cols-3 gap-2">
-              {upcomingPages.map((page) => (
+              {upcomingPages.map((page, i) => (
                 <button
                   key={page.id}
-                  onClick={() => onPageSelect(page.page_number - 1)}
-                  className="group relative aspect-3/4 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-800 hover:ring-2 hover:ring-blue-500 transition-all shadow-sm"
+                  onClick={() => onPageSelect(currentPage + 1 + i)}
+                  className="group relative aspect-3/4 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-900/50 hover:ring-2 hover:ring-blue-500 transition-all shadow-sm"
                   title={`Page ${page.page_number}`}
                 >
                   <RenderedPageImage

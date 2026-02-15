@@ -181,6 +181,15 @@ function ComicViewerPage() {
     }
   };
 
+  // Safety: Ensure currentPage is within bounds when pages load or change
+  useEffect(() => {
+    if (!loading && pages.length > 0 && activeTabId && activeTab) {
+      if (activeTab.currentPage !== undefined && activeTab.currentPage >= pages.length) {
+        updateTab(activeTabId, { currentPage: 0 });
+      }
+    }
+  }, [loading, pages.length, activeTabId, activeTab?.currentPage]);
+
   const toggleSlideshow = () => {
     if (activeTabId) {
       updateTab(activeTabId, { slideshowActive: !activeTab?.slideshowActive });

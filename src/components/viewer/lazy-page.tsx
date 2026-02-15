@@ -41,7 +41,10 @@ export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.Ref
         ([entry]) => {
           if (entry.isIntersecting) {
             setIsVisible(true);
-            if (onVisible) {
+            if (onVisible !== undefined) {
+              // We don't have the index here, and page_number is original comic page number.
+              // For now, we still use page_number - 1 but it's risky for galleries.
+              // However, current ScrollMode doesn't use onVisible, it uses its own tracker.
               onVisible(page.page_number - 1);
             }
           }

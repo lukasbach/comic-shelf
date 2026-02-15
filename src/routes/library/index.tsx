@@ -51,7 +51,7 @@ function LibraryExplorer() {
       });
       
       if (selected && typeof selected === 'string') {
-        await indexPathService.addIndexPath(selected, '{artist}/{series}/{issue}');
+        await indexPathService.addIndexPath(selected, '{author}/{series}');
         await refreshPaths();
         // Trigger indexing for new path
         startIndexing();

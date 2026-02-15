@@ -675,6 +675,7 @@ dependencies = [
  "lopdf",
  "num_cpus",
  "rayon",
+ "regex",
  "serde",
  "serde_json",
  "tauri",

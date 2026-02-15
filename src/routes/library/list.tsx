@@ -5,6 +5,7 @@ import { ComicCard } from '../../components/comic-card';
 import { useComics } from '../../hooks/use-comics';
 import { useOpenComic } from '../../hooks/use-open-comic';
 import { RxSymbol, RxArrowDown, RxArrowUp, RxMagnifyingGlass, RxEyeOpen, RxEyeClosed, RxStar, RxStarFilled } from 'react-icons/rx';
+import { naturalSortComparator } from '../../utils/image-utils';
 
 type SortKey = 'title' | 'artist' | 'date' | 'views' | 'path' | 'recent';
 type ViewFilter = 'all' | 'viewed' | 'not-viewed';
@@ -83,10 +84,10 @@ function LibraryList() {
       let comparison = 0;
       switch (sortKey) {
         case 'title':
-          comparison = a.title.localeCompare(b.title);
+          comparison = naturalSortComparator(a.title, b.title);
           break;
         case 'artist':
-          comparison = (a.artist || '').localeCompare(b.artist || '');
+          comparison = naturalSortComparator(a.artist || '', b.artist || '');
           break;
         case 'date':
           comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
@@ -95,7 +96,7 @@ function LibraryList() {
           comparison = a.view_count - b.view_count;
           break;
         case 'path':
-          comparison = a.path.localeCompare(b.path);
+          comparison = naturalSortComparator(a.path, b.path);
           break;
         case 'recent':
           const timeA = a.last_opened_at ? new Date(a.last_opened_at).getTime() : 0;

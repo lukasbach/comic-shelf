@@ -50,24 +50,68 @@ export const parsePattern = (pattern: string): string[] => {
   return matches ? matches.map((m) => m.slice(1, -1)) : [];
 };
 
-export const extractMetadata = (relativePath: string, pattern: string): Record<string, string | null> => {
-  const patternVars = parsePattern(pattern);
-  const patternSegments = pattern.split(/[\\/]/);
-  const pathSegments = normalizePath(relativePath).split('/');
+export const extractMetadata = (relativePath: string, pattern: string): Record<string, string | null> | null => {
+  const normalizedPath = normalizePath(relativePath);
+  const patternSegments = pattern.split(/[\\/]/).filter(s => s !== '');
 
-  const metadata: Record<string, string | null> = {};
-  patternVars.forEach((v) => {
-    metadata[v] = null;
-  });
+  const metadata: Record<string, string | null> = {
+    artist: null,
+    series: null,
+    issue: null,
+  };
 
-  patternSegments.forEach((segment, index) => {
-    const varMatch = segment.match(/^\{([^}]+)\}$/);
-    if (varMatch && pathSegments[index]) {
-      metadata[varMatch[1]] = pathSegments[index];
+  let regexStr = '^';
+  const placeholders: string[] = [];
+  const placeholderRegex = /\{([^}]+)\}/g;
+  let skipNextSlash = false;
+
+  for (let i = 0; i < patternSegments.length; i++) {
+    const segment = patternSegments[i];
+
+    if (i > 0 && !skipNextSlash) {
+      regexStr += '/';
     }
-  });
+    skipNextSlash = false;
 
-  return metadata;
+    if (segment === '**') {
+      if (i < patternSegments.length - 1) {
+        regexStr += '(?:.*/)?';
+        skipNextSlash = true;
+      } else {
+        regexStr += '.*';
+      }
+    } else {
+      let lastIdx = 0;
+      let match;
+      while ((match = placeholderRegex.exec(segment)) !== null) {
+        const literal = segment.substring(lastIdx, match.index);
+        regexStr += literal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        const varName = match[1];
+        const captureName = (varName === 'author' || varName === 'artist') ? 'artist' : varName;
+        placeholders.push(captureName);
+
+        regexStr += '([^/]+?)';
+        lastIdx = placeholderRegex.lastIndex;
+      }
+      regexStr += segment.substring(lastIdx).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+  }
+  regexStr += '$';
+
+  const re = new RegExp(regexStr);
+  const m = normalizedPath.match(re);
+
+  if (m) {
+    placeholders.forEach((name, idx) => {
+      if (name in metadata) {
+        metadata[name] = m[idx + 1];
+      }
+    });
+    return metadata;
+  }
+
+  return null;
 };
 
 const generatePdfFallbackThumbnails = async (

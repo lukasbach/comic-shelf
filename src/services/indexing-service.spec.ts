@@ -46,6 +46,51 @@ describe('indexing-service', () => {
     expect(metadata).toEqual({ artist: 'Artist', series: 'Series', issue: 'Issue' });
   });
 
+  it('should return null if pattern length does not match', () => {
+    const metadata = indexingService.extractMetadata('Artist/Series', '{artist}/{series}/{issue}');
+    expect(metadata).toBeNull();
+  });
+
+  it('should match literal segments in pattern', () => {
+    const metadata = indexingService.extractMetadata('Comics/Artist/Series', 'Comics/{artist}/{series}');
+    expect(metadata).toEqual({ artist: 'Artist', series: 'Series', issue: null });
+
+    const mismatch = indexingService.extractMetadata('Manga/Artist/Series', 'Comics/{artist}/{series}');
+    expect(mismatch).toBeNull();
+  });
+
+  it('should support ** wildcard for zero or more segments', () => {
+    const pattern = '{author}/**/{series}';
+    
+    // Zero segments for **
+    const direct = indexingService.extractMetadata('Artist/Series', pattern);
+    expect(direct).toEqual({ artist: 'Artist', series: 'Series', issue: null });
+
+    // One segment for **
+    const oneSub = indexingService.extractMetadata('Artist/Sub/Series', pattern);
+    expect(oneSub).toEqual({ artist: 'Artist', series: 'Series', issue: null });
+
+    // Multiple segments for **
+    const multiSub = indexingService.extractMetadata('Artist/a/b/c/Series', pattern);
+    expect(multiSub).toEqual({ artist: 'Artist', series: 'Series', issue: null });
+
+    // No match (missing series segment)
+    const noMatch = indexingService.extractMetadata('Artist', pattern);
+    expect(noMatch).toBeNull();
+  });
+
+  it('should support mixed literal and placeholders in segments', () => {
+    const metadata = indexingService.extractMetadata(
+      'Comix/Various-Authors-NaughtyComix-Endangered-Species',
+      'Comix/Various-Authors-{author}-{series}'
+    );
+    expect(metadata).toEqual({
+      artist: 'NaughtyComix',
+      series: 'Endangered-Species',
+      issue: null
+    });
+  });
+
   it('indexes image, pdf and archive candidates', async () => {
     const sourceFileService = await import('./source-file-service');
     const pageSourceUtils = await import('./page-source-utils');

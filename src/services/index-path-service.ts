@@ -15,6 +15,14 @@ export const addIndexPath = async (path: string, pattern: string): Promise<numbe
   return result.lastInsertId ?? 0;
 };
 
+export const updateIndexPath = async (id: number, pattern: string): Promise<void> => {
+  const db = await getDb();
+  await db.execute(
+    'UPDATE index_paths SET pattern = $1 WHERE id = $2',
+    [pattern, id]
+  );
+};
+
 export const removeIndexPath = async (id: number): Promise<void> => {
   const db = await getDb();
   await db.execute('DELETE FROM index_paths WHERE id = $1', [id]);

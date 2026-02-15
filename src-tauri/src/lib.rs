@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::cmp;
+use regex::Regex;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::{HashMap, HashSet};
 use std::fs;
@@ -134,7 +135,52 @@ fn is_pdf_file(path: &Path) -> bool {
 }
 
 fn natural_cmp(a: &str, b: &str) -> Ordering {
-    a.to_ascii_lowercase().cmp(&b.to_ascii_lowercase())
+    let mut a_chars = a.chars().peekable();
+    let mut b_chars = b.chars().peekable();
+
+    loop {
+        match (a_chars.peek(), b_chars.peek()) {
+            (Some(a_char), Some(b_char)) => {
+                if a_char.is_ascii_digit() && b_char.is_ascii_digit() {
+                    let mut a_num = 0u64;
+                    while let Some(&c) = a_chars.peek() {
+                        if let Some(digit) = c.to_digit(10) {
+                            a_num = a_num * 10 + digit as u64;
+                            a_chars.next();
+                        } else {
+                            break;
+                        }
+                    }
+
+                    let mut b_num = 0u64;
+                    while let Some(&c) = b_chars.peek() {
+                        if let Some(digit) = c.to_digit(10) {
+                            b_num = b_num * 10 + digit as u64;
+                            b_chars.next();
+                        } else {
+                            break;
+                        }
+                    }
+
+                    if a_num != b_num {
+                        return a_num.cmp(&b_num);
+                    }
+                } else {
+                    let a_c = a_chars.next().unwrap();
+                    let b_c = b_chars.next().unwrap();
+                    let a_lower = a_c.to_ascii_lowercase();
+                    let b_lower = b_c.to_ascii_lowercase();
+                    if a_lower != b_lower {
+                        return a_lower.cmp(&b_lower);
+                    }
+                }
+            }
+            (None, None) => break,
+            (None, Some(_)) => return Ordering::Less,
+            (Some(_), None) => return Ordering::Greater,
+        }
+    }
+    a.to_ascii_lowercase().cmp(&b.to_ascii_lowercase()).then_with(|| a.cmp(b))
 }
 
 fn is_image_entry_name(path: &str) -> bool {
@@ -318,25 +364,71 @@ fn get_relative_path(base_path: &Path, target_path: &Path) -> String {
     to_forward_slash_path(target_path)
 }
 
-fn extract_metadata(relative_path: &str, pattern: &str) -> PatternMetadata {
+fn extract_metadata(relative_path: &str, pattern: &str) -> Option<PatternMetadata> {
     let mut metadata = PatternMetadata::default();
-    let path_segments: Vec<&str> = relative_path.split('/').filter(|segment| !segment.is_empty()).collect();
-    let pattern_segments: Vec<&str> = pattern
-        .split(['/', '\\'])
+    let normalized_pattern = pattern.replace('\\', "/");
+    let segments: Vec<&str> = normalized_pattern
+        .split('/')
         .filter(|segment| !segment.is_empty())
         .collect();
 
-    for (index, pattern_segment) in pattern_segments.iter().enumerate() {
-        let value = path_segments.get(index).map(|s| s.to_string());
-        match *pattern_segment {
-            "{artist}" => metadata.artist = value,
-            "{series}" => metadata.series = value,
-            "{issue}" => metadata.issue = value,
-            _ => {}
+    let mut regex_str = String::from("^");
+    let mut skip_next_slash = false;
+    let mut capture_names = Vec::new();
+
+    for (i, segment) in segments.iter().enumerate() {
+        if i > 0 && !skip_next_slash {
+            regex_str.push('/');
+        }
+        skip_next_slash = false;
+
+        if *segment == "**" {
+            if i < segments.len() - 1 {
+                regex_str.push_str("(?:.*/)?");
+                skip_next_slash = true;
+            } else {
+                regex_str.push_str(".*");
+            }
+        } else {
+            let mut last_idx = 0;
+            for (start, _) in segment.match_indices('{') {
+                regex_str.push_str(&regex::escape(&segment[last_idx..start]));
+                if let Some(end_offset) = segment[start..].find('}') {
+                    let end = start + end_offset;
+                    let var_name = &segment[start + 1..end];
+                    let capture_name = match var_name {
+                        "artist" | "author" => "artist",
+                        "series" => "series",
+                        "issue" => "issue",
+                        _ => var_name,
+                    };
+                    regex_str.push_str("([^/]+?)");
+                    capture_names.push(capture_name);
+                    last_idx = end + 1;
+                }
+            }
+            regex_str.push_str(&regex::escape(&segment[last_idx..]));
+        }
+    }
+    regex_str.push('$');
+
+    if let Ok(re) = Regex::new(&regex_str) {
+        if let Some(caps) = re.captures(relative_path) {
+            for (i, name) in capture_names.iter().enumerate() {
+                if let Some(m) = caps.get(i + 1) {
+                    match *name {
+                        "artist" => metadata.artist = Some(m.as_str().to_string()),
+                        "series" => metadata.series = Some(m.as_str().to_string()),
+                        "issue" => metadata.issue = Some(m.as_str().to_string()),
+                        _ => {}
+                    }
+                }
+            }
+            return Some(metadata);
         }
     }
 
-    metadata
+    None
 }
 
 fn list_image_pages_internal(comic_dir: &Path) -> Result<Vec<ImagePageEntry>, String> {
@@ -603,7 +695,16 @@ fn build_index_payload_for_path_impl(
             candidate.source_type
         );
         let relative_path = get_relative_path(&base_path_buf, Path::new(&comic_path));
-        let metadata = extract_metadata(&relative_path, pattern);
+        let metadata = match extract_metadata(&relative_path, pattern) {
+            Some(m) => m,
+            None => {
+                println!(
+                    "[Indexing][Rust] Skipping '{}' (does not match pattern '{}')",
+                    comic_path, pattern
+                );
+                continue;
+            }
+        };
 
         match build_pages_for_candidate(
             app,
@@ -1075,7 +1176,7 @@ fn get_migrations() -> Vec<Migration> {
                 CREATE TABLE IF NOT EXISTS index_paths (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     path TEXT NOT NULL,
-                    pattern TEXT NOT NULL DEFAULT '{artist}/{series}/{issue}',
+                    pattern TEXT NOT NULL DEFAULT '{author}/**/{series}',
                     created_at TEXT NOT NULL DEFAULT (datetime('now'))
                 );
             ",

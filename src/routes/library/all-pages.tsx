@@ -14,6 +14,7 @@ import {
   RxStar,
   RxStarFilled
 } from 'react-icons/rx';
+import { naturalSortComparator } from '../../utils/image-utils';
 
 type SortKey = 'comic_title' | 'path' | 'views' | 'recent';
 type ViewFilter = 'all' | 'viewed' | 'not-viewed';
@@ -91,13 +92,13 @@ function AllPagesList() {
       let comparison = 0;
       switch (sortKey) {
         case 'comic_title':
-          comparison = a.comic_title.localeCompare(b.comic_title);
+          comparison = naturalSortComparator(a.comic_title, b.comic_title);
           if (comparison === 0) {
             comparison = a.page_number - b.page_number;
           }
           break;
         case 'path':
-          comparison = a.file_path.localeCompare(b.file_path);
+          comparison = naturalSortComparator(a.file_path, b.file_path);
           break;
         case 'views':
           comparison = a.view_count - b.view_count;

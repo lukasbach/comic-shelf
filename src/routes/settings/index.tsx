@@ -13,6 +13,7 @@ import {
   RxCheck,
   RxPlus,
   RxTrash,
+  RxCross2,
   RxDesktop,
   RxMoon,
   RxSun,
@@ -34,6 +35,8 @@ function SettingsPage() {
   const { isIndexing, startIndexing, lastIndexedAt, progress } = useIndexing();
   const { indexPaths, refresh: refreshPaths } = useIndexPaths();
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [editingPathId, setEditingPathId] = useState<number | null>(null);
+  const [editingPattern, setEditingPattern] = useState('');
 
   const form = useForm({
     defaultValues: settings as AppSettings,
@@ -71,7 +74,7 @@ function SettingsPage() {
       });
       
       if (selected && typeof selected === 'string') {
-        await indexPathService.addIndexPath(selected, '{artist}/{series}/{issue}');
+        await indexPathService.addIndexPath(selected, '{author}/**/{series}');
         await refreshPaths();
         // Trigger indexing for new path
         startIndexing();
@@ -89,6 +92,18 @@ function SettingsPage() {
       startIndexing();
     } catch (error) {
       console.error('Failed to remove path:', error);
+    }
+  };
+
+  const handleUpdatePattern = async (id: number) => {
+    try {
+      await indexPathService.updateIndexPath(id, editingPattern);
+      setEditingPathId(null);
+      await refreshPaths();
+      // Trigger indexing to refresh metadata with new pattern
+      startIndexing();
+    } catch (error) {
+      console.error('Failed to update pattern:', error);
     }
   };
 
@@ -382,7 +397,17 @@ function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-medium text-slate-200">Index Paths</h3>
-                  <p className="text-xs text-slate-500">Directories scanned for comics.</p>
+                  <p className="text-xs text-slate-500">Directories scanned for comics. Use patterns to extract metadata.</p>
+                  <div className="flex gap-4 mt-1">
+                    <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
+                      <span className="bg-slate-800 px-1 rounded font-mono text-blue-400">{"{author}"}</span>
+                      <span>Author</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
+                      <span className="bg-slate-800 px-1 rounded font-mono text-blue-400">{"{series}"}</span>
+                      <span>Series</span>
+                    </div>
+                  </div>
                 </div>
                 <button
                   type="button"
@@ -404,7 +429,49 @@ function SettingsPage() {
                     <div key={path.id} className="flex items-center justify-between p-3 bg-slate-800/50 border border-slate-800 rounded-lg">
                       <div className="truncate flex-1 mr-4">
                         <div className="text-sm text-slate-200 truncate">{path.path}</div>
-                        <div className="text-[10px] text-slate-500 font-mono">{path.pattern}</div>
+                        {editingPathId === path.id ? (
+                          <div className="flex items-center gap-2 mt-1">
+                            <input
+                              type="text"
+                              value={editingPattern}
+                              onChange={(e) => setEditingPattern(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleUpdatePattern(path.id!);
+                                if (e.key === 'Escape') setEditingPathId(null);
+                              }}
+                              className="bg-slate-900 border border-blue-500 rounded px-2 py-0.5 text-[10px] text-slate-200 font-mono w-full max-w-xs focus:outline-none"
+                              autoFocus
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleUpdatePattern(path.id!)}
+                              className="text-green-500 hover:text-green-400"
+                              title="Save pattern"
+                            >
+                              <RxCheck size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingPathId(null)}
+                              className="text-slate-500 hover:text-red-400"
+                              title="Cancel"
+                            >
+                              <RxCross2 size={14} />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingPathId(path.id!);
+                              setEditingPattern(path.pattern);
+                            }}
+                            className="text-[10px] text-slate-500 font-mono hover:text-blue-400 transition-colors block mt-1"
+                            title="Click to edit pattern"
+                          >
+                            {path.pattern}
+                          </button>
+                        )}
                       </div>
                       <button
                         type="button"

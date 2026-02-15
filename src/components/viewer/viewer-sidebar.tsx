@@ -177,9 +177,9 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
               {upcomingPages.map((page) => (
                 <button
                   key={page.id}
-                  onClick={() => onPageSelect(page.page_number)}
+                  onClick={() => onPageSelect(page.page_number - 1)}
                   className="group relative aspect-3/4 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-800 hover:ring-2 hover:ring-blue-500 transition-all shadow-sm"
-                  title={`Page ${page.page_number + 1}`}
+                  title={`Page ${page.page_number}`}
                 >
                   <RenderedPageImage
                     page={page}
@@ -188,7 +188,7 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
                     preferThumbnail
                   />
                   <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white py-0.5 text-[10px] font-bold text-center">
-                    {page.page_number + 1}
+                    {page.page_number}
                   </div>
                   {page.is_favorite === 1 && (
                     <div className="absolute top-1 right-1">

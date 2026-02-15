@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { useRouterState, useNavigate, useRouter } from '@tanstack/react-router';
 import { Tab } from '../stores/tab-store';
-import { Comic } from '../types/comic';
 
 interface TabContextType {
   tabs: Tab[];

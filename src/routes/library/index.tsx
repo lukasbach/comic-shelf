@@ -51,9 +51,9 @@ function LibraryExplorer() {
     if (isNewTab) {
       const title = path.split(/[\\/]/).pop() || path;
       openLibraryTab(`/library?path=${encodeURIComponent(path)}`, title, true);
+    } else {
+      setCurrentPath(path);
     }
-    
-    setCurrentPath(path);
   };
 
   const currentItems = useMemo(() => {

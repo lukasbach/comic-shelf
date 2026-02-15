@@ -83,7 +83,12 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
     } else if (comic) {
       openComic(comic);
     } else if (page) {
-      openComicPage(page.comic_id, page.page_number);
+      const comicInfo = (page as any).comic_path ? {
+        id: page.comic_id,
+        title: (page as any).comic_title,
+        path: (page as any).comic_path
+      } : undefined;
+      openComicPage(page.comic_id, page.page_number, undefined, comicInfo);
     }
   };
 
@@ -91,7 +96,12 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
     if (comic) {
       openComic(comic, { ctrlKey: true } as any);
     } else if (page) {
-      openComicPage(page.comic_id, page.page_number, { ctrlKey: true } as any);
+      const comicInfo = (page as any).comic_path ? {
+        id: page.comic_id,
+        title: (page as any).comic_title,
+        path: (page as any).comic_path
+      } : undefined;
+      openComicPage(page.comic_id, page.page_number, { ctrlKey: true } as any, comicInfo);
     }
   };
 

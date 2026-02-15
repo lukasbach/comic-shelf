@@ -1,5 +1,5 @@
 import { FC } from 'react'
-import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
+import { Link, useRouterState } from '@tanstack/react-router'
 import {
   RxArchive,
   RxListBullet,
@@ -103,7 +103,6 @@ export function LibrarySidebar() {
   const { comics: recentComics, pages: recentPages, refetch: refetchRecent } = useRecentlyOpened(6)
   const openComic = useOpenComic()
   const openComicPage = useOpenComicPage()
-  const navigate = useNavigate()
   const { location } = useRouterState()
 
   const handleUpdate = () => {
@@ -130,7 +129,6 @@ export function LibrarySidebar() {
                 e.preventDefault()
                 // Create new tab and navigate to it
                 openLibraryTab(item.to, item.name)
-                navigate({ to: item.to as any })
               }
             }}
             className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors"

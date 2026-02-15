@@ -6,7 +6,7 @@ import { Comic } from '../types/comic';
 interface TabContextType {
   tabs: Tab[];
   activeTabId: string | null;
-  openTab: (comic: Comic, newTab?: boolean) => void;
+  openTab: (comic: { id: number; path: string; title: string }, newTab?: boolean, options?: { path?: string; currentPage?: number; viewMode?: 'overview' | 'single' | 'scroll' }) => void;
   openLibraryTab: (path: string, title: string, newTab?: boolean) => void;
   closeTab: (tabId: string) => void;
   setActiveTabId: (tabId: string) => void;
@@ -42,14 +42,38 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const currentPath = location.pathname + (location.searchStr ? `?${location.searchStr}` : '');
     
     if (tabs.length === 0) {
-      // ... (rest of initial load remains same)
+      // Correctly initialize the first tab if none exist
+      const initialTab: Tab = {
+        id: crypto.randomUUID(),
+        type: location.pathname.startsWith('/viewer/') ? 'comic' : 'library',
+        path: currentPath,
+        title: getRouteTitle(location.pathname),
+        currentPage: 0,
+        viewMode: 'overview',
+        zoomLevel: 100,
+        sidebarCollapsed: false,
+      };
+
+      if (initialTab.type === 'comic') {
+        const idMatch = location.pathname.match(/\/viewer\/(\d+)/);
+        if (idMatch) {
+          initialTab.comicId = parseInt(idMatch[1]);
+        }
+      }
+
+      setTabs([initialTab]);
+      setActiveTabId(initialTab.id);
     } else if (activeTabId) {
       const activeTab = tabs.find(t => t.id === activeTabId);
       
       if (activeTab) {
         if (isSwitchingTab) {
-          // If we are switching tabs, wait until the router catches up to the tab's path
-          if (activeTab.path === currentPath) {
+          // If we are switching tabs, wait until the router catches up to the tab's path.
+          // We ignore search parameters during this initial catch-up to avoid getting stuck.
+          const tabBase = activeTab.path.split('?')[0];
+          const currentBase = currentPath.split('?')[0];
+          
+          if (tabBase === currentBase) {
             setIsSwitchingTab(false);
           }
           return;
@@ -89,20 +113,25 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   }, [location.pathname, location.searchStr, activeTabId, tabs, isSwitchingTab]);
 
-  const openTab = useCallback((comic: Comic, newTab: boolean = true) => {
+  const openTab = useCallback((
+    comic: { id: number; path: string; title: string }, 
+    newTab: boolean = true,
+    options?: { path?: string; currentPage?: number; viewMode?: 'overview' | 'single' | 'scroll' }
+  ) => {
+    const targetPath = options?.path || `/viewer/${comic.id}`;
     const tabData: Partial<Tab> = {
       type: 'comic',
       comicId: comic.id,
       comicPath: comic.path,
       title: comic.title,
-      path: `/viewer/${comic.id}`,
-      currentPage: 0,
-      viewMode: 'overview',
+      path: targetPath,
+      currentPage: options?.currentPage ?? 0,
+      viewMode: options?.viewMode || (options?.currentPage !== undefined ? 'single' : 'overview'),
       zoomLevel: 100,
       sidebarCollapsed: false,
     };
 
-    if (newTab) {
+    if (newTab || !activeTabId) {
       const newTabObj: Tab = {
         ...tabData as Tab,
         id: crypto.randomUUID(),
@@ -110,7 +139,9 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       setIsSwitchingTab(true);
       setTabs(prevTabs => [...prevTabs, newTabObj]);
       setActiveTabId(newTabObj.id);
-    } else if (activeTabId) {
+      router.history.push(newTabObj.path);
+    } else {
+      setIsSwitchingTab(true);
       setTabs(prevTabs => 
         prevTabs.map(t => 
           t.id === activeTabId 
@@ -118,8 +149,9 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             : t
         )
       );
+      router.history.push(targetPath);
     }
-  }, [activeTabId]);
+  }, [activeTabId, router]);
 
   const openLibraryTab = useCallback((path: string, title: string, newTab: boolean = true) => {
     const tabData: Partial<Tab> = {
@@ -128,7 +160,7 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       path: path,
     };
 
-    if (newTab) {
+    if (newTab || !activeTabId) {
       const newTabObj: Tab = {
         ...tabData as Tab,
         id: crypto.randomUUID(),
@@ -136,7 +168,9 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       setIsSwitchingTab(true);
       setTabs(prevTabs => [...prevTabs, newTabObj]);
       setActiveTabId(newTabObj.id);
-    } else if (activeTabId) {
+      router.history.push(newTabObj.path);
+    } else {
+      setIsSwitchingTab(true);
       setTabs(prevTabs => 
         prevTabs.map(t => 
           t.id === activeTabId 
@@ -144,8 +178,9 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             : t
         )
       );
+      router.history.push(path);
     }
-  }, [activeTabId]);
+  }, [activeTabId, router]);
 
   const switchTab = useCallback((tabId: string) => {
     const tab = tabs.find(t => t.id === tabId);

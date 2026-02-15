@@ -8,7 +8,7 @@ import { AllPageItem } from '../hooks/use-all-pages';
 
 type PageCardProps = {
   page: AllPageItem;
-  onOpen: (comicId: number, pageNumber: number, e?: React.MouseEvent) => void;
+  onOpen: (comicId: number, pageNumber: number, e?: React.MouseEvent, comicInfo?: { id: number; path: string; title: string }) => void;
   onUpdate?: () => void;
 };
 
@@ -70,7 +70,7 @@ export const PageCard: React.FC<PageCardProps> = ({ page, onOpen, onUpdate }) =>
   return (
     <ComicContextMenu 
       page={page} 
-      onOpen={() => onOpen(page.comic_id, page.page_number)}
+      onOpen={() => onOpen(page.comic_id, page.page_number, undefined, { id: page.comic_id, title: page.comic_title, path: page.comic_path })}
       isFavorite={isFavorite}
       setIsFavorite={setIsFavorite}
       isViewed={isViewed}
@@ -85,10 +85,10 @@ export const PageCard: React.FC<PageCardProps> = ({ page, onOpen, onUpdate }) =>
     >
       <div 
         className="group flex flex-col bg-card rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all cursor-pointer relative"
-        onClick={(e) => onOpen(page.comic_id, page.page_number, e)}
+        onClick={(e) => onOpen(page.comic_id, page.page_number, e, { id: page.comic_id, title: page.comic_title, path: page.comic_path })}
         onAuxClick={(e) => {
           if (e.button === 1) {
-            onOpen(page.comic_id, page.page_number, e);
+            onOpen(page.comic_id, page.page_number, e, { id: page.comic_id, title: page.comic_title, path: page.comic_path });
           }
         }}
       >

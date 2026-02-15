@@ -3,7 +3,7 @@ import * as comicService from '../services/comic-service';
 import * as pageService from '../services/comic-page-service';
 import type { Comic, ComicPage } from '../types/comic';
 
-export type RecentlyOpenedPage = ComicPage & { comic_title: string };
+export type RecentlyOpenedPage = ComicPage & { comic_title: string; comic_path: string };
 
 export const useRecentlyOpened = (limit: number = 6) => {
   const [comics, setComics] = useState<Comic[]>([]);

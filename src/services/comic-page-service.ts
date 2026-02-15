@@ -91,10 +91,10 @@ export const getAllPages = async (): Promise<(ComicPage & { comic_title: string;
   `);
 };
 
-export const getFavoritePages = async (): Promise<(ComicPage & { comic_title: string })[]> => {
+export const getFavoritePages = async (): Promise<(ComicPage & { comic_title: string; comic_path: string })[]> => {
   const db = await getDb();
-  return await db.select<(ComicPage & { comic_title: string })[]>(`
-    SELECT p.*, c.title as comic_title 
+  return await db.select<(ComicPage & { comic_title: string; comic_path: string })[]>(`
+    SELECT p.*, c.title as comic_title, c.path as comic_path
     FROM comic_pages p 
     JOIN comics c ON p.comic_id = c.id 
     WHERE p.is_favorite = 1
@@ -102,10 +102,10 @@ export const getFavoritePages = async (): Promise<(ComicPage & { comic_title: st
   `);
 };
 
-export const getRecentlyOpenedPages = async (limit: number = 6): Promise<(ComicPage & { comic_title: string })[]> => {
+export const getRecentlyOpenedPages = async (limit: number = 6): Promise<(ComicPage & { comic_title: string; comic_path: string })[]> => {
   const db = await getDb();
-  return await db.select<(ComicPage & { comic_title: string })[]>(`
-    SELECT p.*, c.title as comic_title 
+  return await db.select<(ComicPage & { comic_title: string; comic_path: string })[]>(`
+    SELECT p.*, c.title as comic_title, c.path as comic_path
     FROM comic_pages p 
     JOIN comics c ON p.comic_id = c.id 
     WHERE p.last_opened_at IS NOT NULL

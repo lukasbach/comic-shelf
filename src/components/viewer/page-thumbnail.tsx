@@ -4,6 +4,7 @@ import { FavoriteButton } from '../favorite-button';
 import { ViewCounter } from '../view-counter';
 import { ComicContextMenu } from '../comic-context-menu';
 import { RxLayers, RxCross2 } from 'react-icons/rx';
+import { RenderedPageImage } from './rendered-page-image';
 
 type PageThumbnailProps = {
   page: ComicPage;

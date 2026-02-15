@@ -41,7 +41,7 @@ function AllPagesList() {
       items={pages}
       loading={loading}
       onActivateItem={(page) => openComicPage(page.comic_id, page.page_number, undefined, { id: page.comic_id, title: page.comic_title, path: page.comic_path })}
-      renderItem={(page, index, isFocused) => (
+      renderItem={(page, _, isFocused) => (
         <PageCard 
           key={page.id} 
           page={page} 

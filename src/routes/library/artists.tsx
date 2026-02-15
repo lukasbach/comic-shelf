@@ -34,7 +34,7 @@ function LibraryArtists() {
       items={artists}
       loading={loading}
       onActivateItem={(artist) => handleArtistClick(artist.artist || 'Unknown Artist')}
-      renderItem={(artist, index, isFocused) => (
+      renderItem={(artist, _, isFocused) => (
         <ArtistCard 
           key={artist.artist || 'unknown'} 
           artist={artist} 

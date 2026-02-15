@@ -51,7 +51,6 @@ describe('ScrollMode', () => {
         view_count: 0,
         is_favorite: 0,
         last_opened_at: null,
-        last_opened_at: null,
         bookmark_page: null,
         page_count: 2,
         cover_image_path: null,
@@ -79,6 +78,7 @@ describe('ScrollMode', () => {
             onTogglePageFavorite={vi.fn()}
             onIncrementPageViewCount={vi.fn()}
             onDecrementPageViewCount={vi.fn()}
+            onTogglePageViewed={vi.fn()}
         />);
         expect(screen.getByText('Page 1')).toBeDefined();
         expect(screen.getByText('Page 2')).toBeDefined();
@@ -91,6 +91,7 @@ describe('ScrollMode', () => {
             onTogglePageFavorite={vi.fn()}
             onIncrementPageViewCount={vi.fn()}
             onDecrementPageViewCount={vi.fn()}
+            onTogglePageViewed={vi.fn()}
         />);
         expect(screen.getByTestId('viewer-sidebar')).toBeDefined();
     });

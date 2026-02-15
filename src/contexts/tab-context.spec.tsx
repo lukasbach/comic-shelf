@@ -36,7 +36,6 @@ const mockComic: Comic = {
   is_favorite: 0,
   last_opened_at: null,
   view_count: 0,
-  last_opened_at: null,
   created_at: '',
   updated_at: '',
   bookmark_page: null,

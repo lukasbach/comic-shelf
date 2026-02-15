@@ -43,7 +43,7 @@ function LibraryList() {
       items={comics}
       loading={loading}
       onActivateItem={(comic) => openComic(comic)}
-      renderItem={(comic, index, isFocused) => (
+      renderItem={(comic, _, isFocused) => (
         <ComicCard 
           key={comic.id} 
           comic={comic} 

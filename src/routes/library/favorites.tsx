@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { GridPage, SortOption } from '../../components/grid-page';
 import { ComicCard } from '../../components/comic-card';
@@ -48,6 +49,7 @@ function LibraryFavorites() {
   const { tab: activeTab } = Route.useSearch();
   const navigate = useNavigate();
   const { settings } = useSettings();
+  const [gallerySelectionPageId, setGallerySelectionPageId] = useState<number | null>(null);
   const { comics: favoriteComics, loading: loadingComics } = useFavoriteComics();
   const { pages: favoritePages, loading: loadingPages, refresh: refreshPages } = useFavoritePages();
   const { galleries: favoriteGalleries, loading: loadingGalleries, refresh: refreshGalleries } = useFavoriteGalleries();
@@ -82,7 +84,7 @@ function LibraryFavorites() {
 
   const loading = loadingComics || loadingPages || loadingGalleries;
 
-  const renderItem = (item: any, index: number, isFocused: boolean) => {
+  const renderItem = (item: any, _index: number, isFocused: boolean) => {
     if (activeTab === 'comics') {
       return <ComicCard key={item.id} comic={item} onOpen={openComic} isFocused={isFocused} />;
     }

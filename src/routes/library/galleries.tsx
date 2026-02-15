@@ -78,7 +78,7 @@ function GalleriesPage() {
       items={galleries}
       loading={loading}
       onActivateItem={(g) => navigate({ to: `/viewer/gallery-${g.id}` as any })}
-      renderItem={(g, index, isFocused) => (
+      renderItem={(g, _, isFocused) => (
         <GalleryCard
           key={g.id}
           gallery={g}

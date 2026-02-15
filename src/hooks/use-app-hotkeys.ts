@@ -57,7 +57,7 @@ export const useAppHotkeys = () => {
           } else if (activeTab.galleryId) {
             navigate({ to: '/library/galleries' });
           } else {
-            navigate({ to: '/library' });
+            navigate({ to: '/library', search: { path: '' } });
           }
         } else {
           updateTab(activeTab.id, { viewMode: 'overview' });
@@ -70,7 +70,7 @@ export const useAppHotkeys = () => {
           const parentPath = segments.join('/');
           navigate({ to: '/library', search: { path: parentPath } });
         } else if (location.pathname !== '/library') {
-          navigate({ to: '/library' });
+          navigate({ to: '/library', search: { path: '' } });
         }
       }
     };

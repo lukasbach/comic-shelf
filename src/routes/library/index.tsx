@@ -197,7 +197,7 @@ function LibraryExplorer() {
                 openComic(item);
               }
             }}
-            renderItem={(item, index, isFocused) => (
+            renderItem={(item, _, isFocused) => (
               item.type === 'folder' ? (
                 <FolderCard 
                   key={item.path}

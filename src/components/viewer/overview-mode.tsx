@@ -62,9 +62,8 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
           sm: 3,
           default: 2,
         }}
-        focusedIndex={currentPage}
         onFocusedIndexChange={(index) => activeTabId && updateTab(activeTabId, { currentPage: index ?? 0 })}
-        onActivateItem={(page, index) => handlePageClick(index)}
+        onActivateItem={(_, index) => handlePageClick(index)}
         renderItem={(page, index, isFocused) => (
           <PageThumbnail
             key={page.id}

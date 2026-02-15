@@ -1,17 +1,19 @@
 import { FC } from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
 import {
-  RxArchive,
-  RxListBullet,
-  RxPerson,
-  RxStar,
-  RxFileText,
-  RxCounterClockwiseClock,
-  RxBookmark,
-  RxPlus
+    RxArchive,
+    RxListBullet,
+    RxPerson,
+    RxStar,
+    RxFileText,
+    RxCounterClockwiseClock,
+    RxBookmark,
+    RxPlus,
+    RxLayers
 } from 'react-icons/rx'
 import { useTabs } from '../contexts/tab-context'
 import { useIndexing } from '../contexts/indexing-context'
+import { useSettings } from '../contexts/settings-context'
 import { useIndexPaths } from '../hooks/use-index-paths'
 import { IndexingStatus } from './indexing-status'
 import { useFavoriteComics } from '../hooks/use-favorite-comics'
@@ -101,11 +103,13 @@ const navItems = [
   { name: 'All Comics', to: '/library/list', icon: RxListBullet },
   { name: 'All Pages', to: '/library/all-pages', icon: RxFileText },
   { name: 'Artists', to: '/library/artists', icon: RxPerson },
+  { name: 'Galleries', to: '/library/galleries', icon: RxLayers, featureFlag: 'enableGalleries' },
   { name: 'Favorites', to: '/library/favorites', icon: RxStar },
 ]
 
 export function LibrarySidebar() {
   const { openLibraryTab } = useTabs()
+  const { settings } = useSettings()
   const { comics: favoriteComics, refetch: refetchFavorites } = useFavoriteComics()
   const { comics: bookmarkedComics } = useBookmarkedComics()
   const { comics: recentComics, pages: recentPages, refetch: refetchRecent } = useRecentlyOpened(6)
@@ -143,7 +147,9 @@ export function LibrarySidebar() {
   return (
     <div className="w-64 shrink-0 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 h-full flex flex-col">
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-        {navItems.map((item) => (
+        {navItems
+          .filter(item => !item.featureFlag || (settings as any)[item.featureFlag])
+          .map((item) => (
           <Link
             key={item.name}
             to={item.to}

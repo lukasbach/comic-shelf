@@ -17,6 +17,9 @@ type ScrollModeProps = {
   onTogglePageFavorite: (pageId: number) => void;
   onIncrementPageViewCount: (pageId: number) => void;
   onDecrementPageViewCount: (pageId: number) => void;
+  isGallery?: boolean;
+  onRemoveFromGallery?: (pageId: number) => void;
+  onAddToGallery?: (pageId: number) => void;
 };
 
 export const ScrollMode: React.FC<ScrollModeProps> = ({ 
@@ -24,7 +27,10 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
   slideshowActive = false,
   onTogglePageFavorite,
   onIncrementPageViewCount,
-  onDecrementPageViewCount
+  onDecrementPageViewCount,
+  isGallery,
+  onRemoveFromGallery,
+  onAddToGallery
 }) => {
   const { tabs, activeTabId, updateTab } = useTabs();
   const { settings } = useSettings();
@@ -153,6 +159,10 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
               onToggleFavorite={() => onTogglePageFavorite(page.id)}
               onIncrementViewCount={() => onIncrementPageViewCount(page.id)}
               onDecrementViewCount={() => onDecrementPageViewCount(page.id)}
+              isGallery={isGallery}
+              onRemoveFromGallery={() => onRemoveFromGallery?.(page.id)}
+              onAddToGallery={() => onAddToGallery?.(page.id)}
+              enableGalleries={settings.enableGalleries}
             />
             ))}
           </div>

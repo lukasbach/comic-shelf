@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { RxChevronLeft, RxChevronRight } from 'react-icons/rx';
+import { RxChevronLeft, RxChevronRight, RxLayers, RxCross2 } from 'react-icons/rx';
 import { FavoriteButton } from '../favorite-button';
 import { ViewCounter } from '../view-counter';
 import { ComicContextMenu } from '../comic-context-menu';
@@ -17,6 +17,10 @@ type PageNavigationProps = {
   onToggleFavorite?: () => void;
   onIncrementViewCount?: () => void;
   onDecrementViewCount?: () => void;
+  isGallery?: boolean;
+  onRemoveFromGallery?: () => void;
+  onAddToGallery?: () => void;
+  enableGalleries?: boolean;
 };
 
 export const PageNavigation: React.FC<PageNavigationProps> = ({
@@ -31,6 +35,10 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
   onToggleFavorite,
   onIncrementViewCount,
   onDecrementViewCount,
+  isGallery,
+  onRemoveFromGallery,
+  onAddToGallery,
+  enableGalleries,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(String(currentPage + 1));
@@ -65,13 +73,37 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
 
   return (
     <div className="flex items-center justify-center gap-4 py-2 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800">
-      <button
-        onClick={onPrevPage}
-        className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-        aria-label="Previous Page"
-      >
-        <RxChevronLeft className="w-6 h-6" />
-      </button>
+      <div className="flex items-center gap-4 border-r border-gray-200 dark:border-gray-800 pr-4">
+        {enableGalleries && (
+          <>
+            {isGallery ? (
+              <button
+                onClick={onRemoveFromGallery}
+                className="p-1.5 bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white rounded-lg transition-all border border-red-500/30"
+                title="Remove from Gallery"
+              >
+                <RxCross2 size={18} />
+              </button>
+            ) : (
+              <button
+                onClick={onAddToGallery}
+                className="p-1.5 bg-pink-600/10 text-pink-500 hover:bg-pink-600 hover:text-white rounded-lg transition-all border border-pink-500/30"
+                title="Add to Gallery"
+              >
+                <RxLayers size={18} />
+              </button>
+            )}
+          </>
+        )}
+
+        <button
+          onClick={onPrevPage}
+          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          aria-label="Previous Page"
+        >
+          <RxChevronLeft className="w-6 h-6" />
+        </button>
+      </div>
 
       <div className="min-w-30 text-center">
         {isEditing ? (

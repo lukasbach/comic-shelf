@@ -3,7 +3,7 @@ import { ComicPage } from '../../types/comic';
 import { FavoriteButton } from '../favorite-button';
 import { ViewCounter } from '../view-counter';
 import { ComicContextMenu } from '../comic-context-menu';
-import { RenderedPageImage } from './rendered-page-image';
+import { RxLayers, RxCross2 } from 'react-icons/rx';
 
 type PageThumbnailProps = {
   page: ComicPage;
@@ -12,6 +12,10 @@ type PageThumbnailProps = {
   onToggleFavorite: () => void;
   onIncrementViewCount: () => void;
   onDecrementViewCount: () => void;
+  isGallery?: boolean;
+  onRemoveFromGallery?: () => void;
+  onAddToGallery?: () => void;
+  enableGalleries?: boolean;
 };
 
 export const PageThumbnail: React.FC<PageThumbnailProps> = ({ 
@@ -20,7 +24,11 @@ export const PageThumbnail: React.FC<PageThumbnailProps> = ({
   onClick,
   onToggleFavorite,
   onIncrementViewCount,
-  onDecrementViewCount
+  onDecrementViewCount,
+  isGallery,
+  onRemoveFromGallery,
+  onAddToGallery,
+  enableGalleries
 }) => {
   return (
     <ComicContextMenu 
@@ -68,6 +76,29 @@ export const PageThumbnail: React.FC<PageThumbnailProps> = ({
             className="bg-black/40 backdrop-blur-sm shadow-md"
           />
         </div>
+
+        {/* Gallery Buttons */}
+        {enableGalleries && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity scale-90 group-hover:scale-100">
+            {isGallery ? (
+              <button
+                onClick={(e) => { e.stopPropagation(); onRemoveFromGallery?.(); }}
+                className="p-2 bg-red-600/90 text-white rounded-full shadow-lg hover:bg-red-500 transition-all border border-red-400"
+                title="Remove from Gallery"
+              >
+                <RxCross2 size={24} />
+              </button>
+            ) : (
+              <button
+                onClick={(e) => { e.stopPropagation(); onAddToGallery?.(); }}
+                className="p-2 bg-pink-600/90 text-white rounded-full shadow-lg hover:bg-pink-500 transition-all border border-pink-400"
+                title="Add to Gallery"
+              >
+                <RxLayers size={24} />
+              </button>
+            )}
+          </div>
+        )}
         
         {page.view_count > 0 && (
           <div className="absolute bottom-1 left-1 bg-black/60 text-white px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-mono group-hover:hidden">

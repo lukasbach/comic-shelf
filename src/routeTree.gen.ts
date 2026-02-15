@@ -15,6 +15,7 @@ import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as LibraryIndexRouteImport } from './routes/library/index'
 import { Route as ViewerComicIdRouteImport } from './routes/viewer/$comicId'
 import { Route as LibraryListRouteImport } from './routes/library/list'
+import { Route as LibraryGalleriesRouteImport } from './routes/library/galleries'
 import { Route as LibraryFavoritesRouteImport } from './routes/library/favorites'
 import { Route as LibraryArtistsRouteImport } from './routes/library/artists'
 import { Route as LibraryAllPagesRouteImport } from './routes/library/all-pages'
@@ -49,6 +50,11 @@ const LibraryListRoute = LibraryListRouteImport.update({
   path: '/list',
   getParentRoute: () => LibraryRouteRoute,
 } as any)
+const LibraryGalleriesRoute = LibraryGalleriesRouteImport.update({
+  id: '/galleries',
+  path: '/galleries',
+  getParentRoute: () => LibraryRouteRoute,
+} as any)
 const LibraryFavoritesRoute = LibraryFavoritesRouteImport.update({
   id: '/favorites',
   path: '/favorites',
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/library/all-pages': typeof LibraryAllPagesRoute
   '/library/artists': typeof LibraryArtistsRoute
   '/library/favorites': typeof LibraryFavoritesRoute
+  '/library/galleries': typeof LibraryGalleriesRoute
   '/library/list': typeof LibraryListRoute
   '/viewer/$comicId': typeof ViewerComicIdRoute
   '/library/': typeof LibraryIndexRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/library/all-pages': typeof LibraryAllPagesRoute
   '/library/artists': typeof LibraryArtistsRoute
   '/library/favorites': typeof LibraryFavoritesRoute
+  '/library/galleries': typeof LibraryGalleriesRoute
   '/library/list': typeof LibraryListRoute
   '/viewer/$comicId': typeof ViewerComicIdRoute
   '/library': typeof LibraryIndexRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/library/all-pages': typeof LibraryAllPagesRoute
   '/library/artists': typeof LibraryArtistsRoute
   '/library/favorites': typeof LibraryFavoritesRoute
+  '/library/galleries': typeof LibraryGalleriesRoute
   '/library/list': typeof LibraryListRoute
   '/viewer/$comicId': typeof ViewerComicIdRoute
   '/library/': typeof LibraryIndexRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/library/all-pages'
     | '/library/artists'
     | '/library/favorites'
+    | '/library/galleries'
     | '/library/list'
     | '/viewer/$comicId'
     | '/library/'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/library/all-pages'
     | '/library/artists'
     | '/library/favorites'
+    | '/library/galleries'
     | '/library/list'
     | '/viewer/$comicId'
     | '/library'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/library/all-pages'
     | '/library/artists'
     | '/library/favorites'
+    | '/library/galleries'
     | '/library/list'
     | '/viewer/$comicId'
     | '/library/'
@@ -184,6 +196,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LibraryListRouteImport
       parentRoute: typeof LibraryRouteRoute
     }
+    '/library/galleries': {
+      id: '/library/galleries'
+      path: '/galleries'
+      fullPath: '/library/galleries'
+      preLoaderRoute: typeof LibraryGalleriesRouteImport
+      parentRoute: typeof LibraryRouteRoute
+    }
     '/library/favorites': {
       id: '/library/favorites'
       path: '/favorites'
@@ -212,6 +231,7 @@ interface LibraryRouteRouteChildren {
   LibraryAllPagesRoute: typeof LibraryAllPagesRoute
   LibraryArtistsRoute: typeof LibraryArtistsRoute
   LibraryFavoritesRoute: typeof LibraryFavoritesRoute
+  LibraryGalleriesRoute: typeof LibraryGalleriesRoute
   LibraryListRoute: typeof LibraryListRoute
   LibraryIndexRoute: typeof LibraryIndexRoute
 }
@@ -220,6 +240,7 @@ const LibraryRouteRouteChildren: LibraryRouteRouteChildren = {
   LibraryAllPagesRoute: LibraryAllPagesRoute,
   LibraryArtistsRoute: LibraryArtistsRoute,
   LibraryFavoritesRoute: LibraryFavoritesRoute,
+  LibraryGalleriesRoute: LibraryGalleriesRoute,
   LibraryListRoute: LibraryListRoute,
   LibraryIndexRoute: LibraryIndexRoute,
 }

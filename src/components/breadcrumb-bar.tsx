@@ -55,6 +55,7 @@ export function BreadcrumbBar() {
     if (path.endsWith('/list')) segments.push({ label: 'All Comics', to: '/library/list' })
     else if (path.endsWith('/artists')) segments.push({ label: 'By Artist', to: '/library/artists' })
     else if (path.endsWith('/favorites')) segments.push({ label: 'Favorites', to: '/library/favorites' })
+    else if (path.endsWith('/galleries')) segments.push({ label: 'Galleries', to: '/library/galleries' })
     else if (path === '/library' || path === '/library/') {
       const currentPath = search.path || ''
       if (currentPath) {

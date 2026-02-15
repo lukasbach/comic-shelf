@@ -2,44 +2,105 @@ import { useState, useEffect, useCallback } from 'react';
 import { Comic, ComicPage } from '../types/comic';
 import * as comicService from '../services/comic-service';
 import * as comicPageService from '../services/comic-page-service';
+import * as galleryService from '../services/gallery-service';
 
-export const useComicData = (comicId: number) => {
+export const useComicData = (idOrSlug: string | number) => {
   const [comic, setComic] = useState<Comic | null>(null);
   const [pages, setPages] = useState<ComicPage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [isGallery, setIsGallery] = useState(false);
+  const [galleryId, setGalleryId] = useState<number | null>(null);
 
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
 
-    Promise.all([
-      comicService.getComicById(comicId),
-      comicPageService.getPagesByComicId(comicId),
-      comicService.updateComicLastOpened(comicId).catch(err => console.error('Failed to update comic last opened:', err))
-    ])
-      .then(([c, p]) => {
-        if (isMounted) {
-          setComic(c);
-          setPages(p);
-          setError(null);
-        }
-      })
-      .catch((err) => {
-        if (isMounted) {
-          setError(err instanceof Error ? err : new Error(String(err)));
-        }
-      })
-      .finally(() => {
-        if (isMounted) {
-          setLoading(false);
-        }
-      });
+    const slug = String(idOrSlug);
+    if (slug.startsWith('gallery-')) {
+      const gId = Number(slug.replace('gallery-', ''));
+      setIsGallery(true);
+      setGalleryId(gId);
+
+      galleryService.getGalleryById(gId)
+        .then(async (g) => {
+          if (!g) throw new Error('Gallery not found');
+          const p = await galleryService.getGalleryPages(gId);
+          if (isMounted) {
+            // Map Gallery to a Comic-like structure for the viewer
+            setComic({
+              id: g.id,
+              title: g.name,
+              path: `gallery://${g.id}`,
+              page_count: g.page_count || 0,
+              is_favorite: 0,
+              is_viewed: 0,
+              view_count: 0,
+              artist: null,
+              series: null,
+              issue: null,
+              cover_image_path: p[0]?.thumbnail_path || null,
+              created_at: g.created_at,
+              updated_at: g.updated_at,
+              last_opened_at: null,
+              bookmark_page: null,
+              indexing_status: 'completed'
+            } as Comic);
+            setPages(p);
+            setError(null);
+          }
+        })
+        .catch(err => {
+          if (isMounted) setError(err instanceof Error ? err : new Error(String(err)));
+        })
+        .finally(() => {
+          if (isMounted) setLoading(false);
+        });
+    } else {
+      const comicId = Number(slug);
+      setIsGallery(false);
+      setGalleryId(null);
+
+      Promise.all([
+        comicService.getComicById(comicId),
+        comicPageService.getPagesByComicId(comicId),
+        comicService.updateComicLastOpened(comicId).catch(err => console.error('Failed to update comic last opened:', err))
+      ])
+        .then(([c, p]) => {
+          if (isMounted) {
+            setComic(c);
+            setPages(p);
+            setError(null);
+          }
+        })
+        .catch((err) => {
+          if (isMounted) {
+            setError(err instanceof Error ? err : new Error(String(err)));
+          }
+        })
+        .finally(() => {
+          if (isMounted) {
+            setLoading(false);
+          }
+        });
+    }
 
     return () => {
       isMounted = false;
     };
-  }, [comicId]);
+  }, [idOrSlug]);
+
+  const removePageFromGallery = useCallback(async (pageId: number) => {
+    if (!isGallery || galleryId === null) return;
+    try {
+      await galleryService.removePageFromGallery(galleryId, pageId);
+      setPages(prev => prev.filter(p => p.id !== pageId));
+      setComic(prev => prev ? { ...prev, page_count: Math.max(0, prev.page_count - 1) } : null);
+    } catch (err) {
+      console.error('Failed to remove page from gallery:', err);
+    }
+  }, [isGallery, galleryId]);
+
 
   const toggleComicFavorite = useCallback(async () => {
     if (!comic) return;
@@ -176,6 +237,8 @@ export const useComicData = (comicId: number) => {
     pages, 
     loading, 
     error, 
+    isGallery,
+    galleryId,
     toggleComicFavorite, 
     toggleComicViewed,
     incrementComicViewCount,
@@ -186,6 +249,7 @@ export const useComicData = (comicId: number) => {
     decrementPageViewCount,
     markPageAsOpened,
     setBookmark,
-    clearBookmark
+    clearBookmark,
+    removePageFromGallery
   };
 };

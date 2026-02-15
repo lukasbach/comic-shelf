@@ -1253,6 +1253,29 @@ fn get_migrations() -> Vec<Migration> {
             ",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 7,
+            description: "create_galleries_tables",
+            sql: "
+                CREATE TABLE IF NOT EXISTS galleries (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL UNIQUE,
+                    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+                );
+
+                CREATE TABLE IF NOT EXISTS gallery_pages (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    gallery_id INTEGER NOT NULL,
+                    comic_page_id INTEGER NOT NULL,
+                    added_at TEXT NOT NULL DEFAULT (datetime('now')),
+                    FOREIGN KEY (gallery_id) REFERENCES galleries(id) ON DELETE CASCADE,
+                    FOREIGN KEY (comic_page_id) REFERENCES comic_pages(id) ON DELETE CASCADE,
+                    UNIQUE(gallery_id, comic_page_id)
+                );
+            ",
+            kind: MigrationKind::Up,
+        },
     ]
 }
 

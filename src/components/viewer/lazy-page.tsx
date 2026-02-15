@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ComicPage } from '../../types/comic';
 import { FavoriteButton } from '../favorite-button';
-import { RxStarFilled } from 'react-icons/rx';
+import { RxStarFilled, RxLayers, RxCross2 } from 'react-icons/rx';
 import { ComicContextMenu } from '../comic-context-menu';
 import { RenderedPageImage } from './rendered-page-image';
 
@@ -14,10 +14,14 @@ type LazyPageProps = {
   onToggleFavorite?: () => void;
   onIncrementViewCount?: () => void;
   onDecrementViewCount?: () => void;
+  isGallery?: boolean;
+  onRemoveFromGallery?: () => void;
+  onAddToGallery?: () => void;
+  enableGalleries?: boolean;
 };
 
 export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.RefAttributes<HTMLDivElement>> = React.forwardRef<HTMLDivElement, LazyPageProps>(
-  ({ page, zoomLevel, fitMode, onVisible, isFavorite, onToggleFavorite, onIncrementViewCount, onDecrementViewCount }, ref) => {
+  ({ page, zoomLevel, fitMode, onVisible, isFavorite, onToggleFavorite, onIncrementViewCount, onDecrementViewCount, isGallery, onRemoveFromGallery, onAddToGallery, enableGalleries }, ref) => {
     const [isVisible, setIsVisible] = useState(false);
     const [naturalSize, setNaturalSize] = useState<{ width: number; height: number } | null>(null);
     const internalRef = useRef<HTMLDivElement>(null);
@@ -89,6 +93,28 @@ export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.Ref
             <span>Page {page.page_number}</span>
             {isFavorite && <RxStarFilled className="group-hover:hidden text-yellow-500" />}
           </div>
+
+          {enableGalleries && (
+            <div className="absolute top-2 left-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+              {isGallery ? (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onRemoveFromGallery?.(); }}
+                  className="p-1.5 bg-red-600/80 hover:bg-red-600 text-white rounded-lg transition-all border border-red-500/30 shadow-lg"
+                  title="Remove from Gallery"
+                >
+                  <RxCross2 size={18} />
+                </button>
+              ) : (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onAddToGallery?.(); }}
+                  className="p-1.5 bg-pink-600/80 hover:bg-pink-600 text-white rounded-lg transition-all border border-pink-500/30 shadow-lg"
+                  title="Add to Gallery"
+                >
+                  <RxLayers size={18} />
+                </button>
+              )}
+            </div>
+          )}
 
           {onToggleFavorite && (
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">

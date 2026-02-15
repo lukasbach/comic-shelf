@@ -21,6 +21,7 @@ export type AppSettings = {
   slideshowAutoScroll: boolean;
   autoReindex: boolean;
   lastIndexedAt: string | null;
+  enableGalleries: boolean;
 };
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -44,6 +45,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   slideshowAutoScroll: true,
   autoReindex: true,
   lastIndexedAt: null,
+  enableGalleries: false,
 };
 
 const STORE_PATH = 'settings.json';

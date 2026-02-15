@@ -13,6 +13,7 @@ import { ScrollMode } from '../../components/viewer/scroll-mode';
 import { SlideshowIndicator } from '../../components/viewer/slideshow-indicator';
 import { Tab } from '../../stores/tab-store';
 import { useViewerRef } from '../../contexts/viewer-ref-context';
+import { AddToGalleryDialog } from '../../components/add-to-gallery-dialog';
 
 type ComicViewerSearch = {
   page?: number;
@@ -36,6 +37,7 @@ function ComicViewerPage() {
   const activeTab = tabs.find((t: Tab) => t.id === activeTabId);
   const [showBookmarkPrompt, setShowBookmarkPrompt] = React.useState(false);
   const [promptHandled, setPromptHandled] = React.useState(false);
+  const [gallerySelectionPageId, setGallerySelectionPageId] = React.useState<number | null>(null);
   
   // Default to overview if no mode is set in tab
   const viewMode = activeTab?.viewMode ?? 'overview';
@@ -45,6 +47,7 @@ function ComicViewerPage() {
     pages, 
     loading, 
     error, 
+    isGallery,
     toggleComicFavorite, 
     toggleComicViewed,
     incrementComicViewCount,
@@ -54,8 +57,9 @@ function ComicViewerPage() {
     decrementPageViewCount,
     markPageAsOpened,
     setBookmark,
-    clearBookmark
-  } = useComicData(Number(comicId));
+    clearBookmark,
+    removePageFromGallery
+  } = useComicData(comicId);
 
   // Show prompt if bookmark exists and not already handled or explicitly requested via search
   useEffect(() => {
@@ -204,6 +208,9 @@ function ComicViewerPage() {
             onTogglePageFavorite={togglePageFavorite}
             onIncrementPageViewCount={incrementPageViewCount}
             onDecrementPageViewCount={decrementPageViewCount}
+            isGallery={isGallery}
+            onRemoveFromGallery={removePageFromGallery}
+            onAddToGallery={setGallerySelectionPageId}
           />
         );
       case 'single':
@@ -216,6 +223,9 @@ function ComicViewerPage() {
             onTogglePageFavorite={togglePageFavorite}
             onIncrementPageViewCount={incrementPageViewCount}
             onDecrementPageViewCount={decrementPageViewCount}
+            isGallery={isGallery}
+            onRemoveFromGallery={removePageFromGallery}
+            onAddToGallery={setGallerySelectionPageId}
           />
         );
       case 'scroll':
@@ -227,6 +237,9 @@ function ComicViewerPage() {
             onTogglePageFavorite={togglePageFavorite}
             onIncrementPageViewCount={incrementPageViewCount}
             onDecrementPageViewCount={decrementPageViewCount}
+            isGallery={isGallery}
+            onRemoveFromGallery={removePageFromGallery}
+            onAddToGallery={setGallerySelectionPageId}
           />
         );
       default:
@@ -237,6 +250,9 @@ function ComicViewerPage() {
             onTogglePageFavorite={togglePageFavorite}
             onIncrementPageViewCount={incrementPageViewCount}
             onDecrementPageViewCount={decrementPageViewCount}
+            isGallery={isGallery}
+            onRemoveFromGallery={removePageFromGallery}
+            onAddToGallery={setGallerySelectionPageId}
           />
         );
     }
@@ -302,6 +318,13 @@ function ComicViewerPage() {
         onStop={() => updateTab(activeTabId!, { slideshowActive: false })}
         showProgress={viewMode === 'single'}
       />
+
+      {gallerySelectionPageId !== null && (
+        <AddToGalleryDialog
+          comicPageId={gallerySelectionPageId}
+          onClose={() => setGallerySelectionPageId(null)}
+        />
+      )}
     </div>
   );
 }

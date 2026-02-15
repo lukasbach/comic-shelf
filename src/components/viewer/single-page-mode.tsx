@@ -18,6 +18,9 @@ type SinglePageModeProps = {
   onTogglePageFavorite: (pageId: number) => void;
   onIncrementPageViewCount: (pageId: number) => void;
   onDecrementPageViewCount: (pageId: number) => void;
+  isGallery?: boolean;
+  onRemoveFromGallery?: (pageId: number) => void;
+  onAddToGallery?: (pageId: number) => void;
 };
 
 export const SinglePageMode: React.FC<SinglePageModeProps> = ({ 
@@ -26,7 +29,10 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
   onSlideshowComplete,
   onTogglePageFavorite,
   onIncrementPageViewCount,
-  onDecrementPageViewCount
+  onDecrementPageViewCount,
+  isGallery,
+  onRemoveFromGallery,
+  onAddToGallery
 }) => {
   const { tabs, activeTabId, updateTab } = useTabs();
   const { settings } = useSettings();
@@ -130,8 +136,10 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
           viewCount={currentPageData.view_count}
           onToggleFavorite={() => onTogglePageFavorite(currentPageData.id)}
           onIncrementViewCount={() => onIncrementPageViewCount(currentPageData.id)}
-          onDecrementViewCount={() => onDecrementPageViewCount(currentPageData.id)}
-        />
+          onDecrementViewCount={() => onDecrementPageViewCount(currentPageData.id)}          isGallery={isGallery}
+          onRemoveFromGallery={() => onRemoveFromGallery?.(currentPageData.id)}
+          onAddToGallery={() => onAddToGallery?.(currentPageData.id)}
+          enableGalleries={settings.enableGalleries}        />
       </div>
 
       <ViewerSidebar

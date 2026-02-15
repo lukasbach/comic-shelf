@@ -20,7 +20,8 @@ import {
     RxGrid,
     RxTimer,
     RxKeyboard,
-    RxArchive
+    RxArchive,
+    RxLayers
 } from 'react-icons/rx';
 import { open } from '@tauri-apps/plugin-dialog';
 
@@ -302,6 +303,44 @@ function SettingsPage() {
                   {isIndexing ? <RxSymbol className="animate-spin" /> : <RxReload />}
                   {isIndexing ? 'Indexing...' : 'Force Re-index All'}
                 </button>
+              </div>
+            </div>
+          </section>
+
+          {/* Modules Section */}
+          <section className="space-y-6">
+            <div className="flex items-center gap-2 text-pink-400">
+              <RxLayers size={20} />
+              <h2 className="text-xl font-semibold">Modules</h2>
+            </div>
+            
+            <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800 space-y-6">
+              <div className="flex items-center justify-between">
+                <form.Field name="enableGalleries">
+                  {(field) => (
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={field.state.value}
+                        onClick={() => field.handleChange(!field.state.value)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                          field.state.value ? 'bg-pink-600' : 'bg-slate-700'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            field.state.value ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                      <div>
+                        <span className="text-sm font-medium text-slate-200">Enable Galleries</span>
+                        <p className="text-[10px] text-slate-500">Create custom collections of pages from different comics.</p>
+                      </div>
+                    </div>
+                  )}
+                </form.Field>
               </div>
             </div>
           </section>

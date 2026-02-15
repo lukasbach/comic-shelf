@@ -1,20 +1,20 @@
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, useRouter } from '@tanstack/react-router'
 import { useTabs } from '../contexts/tab-context'
 import { RxCross2 } from 'react-icons/rx'
 import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
 } from '@dnd-kit/core'
 import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  horizontalListSortingStrategy,
-  useSortable,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    horizontalListSortingStrategy,
+    useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Tab } from '../stores/tab-store'
@@ -84,8 +84,9 @@ function SortableTab({ tab, isActive, onClose, onSelect }: SortableTabProps) {
 }
 
 export function TabBar() {
-  const { tabs, activeTabId, closeTab, setActiveTabId, reorderTabs } = useTabs()
+  const { tabs, activeTabId, closeTab, switchTab, reorderTabs } = useTabs()
   const navigate = useNavigate()
+  const router = useRouter()
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -113,8 +114,7 @@ export function TabBar() {
 
   const handleSelect = (id: string, path: string) => {
     if (id !== activeTabId) {
-      setActiveTabId(id)
-      navigate({ to: path as any })
+      switchTab(id)
     }
   }
 

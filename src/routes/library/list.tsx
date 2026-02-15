@@ -1,27 +1,55 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useState, useMemo } from 'react';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useMemo } from 'react';
 import { VirtualizedGrid } from '../../components/virtualized-grid';
 import { ComicCard } from '../../components/comic-card';
 import { useComics } from '../../hooks/use-comics';
 import { useOpenComic } from '../../hooks/use-open-comic';
 import { RxSymbol, RxArrowDown, RxArrowUp, RxMagnifyingGlass, RxEyeOpen, RxEyeClosed, RxStar, RxStarFilled } from 'react-icons/rx';
 
-export const Route = createFileRoute('/library/list')({
-  component: LibraryList,
-});
-
 type SortKey = 'title' | 'artist' | 'date' | 'views' | 'path' | 'recent';
 type ViewFilter = 'all' | 'viewed' | 'not-viewed';
 type FavoriteFilter = 'all' | 'favorited' | 'not-favorited';
 
+interface ListSearchParams {
+  search?: string;
+  sort?: SortKey;
+  order?: 'asc' | 'desc';
+  view?: ViewFilter;
+  favorite?: FavoriteFilter;
+}
+
+export const Route = createFileRoute('/library/list')({
+  validateSearch: (search: Record<string, unknown>): ListSearchParams => {
+    return {
+      search: (search.search as string) || undefined,
+      sort: (search.sort as SortKey) || 'title',
+      order: (search.order as 'asc' | 'desc') || 'asc',
+      view: (search.view as ViewFilter) || 'all',
+      favorite: (search.favorite as FavoriteFilter) || 'all',
+    }
+  },
+  component: LibraryList,
+});
+
 function LibraryList() {
+  const { search: searchQuery = '', sort: sortKey, order: sortOrder, view: viewFilter, favorite: favoriteFilter } = Route.useSearch();
+  const navigate = useNavigate();
   const { comics, loading } = useComics();
   const openComic = useOpenComic();
-  const [sortKey, setSortKey] = useState<SortKey>('title');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [viewFilter, setViewFilter] = useState<ViewFilter>('all');
-  const [favoriteFilter, setFavoriteFilter] = useState<FavoriteFilter>('all');
+
+  const setParams = (updates: Partial<ListSearchParams>) => {
+    navigate({
+      to: '/library/list',
+      search: (prev) => ({ ...prev, ...updates }),
+      replace: true,
+    });
+  };
+
+  const setSearchQuery = (q: string) => setParams({ search: q || undefined });
+  const setSortKey = (k: SortKey) => setParams({ sort: k });
+  const setViewFilter = (v: ViewFilter) => setParams({ view: v });
+  const setFavoriteFilter = (f: FavoriteFilter) => setParams({ favorite: f });
+  const toggleOrder = () => setParams({ order: sortOrder === 'asc' ? 'desc' : 'asc' });
 
   const filteredAndSortedComics = useMemo(() => {
     let result = [...comics];
@@ -79,8 +107,6 @@ function LibraryList() {
     });
   }, [comics, sortKey, sortOrder, searchQuery, viewFilter, favoriteFilter]);
 
-  const toggleOrder = () => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -108,14 +134,14 @@ function LibraryList() {
             <select 
               value={sortKey} 
               onChange={(e) => setSortKey(e.target.value as SortKey)}
-              className="bg-transparent text-sm font-medium px-2 py-1 outline-none cursor-pointer"
+              className="bg-transparent text-foreground text-sm font-medium px-2 py-1 outline-none cursor-pointer"
             >
-              <option value="title">Sort by Title</option>
-              <option value="path">Sort by Path</option>
-              <option value="artist">Sort by Artist</option>
-              <option value="date">Sort by Date Added</option>
-              <option value="views">Sort by View Count</option>
-              <option value="recent">Sort by Recently Opened</option>
+              <option value="title" className="bg-background text-foreground">Sort by Title</option>
+              <option value="path" className="bg-background text-foreground">Sort by Path</option>
+              <option value="artist" className="bg-background text-foreground">Sort by Artist</option>
+              <option value="date" className="bg-background text-foreground">Sort by Date Added</option>
+              <option value="views" className="bg-background text-foreground">Sort by View Count</option>
+              <option value="recent" className="bg-background text-foreground">Sort by Recently Opened</option>
             </select>
             <button 
               onClick={toggleOrder}
@@ -135,7 +161,7 @@ function LibraryList() {
               placeholder="Search by title, author or path..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-muted border-none rounded-md py-2 pl-9 pr-4 text-sm focus:ring-1 focus:ring-primary outline-none"
+              className="w-full bg-muted text-foreground border-none rounded-md py-2 pl-9 pr-4 text-sm focus:ring-1 focus:ring-primary outline-none placeholder:text-muted-foreground"
             />
           </div>
 

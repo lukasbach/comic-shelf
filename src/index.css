@@ -32,6 +32,7 @@
   :root {
     --background: #ffffff;
     --foreground: #0f172a;
+    color-scheme: light;
 
     --primary: #2563eb;
     --primary-foreground: #ffffff;
@@ -58,6 +59,7 @@
   .dark {
     --background: #020617;
     --foreground: #f8fafc;
+    color-scheme: dark;
 
     --primary: #3b82f6;
     --primary-foreground: #ffffff;
@@ -86,5 +88,9 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  input, select, textarea, button {
+    @apply text-foreground;
   }
 }

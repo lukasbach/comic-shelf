@@ -1,5 +1,5 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useState, useMemo } from 'react';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useMemo } from 'react';
 import { VirtualizedGrid } from '../../components/virtualized-grid';
 import { PageCard } from '../../components/page-card';
 import { useAllPages } from '../../hooks/use-all-pages';
@@ -15,29 +15,56 @@ import {
   RxStarFilled
 } from 'react-icons/rx';
 
-export const Route = createFileRoute('/library/all-pages')({
-  component: AllPagesList,
-});
-
 type SortKey = 'comic_title' | 'path' | 'views' | 'recent';
 type ViewFilter = 'all' | 'viewed' | 'not-viewed';
 type FavoriteFilter = 'all' | 'favorited' | 'not-favorited';
 
+interface AllPagesSearchParams {
+  search?: string;
+  sort?: SortKey;
+  order?: 'asc' | 'desc';
+  view?: ViewFilter;
+  favorite?: FavoriteFilter;
+}
+
+export const Route = createFileRoute('/library/all-pages')({
+  validateSearch: (search: Record<string, unknown>): AllPagesSearchParams => {
+    return {
+      search: (search.search as string) || undefined,
+      sort: (search.sort as SortKey) || 'recent',
+      order: (search.order as 'asc' | 'desc') || 'desc',
+      view: (search.view as ViewFilter) || 'all',
+      favorite: (search.favorite as FavoriteFilter) || 'all',
+    }
+  },
+  component: AllPagesList,
+});
+
 function AllPagesList() {
+  const { search: searchQuery = '', sort: sortKey, order: sortOrder, view: viewFilter, favorite: favoriteFilter } = Route.useSearch();
+  const navigate = useNavigate();
   const { pages, loading, refetch } = useAllPages();
   const openComicPage = useOpenComicPage();
-  const [sortKey, setSortKey] = useState<SortKey>('comic_title');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [viewFilter, setViewFilter] = useState<ViewFilter>('all');
-  const [favoriteFilter, setFavoriteFilter] = useState<FavoriteFilter>('all');
+
+  const setParams = (updates: Partial<AllPagesSearchParams>) => {
+    navigate({
+      to: '/library/all-pages',
+      search: (prev) => ({ ...prev, ...updates }),
+      replace: true,
+    });
+  };
+
+  const setSearchQuery = (q: string) => setParams({ search: q || undefined });
+  const setSortKey = (k: SortKey) => setParams({ sort: k });
+  const setViewFilter = (v: ViewFilter) => setParams({ view: v });
+  const setFavoriteFilter = (f: FavoriteFilter) => setParams({ favorite: f });
+  const toggleOrder = () => setParams({ order: sortOrder === 'asc' ? 'desc' : 'asc' });
 
   const filteredAndSortedPages = useMemo(() => {
     let result = [...pages];
 
-    // Search filter
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
+    const q = searchQuery.toLowerCase();
+    if (q) {
       result = result.filter(p => 
         p.comic_title.toLowerCase().includes(q) || 
         (p.comic_artist || '').toLowerCase().includes(q) || 
@@ -85,8 +112,6 @@ function AllPagesList() {
     });
   }, [pages, sortKey, sortOrder, searchQuery, viewFilter, favoriteFilter]);
 
-  const toggleOrder = () => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -105,12 +130,12 @@ function AllPagesList() {
             <select 
               value={sortKey} 
               onChange={(e) => setSortKey(e.target.value as SortKey)}
-              className="bg-transparent text-sm font-medium px-2 py-1 outline-none cursor-pointer"
+              className="bg-transparent text-foreground text-sm font-medium px-2 py-1 outline-none cursor-pointer"
             >
-              <option value="comic_title">Sort by Comic Title</option>
-              <option value="path">Sort by Path</option>
-              <option value="views">Sort by View Count</option>
-              <option value="recent">Sort by Recently Opened</option>
+              <option value="comic_title" className="bg-background text-foreground">Sort by Comic Title</option>
+              <option value="path" className="bg-background text-foreground">Sort by Path</option>
+              <option value="views" className="bg-background text-foreground">Sort by View Count</option>
+              <option value="recent" className="bg-background text-foreground">Sort by Recently Opened</option>
             </select>
             <button 
               onClick={toggleOrder}
@@ -130,7 +155,7 @@ function AllPagesList() {
               placeholder="Search by comic title, author or path..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-muted border-none rounded-md py-2 pl-9 pr-4 text-sm focus:ring-1 focus:ring-primary outline-none"
+              className="w-full bg-muted text-foreground border-none rounded-md py-2 pl-9 pr-4 text-sm focus:ring-1 focus:ring-primary outline-none placeholder:text-muted-foreground"
             />
           </div>
 

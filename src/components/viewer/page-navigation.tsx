@@ -84,7 +84,7 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
               onChange={(e) => setInputValue(e.target.value)}
               onBlur={handleInputBlur}
               onKeyDown={handleInputKeyDown}
-              className="w-12 px-1 text-center bg-gray-100 dark:bg-gray-800 border-b-2 border-blue-500 outline-none"
+              className="w-12 px-1 text-center bg-gray-100 dark:bg-gray-800 text-foreground border-b-2 border-blue-500 outline-none"
             />
             <span className="text-sm font-medium">/ {totalPages}</span>
           </div>

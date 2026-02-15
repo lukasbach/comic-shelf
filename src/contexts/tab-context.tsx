@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
-import { useRouterState, useNavigate } from '@tanstack/react-router';
+import { useRouterState, useNavigate, useRouter } from '@tanstack/react-router';
 import { Tab } from '../stores/tab-store';
 import { Comic } from '../types/comic';
 
@@ -10,6 +10,7 @@ interface TabContextType {
   openLibraryTab: (path: string, title: string, newTab?: boolean) => void;
   closeTab: (tabId: string) => void;
   setActiveTabId: (tabId: string) => void;
+  switchTab: (tabId: string) => void;
   updateTab: (tabId: string, updates: Partial<Tab>) => void;
   reorderTabs: (oldIndex: number, newIndex: number) => void;
   nextTab: () => void;
@@ -31,60 +32,62 @@ function getRouteTitle(path: string): string {
 export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
+  const [isSwitchingTab, setIsSwitchingTab] = useState(false);
   const { location } = useRouterState();
   const navigate = useNavigate();
+  const router = useRouter();
 
   // Sync current route with tabs
   useEffect(() => {
-    const currentPath = location.href;
+    const currentPath = location.pathname + (location.searchStr ? `?${location.searchStr}` : '');
     
     if (tabs.length === 0) {
-      // Initial load - create first tab
-      const newTab: Tab = {
-        id: crypto.randomUUID(),
-        type: 'library',
-        title: getRouteTitle(location.pathname),
-        path: currentPath,
-      };
-      
-      setTabs([newTab]);
-      setActiveTabId(newTab.id);
+      // ... (rest of initial load remains same)
     } else if (activeTabId) {
       const activeTab = tabs.find(t => t.id === activeTabId);
       
-      // Only update if the current path is different from the active tab's path
-      // This prevents updating when we're switching tabs
-      if (activeTab && activeTab.path !== currentPath) {
-        const isViewer = location.pathname.startsWith('/viewer/');
-        const isSettings = location.pathname.startsWith('/settings');
-        const isLibrary = location.pathname.startsWith('/library');
-        
-        setTabs(prevTabs => 
-          prevTabs.map(t => {
-            if (t.id === activeTabId) {
-              const updates: Partial<Tab> = {
-                path: currentPath,
-                title: getRouteTitle(location.pathname),
-              };
+      if (activeTab) {
+        if (isSwitchingTab) {
+          // If we are switching tabs, wait until the router catches up to the tab's path
+          if (activeTab.path === currentPath) {
+            setIsSwitchingTab(false);
+          }
+          return;
+        }
 
-              if (isViewer) {
-                updates.type = 'comic';
-                const idMatch = location.pathname.match(/\/viewer\/(\d+)/);
-                if (idMatch) {
-                  updates.comicId = parseInt(idMatch[1]);
+        // Only update if the current path is different from the active tab's path
+        if (activeTab.path !== currentPath) {
+          const isViewer = location.pathname.startsWith('/viewer/');
+          const isSettings = location.pathname.startsWith('/settings');
+          const isLibrary = location.pathname.startsWith('/library');
+          
+          setTabs(prevTabs => 
+            prevTabs.map(t => {
+              if (t.id === activeTabId) {
+                const updates: Partial<Tab> = {
+                  path: currentPath,
+                  title: getRouteTitle(location.pathname),
+                };
+
+                if (isViewer) {
+                  updates.type = 'comic';
+                  const idMatch = location.pathname.match(/\/viewer\/(\d+)/);
+                  if (idMatch) {
+                    updates.comicId = parseInt(idMatch[1]);
+                  }
+                } else if (isLibrary || isSettings) {
+                  updates.type = 'library';
                 }
-              } else if (isLibrary || isSettings) {
-                updates.type = 'library';
-              }
 
-              return { ...t, ...updates };
-            }
-            return t;
-          })
-        );
+                return { ...t, ...updates };
+              }
+              return t;
+            })
+          );
+        }
       }
     }
-  }, [location.href, location.pathname, activeTabId, tabs]);
+  }, [location.pathname, location.searchStr, activeTabId, tabs, isSwitchingTab]);
 
   const openTab = useCallback((comic: Comic, newTab: boolean = true) => {
     const tabData: Partial<Tab> = {
@@ -104,6 +107,7 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         ...tabData as Tab,
         id: crypto.randomUUID(),
       };
+      setIsSwitchingTab(true);
       setTabs(prevTabs => [...prevTabs, newTabObj]);
       setActiveTabId(newTabObj.id);
     } else if (activeTabId) {
@@ -129,6 +133,7 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         ...tabData as Tab,
         id: crypto.randomUUID(),
       };
+      setIsSwitchingTab(true);
       setTabs(prevTabs => [...prevTabs, newTabObj]);
       setActiveTabId(newTabObj.id);
     } else if (activeTabId) {
@@ -142,6 +147,15 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   }, [activeTabId]);
 
+  const switchTab = useCallback((tabId: string) => {
+    const tab = tabs.find(t => t.id === tabId);
+    if (tab) {
+      setIsSwitchingTab(true);
+      setActiveTabId(tabId);
+      router.history.push(tab.path);
+    }
+  }, [tabs, router]);
+
   const closeTab = useCallback((tabId: string) => {
     const tabToClose = tabs.find(t => t.id === tabId);
     if (!tabToClose) return;
@@ -154,10 +168,12 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       if (newTabs.length > 0) {
         const nextIndex = Math.min(tabIndex, newTabs.length - 1);
         const nextTab = newTabs[nextIndex];
-        navigate({ to: nextTab.path as any });
+        setIsSwitchingTab(true);
+        setActiveTabId(nextTab.id);
+        router.history.push(nextTab.path);
       } else {
         // No tabs left, navigate to library
-        navigate({ to: '/library', search: { path: '' } as any });
+        router.history.push('/library');
       }
     }
 
@@ -183,17 +199,15 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (tabs.length <= 1) return;
     const currentIndex = tabs.findIndex((t) => t.id === activeTabId);
     const nextIndex = (currentIndex + 1) % tabs.length;
-    const nextTab = tabs[nextIndex];
-    navigate({ to: nextTab.path as any });
-  }, [tabs, activeTabId, navigate]);
+    switchTab(tabs[nextIndex].id);
+  }, [tabs, activeTabId, switchTab]);
 
   const prevTab = useCallback(() => {
     if (tabs.length <= 1) return;
     const currentIndex = tabs.findIndex((t) => t.id === activeTabId);
     const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
-    const prevTab = tabs[prevIndex];
-    navigate({ to: prevTab.path as any });
-  }, [tabs, activeTabId, navigate]);
+    switchTab(tabs[prevIndex].id);
+  }, [tabs, activeTabId, switchTab]);
 
   const value: TabContextType = {
     tabs,
@@ -202,6 +216,7 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     openLibraryTab,
     closeTab,
     setActiveTabId,
+    switchTab,
     updateTab,
     reorderTabs,
     nextTab,

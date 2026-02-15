@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
+import { useEffect } from 'react';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { VirtualizedGrid } from '../../components/virtualized-grid';
 import { ComicCard } from '../../components/comic-card';
 import { FavoriteImageCard } from '../../components/favorite-image-card';
@@ -11,16 +11,29 @@ import { RxSymbol, RxStarFilled, RxGrid, RxFile } from 'react-icons/rx';
 import { Tabs } from '../../components/tabs';
 
 export const Route = createFileRoute('/library/favorites')({
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      tab: (search.tab as string) || 'comics',
+    }
+  },
   component: LibraryFavorites,
 });
 
 function LibraryFavorites() {
+  const { tab: activeTab } = Route.useSearch();
+  const navigate = useNavigate();
   const { comics: favoriteComics, loading: loadingComics } = useFavoriteComics();
   const { pages: favoritePages, loading: loadingPages } = useFavoritePages();
   const openComic = useOpenComic();
   const openComicPage = useOpenComicPage();
 
-  const [activeTab, setActiveTab] = useState('comics');
+  const setActiveTab = (tab: string) => {
+    navigate({
+      to: '/library/favorites',
+      search: (prev) => ({ ...prev, tab }),
+      replace: true,
+    });
+  };
 
   const tabItems = [
     {

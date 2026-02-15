@@ -7,9 +7,10 @@ import { CardItem } from './card-item';
 type ArtistCardProps = {
   artist: ArtistMetadata;
   onClick: (artist: string) => void;
+  isFocused?: boolean;
 };
 
-export const ArtistCard: React.FC<ArtistCardProps> = ({ artist, onClick }) => {
+export const ArtistCard: React.FC<ArtistCardProps> = ({ artist, onClick, isFocused }) => {
   const artistName = artist.artist || 'Unknown Artist';
   
   return (
@@ -17,6 +18,7 @@ export const ArtistCard: React.FC<ArtistCardProps> = ({ artist, onClick }) => {
       title={artistName}
       imageUrl={artist.thumbnail_path ? getImageUrl(artist.thumbnail_path) : null}
       onOpen={() => onClick(artistName)}
+      isFocused={isFocused}
       fallbackIcon={<RxPerson size={48} />}
       subtitle={
         <p className="text-xs text-muted-foreground">

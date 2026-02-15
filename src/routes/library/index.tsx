@@ -190,7 +190,14 @@ function LibraryExplorer() {
         ) : (
           <GridView
             items={currentItems}
-            renderItem={(item) => (
+            onActivateItem={(item) => {
+              if (item.type === 'folder') {
+                handleFolderClick(item.path);
+              } else {
+                openComic(item);
+              }
+            }}
+            renderItem={(item, index, isFocused) => (
               item.type === 'folder' ? (
                 <FolderCard 
                   key={item.path}
@@ -199,12 +206,14 @@ function LibraryExplorer() {
                   thumbnailPath={item.thumbnail_path}
                   comicCount={item.comic_count}
                   onClick={handleFolderClick}
+                  isFocused={isFocused}
                 />
               ) : (
                 <ComicCard 
                   key={item.id}
                   comic={item}
                   onOpen={openComic}
+                  isFocused={isFocused}
                 />
               )
             )}

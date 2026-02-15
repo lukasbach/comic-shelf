@@ -19,6 +19,7 @@ export interface CardItemProps {
   failedTitle?: string;
   aspectRatio?: string;
   imageClassName?: string;
+  isFocused?: boolean;
 }
 
 export const CardItem: React.FC<CardItemProps> = ({
@@ -39,10 +40,13 @@ export const CardItem: React.FC<CardItemProps> = ({
   failedTitle,
   aspectRatio = "aspect-3/4",
   imageClassName = "",
+  isFocused = false,
 }) => {
   const content = (
     <div 
-      className={`group flex flex-col bg-card rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all cursor-pointer relative ${className}`}
+      className={`group flex flex-col bg-card rounded-lg overflow-hidden border shadow-sm transition-all cursor-pointer relative ${
+        isFocused ? 'border-primary ring-2 ring-primary/50 scale-102 z-20 shadow-md ring-offset-2 dark:ring-offset-black' : 'border-border hover:shadow-md'
+      } ${className}`}
       onClick={(e) => !isIndexing && onOpen(e)}
       onAuxClick={(e) => {
         if (e.button === 1 && !isIndexing) {

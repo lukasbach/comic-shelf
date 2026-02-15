@@ -31,7 +31,8 @@ interface GridPageProps<T> {
   title: string;
   icon: React.ReactNode;
   items: T[];
-  renderItem: (item: T) => React.ReactNode;
+  renderItem: (item: T, index: number, isFocused: boolean) => React.ReactNode;
+  onActivateItem?: (item: T, index: number) => void;
   loading?: boolean;
   emptyMessage?: string;
   noItemsMessage?: string;
@@ -68,6 +69,7 @@ export function GridPage<T>({
   icon,
   items,
   renderItem,
+  onActivateItem,
   loading = false,
   emptyMessage = "No items found matching your filters.",
   noItemsMessage = "No items found.",
@@ -298,6 +300,7 @@ export function GridPage<T>({
       <div className="flex-1 overflow-hidden">
         <GridView
           items={filteredAndSortedItems}
+          onActivateItem={onActivateItem}
           renderItem={renderItem}
           emptyMessage={emptyMessage}
           itemHeight={itemHeight}

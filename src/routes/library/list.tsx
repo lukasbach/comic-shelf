@@ -42,11 +42,13 @@ function LibraryList() {
       icon={<RxLayers size={24} />}
       items={comics}
       loading={loading}
-      renderItem={(comic) => (
+      onActivateItem={(comic) => openComic(comic)}
+      renderItem={(comic, index, isFocused) => (
         <ComicCard 
           key={comic.id} 
           comic={comic} 
           onOpen={openComic} 
+          isFocused={isFocused}
         />
       )}
       searchFields={(comic) => [comic.title, comic.artist, comic.path]}

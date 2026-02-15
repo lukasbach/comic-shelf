@@ -53,7 +53,7 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
   return (
     <div className="h-full overflow-hidden">
       <GridView
-        items={pages}
+        items={pages || []}
         itemHeight={300} // Pages thumbnails are usually smaller
         columnsMap={{
           xl: 8,
@@ -62,11 +62,14 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
           sm: 3,
           default: 2,
         }}
-        renderItem={(page, index) => (
+        focusedIndex={currentPage}
+        onFocusedIndexChange={(index) => activeTabId && updateTab(activeTabId, { currentPage: index ?? 0 })}
+        onActivateItem={(page, index) => handlePageClick(index)}
+        renderItem={(page, index, isFocused) => (
           <PageThumbnail
             key={page.id}
             page={page}
-            isActive={index === currentPage}
+            isActive={index === currentPage || isFocused}
             onClick={() => handlePageClick(index)}
             onToggleFavorite={() => onTogglePageFavorite(page.id)}
             onToggleViewed={() => onTogglePageViewed(page.id)}

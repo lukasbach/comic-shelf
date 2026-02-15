@@ -15,6 +15,7 @@ interface VirtualizedGridProps<T> {
     sm?: number;
     default?: number;
   };
+  scrollToIndex?: number | null;
 }
 
 export function VirtualizedGrid<T>({
@@ -31,6 +32,7 @@ export function VirtualizedGrid<T>({
     sm: 3,
     default: 2,
   },
+  scrollToIndex,
 }: VirtualizedGridProps<T>) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [columns, setColumns] = useState(columnsMap.default || 2);
@@ -77,6 +79,14 @@ export function VirtualizedGrid<T>({
       return el.getBoundingClientRect().height;
     }
   });
+
+  // Scroll to index when it changes
+  useEffect(() => {
+    if (scrollToIndex !== null && scrollToIndex !== undefined) {
+      const rowIndex = Math.floor(scrollToIndex / columns);
+      rowVirtualizer.scrollToIndex(rowIndex, { align: 'center' });
+    }
+  }, [scrollToIndex, columns, rowVirtualizer]);
 
   return (
     <div

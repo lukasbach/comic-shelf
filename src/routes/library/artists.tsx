@@ -33,11 +33,13 @@ function LibraryArtists() {
       icon={<RxPerson size={24} />}
       items={artists}
       loading={loading}
-      renderItem={(artist) => (
+      onActivateItem={(artist) => handleArtistClick(artist.artist || 'Unknown Artist')}
+      renderItem={(artist, index, isFocused) => (
         <ArtistCard 
           key={artist.artist || 'unknown'} 
           artist={artist} 
           onClick={handleArtistClick} 
+          isFocused={isFocused}
         />
       )}
       searchFields={(artist) => [artist.artist]}

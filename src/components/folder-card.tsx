@@ -9,6 +9,7 @@ type FolderCardProps = {
   thumbnailPath?: string;
   comicCount: number;
   onClick: (path: string, e?: React.MouseEvent) => void;
+  isFocused?: boolean;
 };
 
 export const FolderCard: React.FC<FolderCardProps> = ({ 
@@ -16,7 +17,8 @@ export const FolderCard: React.FC<FolderCardProps> = ({
   path,
   thumbnailPath, 
   comicCount, 
-  onClick 
+  onClick,
+  isFocused
 }) => {
   const coverUrl = thumbnailPath ? getImageUrl(thumbnailPath) : '';
 
@@ -25,6 +27,7 @@ export const FolderCard: React.FC<FolderCardProps> = ({
       title={name}
       imageUrl={coverUrl}
       onOpen={(e) => onClick(path, e)}
+      isFocused={isFocused}
       imageClassName="opacity-60 group-hover:opacity-80"
       fallbackIcon={<RxArchive size={48} className="text-blue-500 drop-shadow-md" />}
       subtitle={

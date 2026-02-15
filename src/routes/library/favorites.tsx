@@ -82,12 +82,12 @@ function LibraryFavorites() {
 
   const loading = loadingComics || loadingPages || loadingGalleries;
 
-  const renderItem = (item: any) => {
+  const renderItem = (item: any, index: number, isFocused: boolean) => {
     if (activeTab === 'comics') {
-      return <ComicCard key={item.id} comic={item} onOpen={openComic} />;
+      return <ComicCard key={item.id} comic={item} onOpen={openComic} isFocused={isFocused} />;
     }
     if (activeTab === 'pages') {
-      return <PageCard key={item.id} page={item} onOpen={openComicPage} onUpdate={refreshPages} onAddToGallery={setGallerySelectionPageId} />;
+      return <PageCard key={item.id} page={item} onOpen={openComicPage} onUpdate={refreshPages} onAddToGallery={setGallerySelectionPageId} isFocused={isFocused} />;
     }
     if (activeTab === 'galleries') {
       return (
@@ -96,10 +96,21 @@ function LibraryFavorites() {
           gallery={item} 
           onClick={() => navigate({ to: `/viewer/gallery-${item.id}` as any })}
           onUpdate={refreshGalleries}
+          isFocused={isFocused}
         />
       );
     }
     return null;
+  };
+
+  const onActivateItem = (item: any) => {
+    if (activeTab === 'comics') {
+      openComic(item);
+    } else if (activeTab === 'pages') {
+      openComicPage(item.comic_id, item.page_number, undefined, { id: item.comic_id, title: item.comic_title, path: item.comic_path });
+    } else if (activeTab === 'galleries') {
+      navigate({ to: `/viewer/gallery-${item.id}` as any });
+    }
   };
 
   const getItems = () => {
@@ -145,6 +156,7 @@ function LibraryFavorites() {
       icon={<RxStarFilled size={24} className="text-amber-400" />}
       items={getItems()}
       loading={loading}
+      onActivateItem={onActivateItem}
       renderItem={renderItem}
       actions={
         <div className="flex items-center bg-muted/30 p-1 rounded-lg border border-border/50">

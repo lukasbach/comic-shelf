@@ -3,6 +3,7 @@ import { SettingsProvider } from '../contexts/settings-context'
 import { TabProvider } from '../contexts/tab-context'
 import { IndexingProvider } from '../contexts/indexing-context'
 import { ViewerRefProvider } from '../contexts/viewer-ref-context'
+import { GridNavigationProvider } from '../contexts/grid-navigation-context'
 import { TopBar } from '../components/top-bar'
 import { TabBar } from '../components/tab-bar'
 import { useAppHotkeys } from '../hooks/use-app-hotkeys'
@@ -31,7 +32,9 @@ function RootLayout() {
       <TabProvider>
         <IndexingProvider>
           <ViewerRefProvider>
-            <RootLayoutContent />
+            <GridNavigationProvider>
+              <RootLayoutContent />
+            </GridNavigationProvider>
           </ViewerRefProvider>
         </IndexingProvider>
       </TabProvider>

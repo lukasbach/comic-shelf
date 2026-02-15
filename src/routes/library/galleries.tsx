@@ -77,7 +77,8 @@ function GalleriesPage() {
       icon={<RxLayers className="text-pink-500" size={24} />}
       items={galleries}
       loading={loading}
-      renderItem={(g) => (
+      onActivateItem={(g) => navigate({ to: `/viewer/gallery-${g.id}` as any })}
+      renderItem={(g, index, isFocused) => (
         <GalleryCard
           key={g.id}
           gallery={g}
@@ -85,6 +86,7 @@ function GalleriesPage() {
           onDelete={() => handleDeleteGallery(g.id, g.name)}
           onRename={() => handleRenameGallery(g.id, g.name)}
           onUpdate={refresh}
+          isFocused={isFocused}
         />
       )}
       searchFields={(g) => [g.name]}

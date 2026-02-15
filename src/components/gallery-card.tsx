@@ -15,9 +15,17 @@ interface GalleryCardProps {
   onDelete?: () => void;
   onRename?: () => void;
   onUpdate?: () => void;
+  isFocused?: boolean;
 }
 
-export const GalleryCard: React.FC<GalleryCardProps> = ({ gallery, onClick, onDelete, onRename, onUpdate }) => {
+export const GalleryCard: React.FC<GalleryCardProps> = ({ 
+  gallery, 
+  onClick, 
+  onDelete, 
+  onRename, 
+  onUpdate,
+  isFocused
+}) => {
   const { settings } = useSettings();
   const [isFavorite, setIsFavorite] = useState(gallery.is_favorite === 1);
   const [isViewed, setIsViewed] = useState(!!gallery.last_opened_at);
@@ -98,6 +106,7 @@ export const GalleryCard: React.FC<GalleryCardProps> = ({ gallery, onClick, onDe
     <CardItem
       title={gallery.name}
       onOpen={onClick}
+      isFocused={isFocused}
       imageUrl={gallery.thumbnail_path ? getImageUrl(gallery.thumbnail_path) : null}
       fallbackIcon={<RxLayers size={48} className="text-slate-700 group-hover:text-pink-500/50 transition-colors" />}
       footer={

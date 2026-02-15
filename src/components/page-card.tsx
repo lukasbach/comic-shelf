@@ -13,9 +13,10 @@ type PageCardProps = {
   onOpen: (comicId: number, pageNumber: number, e?: React.MouseEvent, comicInfo?: { id: number; path: string; title: string }) => void;
   onUpdate?: () => void;
   onAddToGallery?: (pageId: number) => void;
+  isFocused?: boolean;
 };
 
-export const PageCard: React.FC<PageCardProps> = ({ page, onOpen, onUpdate, onAddToGallery }) => {
+export const PageCard: React.FC<PageCardProps> = ({ page, onOpen, onUpdate, onAddToGallery, isFocused }) => {
   const { settings } = useSettings();
   const [isFavorite, setIsFavorite] = useState(page.is_favorite === 1);
   const [isViewed, setIsViewed] = useState(page.last_opened_at !== null);
@@ -76,6 +77,7 @@ export const PageCard: React.FC<PageCardProps> = ({ page, onOpen, onUpdate, onAd
       title={page.comic_title}
       imageUrl={thumbUrl}
       onOpen={(e) => onOpen(page.comic_id, page.page_number, e, { id: page.comic_id, title: page.comic_title, path: page.comic_path })}
+      isFocused={isFocused}
       subtitle={<p className="text-[10px] opacity-80">Page {page.page_number}</p>}
       topRightIcons={
         <>

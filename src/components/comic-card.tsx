@@ -12,9 +12,10 @@ import { useSettings } from '../contexts/settings-context';
 type ComicCardProps = {
   comic: Comic;
   onOpen: (comic: Comic, e?: React.MouseEvent) => void;
+  isFocused?: boolean;
 };
 
-export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen }) => {
+export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen, isFocused }) => {
   const { settings } = useSettings();
   const [isFavorite, setIsFavorite] = useState(comic.is_favorite === 1);
   const [isViewed, setIsViewed] = useState(comic.last_opened_at !== null);
@@ -84,6 +85,7 @@ export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen }) => {
       title={comic.title}
       imageUrl={coverUrl}
       onOpen={(e) => onOpen(comic, e)}
+      isFocused={isFocused}
       isIndexing={isIndexing}
       indexingLabel={comic.indexing_status === 'processing' ? 'Processing' : 'Pending'}
       isFailed={isFailed}

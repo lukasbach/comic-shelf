@@ -40,13 +40,15 @@ function AllPagesList() {
       icon={<RxImage size={24} />}
       items={pages}
       loading={loading}
-      renderItem={(page) => (
+      onActivateItem={(page) => openComicPage(page.comic_id, page.page_number, undefined, { id: page.comic_id, title: page.comic_title, path: page.comic_path })}
+      renderItem={(page, index, isFocused) => (
         <PageCard 
           key={page.id} 
           page={page} 
           onOpen={openComicPage} 
           onUpdate={refetch} 
           onAddToGallery={setGallerySelectionPageId}
+          isFocused={isFocused}
         />
       )}
       searchFields={(page) => [page.comic_title, page.comic_artist, page.file_path]}

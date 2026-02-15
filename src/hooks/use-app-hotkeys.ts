@@ -1,13 +1,19 @@
 import { useEffect, useRef } from 'react';
+import { useNavigate, useLocation, useSearch } from '@tanstack/react-router';
 import { useSettings } from '../contexts/settings-context';
 import { useTabs } from '../contexts/tab-context';
 import { formatKeyEvent } from '../utils/hotkey-utils';
 import { useViewerRef } from '../contexts/viewer-ref-context';
+import { useGridNavigation } from '../contexts/grid-navigation-context';
 
 export const useAppHotkeys = () => {
   const { settings } = useSettings();
   const { activeTabId, tabs, updateTab, closeTab, nextTab, prevTab } = useTabs();
   const { scrollContainerRef, nextPage, prevPage } = useViewerRef();
+  const { moveFocus, activateFocus } = useGridNavigation();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const search = useSearch({ strict: false }) as any;
   const activeTab = tabs.find(t => t.id === activeTabId);
   
   const scrollIntervalRef = useRef<number | null>(null);
@@ -41,6 +47,44 @@ export const useAppHotkeys = () => {
       activeScrollKeyRef.current = null;
     };
 
+    const handleBackspace = () => {
+      if (activeTab?.type === 'comic') {
+        if (activeTab.viewMode === 'overview') {
+          // Go to library folder
+          if (activeTab.comicPath && !activeTab.comicPath.startsWith('gallery://')) {
+            const parentPath = activeTab.comicPath.split(/[\\/]/).slice(0, -1).join('/');
+            navigate({ to: '/library', search: { path: parentPath } });
+          } else if (activeTab.galleryId) {
+            navigate({ to: '/library/galleries' });
+          } else {
+            navigate({ to: '/library' });
+          }
+        } else {
+          updateTab(activeTab.id, { viewMode: 'overview' });
+        }
+      } else if (location.pathname.startsWith('/library')) {
+        const currentPath = search.path || '';
+        if (currentPath) {
+          const segments = currentPath.split(/[\\/]/).filter(Boolean);
+          segments.pop();
+          const parentPath = segments.join('/');
+          navigate({ to: '/library', search: { path: parentPath } });
+        } else if (location.pathname !== '/library') {
+          navigate({ to: '/library' });
+        }
+      }
+    };
+
+    const handleEnter = () => {
+      if (activeTab?.type === 'comic') {
+        if (activeTab.viewMode === 'overview') {
+          updateTab(activeTab.id, { viewMode: 'single' });
+        }
+      } else {
+        activateFocus();
+      }
+    };
+
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't handle hotkeys when in input/textarea/select
       if (
@@ -53,6 +97,31 @@ export const useAppHotkeys = () => {
 
       const key = formatKeyEvent(e);
       const hotkeys = settings.hotkeys;
+
+      // Backspace: navigate up or switch to overview
+      if (e.key === 'Backspace') {
+        e.preventDefault();
+        handleBackspace();
+        return;
+      }
+
+      // Enter: switch to single page in comic viewer, or open focused card in library
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleEnter();
+        return;
+      }
+
+      // Arrow keys for grid navigation (if not in a viewer mode that uses them for paging/scrolling)
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        const isViewerNav = activeTab?.type === 'comic' && (activeTab.viewMode === 'single' || activeTab.viewMode === 'scroll');
+        if (!isViewerNav) {
+          e.preventDefault();
+          const direction = e.key.replace('Arrow', '').toLowerCase() as any;
+          moveFocus(direction);
+          return;
+        }
+      }
 
       // Scrolling (handled with animation frames for smoothness on hold)
       if (key === hotkeys.scrollDown) {

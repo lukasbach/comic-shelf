@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { useRouterState, useNavigate, useRouter } from '@tanstack/react-router';
 import { Tab } from '../stores/tab-store';
+import { useSettings } from './settings-context';
 
 interface TabContextType {
   tabs: Tab[];
@@ -35,6 +36,7 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const { location } = useRouterState();
   const navigate = useNavigate();
   const router = useRouter();
+  const { settings } = useSettings();
 
   // Sync current route with tabs
   useEffect(() => {
@@ -48,8 +50,9 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         path: currentPath,
         title: getRouteTitle(location.pathname),
         currentPage: 0,
-        viewMode: 'overview',
-        zoomLevel: 100,
+        viewMode: settings.defaultViewMode || 'overview',
+        zoomLevel: settings.defaultZoomLevel || 100,
+        fitMode: settings.defaultFitMode || 'width',
         sidebarCollapsed: false,
       };
 
@@ -125,8 +128,9 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       title: comic.title,
       path: targetPath,
       currentPage: options?.currentPage ?? 0,
-      viewMode: options?.viewMode || (options?.currentPage !== undefined ? 'single' : 'overview'),
-      zoomLevel: 100,
+      viewMode: options?.viewMode || (options?.currentPage !== undefined ? 'single' : settings.defaultViewMode || 'overview'),
+      zoomLevel: settings.defaultZoomLevel || 100,
+      fitMode: settings.defaultFitMode || 'width',
       sidebarCollapsed: false,
     };
 

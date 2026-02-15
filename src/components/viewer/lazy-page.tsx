@@ -8,6 +8,7 @@ import { RenderedPageImage } from './rendered-page-image';
 type LazyPageProps = {
   page: ComicPage;
   zoomLevel: number;
+  fitMode: 'width' | 'none';
   onVisible?: (pageNumber: number) => void;
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
@@ -16,8 +17,9 @@ type LazyPageProps = {
 };
 
 export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.RefAttributes<HTMLDivElement>> = React.forwardRef<HTMLDivElement, LazyPageProps>(
-  ({ page, zoomLevel, onVisible, isFavorite, onToggleFavorite, onIncrementViewCount, onDecrementViewCount }, ref) => {
+  ({ page, zoomLevel, fitMode, onVisible, isFavorite, onToggleFavorite, onIncrementViewCount, onDecrementViewCount }, ref) => {
     const [isVisible, setIsVisible] = useState(false);
+    const [naturalSize, setNaturalSize] = useState<{ width: number; height: number } | null>(null);
     const internalRef = useRef<HTMLDivElement>(null);
     
     // Sync internal ref with forwarded ref
@@ -55,7 +57,14 @@ export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.Ref
       };
     }, [page.page_number, onVisible]);
 
-    const isFitWidth = zoomLevel === 100;
+    const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+      setNaturalSize({
+        width: e.currentTarget.naturalWidth,
+        height: e.currentTarget.naturalHeight,
+      });
+    };
+
+    const isFitWidth = fitMode === 'width';
     
     // Estimate height based on aspect ratio if available, otherwise use a default
     // Most comics are roughly 1:1.4 aspect ratio. 
@@ -97,8 +106,13 @@ export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.Ref
               page={page}
               alt={`Page ${page.page_number}`}
               className="block"
+              onLoad={handleLoad}
               style={{
-                width: isFitWidth ? '100%' : `${zoomLevel}%`,
+                width: isFitWidth 
+                  ? '100%' 
+                  : naturalSize 
+                    ? `${(naturalSize.width * zoomLevel) / 100}px` 
+                    : 'auto',
                 height: 'auto',
                 maxWidth: isFitWidth ? '100%' : 'none',
               }}

@@ -32,6 +32,7 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
   
   const currentPage = activeTab?.currentPage ?? 0;
   const zoomLevel = activeTab?.zoomLevel ?? 100;
+  const fitMode = activeTab?.fitMode ?? 'width';
   const viewMode = activeTab?.viewMode ?? 'scroll';
   const isSidebarCollapsed = activeTab?.sidebarCollapsed ?? false;
   
@@ -112,6 +113,12 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
     }
   };
 
+  const handleFitModeChange = (mode: 'width' | 'none') => {
+    if (activeTabId) {
+      updateTab(activeTabId, { fitMode: mode });
+    }
+  };
+
   const handleToggleSidebar = () => {
     if (activeTabId) {
       updateTab(activeTabId, { sidebarCollapsed: !isSidebarCollapsed });
@@ -130,24 +137,18 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
         <div 
           ref={containerRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto overflow-x-hidden p-4 flex flex-col items-center"
-          style={{ 
-            overflowX: zoomLevel > 100 ? 'auto' : 'hidden',
-          }}
+          className="flex-1 overflow-auto p-4 flex flex-col items-center"
         >
           <div 
-            className="flex flex-col items-center gap-4"
-            style={{ 
-                width: zoomLevel > 100 ? `${zoomLevel}%` : '100%',
-                maxWidth: zoomLevel > 100 ? 'none' : '800px' // Limit width in fit-width for readability if too wide
-            }}
+            className="flex flex-col items-center gap-4 w-full"
           >
             {pages.map((page, index) => (
             <LazyPage
               key={page.id}
               ref={(el: HTMLDivElement | null) => { pageRefs.current[index] = el; }}
               page={page}
-              zoomLevel={100} // Image should fill its LazyPage container (which is scaled by parent)
+              zoomLevel={zoomLevel}
+              fitMode={fitMode}
               isFavorite={page.is_favorite === 1}
               onToggleFavorite={() => onTogglePageFavorite(page.id)}
               onIncrementViewCount={() => onIncrementPageViewCount(page.id)}
@@ -169,7 +170,9 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
         currentPage={currentPage}
         onPageSelect={handleGoToPage}
         zoomLevel={zoomLevel}
+        fitMode={fitMode}
         onZoomChange={handleZoomChange}
+        onFitModeChange={handleFitModeChange}
         viewMode={viewMode}
         onViewModeChange={handleModeChange}
         isCollapsed={isSidebarCollapsed}

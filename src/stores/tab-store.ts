@@ -8,6 +8,7 @@ export type Tab = {
   currentPage?: number;  // last viewed page
   viewMode?: 'overview' | 'single' | 'scroll';
   zoomLevel?: number;
+  fitMode?: 'width' | 'none';
   sidebarCollapsed?: boolean;
   slideshowActive?: boolean;
 };

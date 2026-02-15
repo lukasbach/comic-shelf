@@ -34,6 +34,7 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
   
   const currentPage = activeTab?.currentPage ?? 0;
   const zoomLevel = activeTab?.zoomLevel ?? 100;
+  const fitMode = activeTab?.fitMode ?? 'width';
   const viewMode = activeTab?.viewMode ?? 'single';
   const isSidebarCollapsed = activeTab?.sidebarCollapsed ?? false;
   
@@ -85,6 +86,12 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
     }
   };
 
+  const handleFitModeChange = (mode: 'width' | 'none') => {
+    if (activeTabId) {
+      updateTab(activeTabId, { fitMode: mode });
+    }
+  };
+
   const handleToggleSidebar = () => {
     if (activeTabId) {
       updateTab(activeTabId, { sidebarCollapsed: !isSidebarCollapsed });
@@ -112,6 +119,7 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
           <PageImage 
             page={currentPageData} 
             zoomLevel={zoomLevel} 
+            fitMode={fitMode}
             containerRef={containerRef}
           />
         </div>
@@ -135,7 +143,9 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
         currentPage={currentPage}
         onPageSelect={handleGoToPage}
         zoomLevel={zoomLevel}
+        fitMode={fitMode}
         onZoomChange={handleZoomChange}
+        onFitModeChange={handleFitModeChange}
         viewMode={viewMode}
         onViewModeChange={handleModeChange}
         isCollapsed={isSidebarCollapsed}

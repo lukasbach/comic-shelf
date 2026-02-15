@@ -38,12 +38,12 @@ describe('LazyPage', () => {
   });
 
   it('should render page number', () => {
-    render(<LazyPage page={mockPage} zoomLevel={100} />);
+    render(<LazyPage page={mockPage} zoomLevel={100} fitMode="width" />);
     expect(screen.getByText('Page 1')).toBeDefined();
   });
 
   it('should render image when visible', async () => {
-    render(<LazyPage page={mockPage} zoomLevel={100} />);
+    render(<LazyPage page={mockPage} zoomLevel={100} fitMode="width" />);
     const img = await screen.findByRole('img');
     expect(img).toBeDefined();
     expect(img.getAttribute('src')).toBe('asset:///test/path.jpg');
@@ -51,13 +51,13 @@ describe('LazyPage', () => {
 
   it('should call onVisible when intersecting', () => {
     const onVisible = vi.fn();
-    render(<LazyPage page={mockPage} zoomLevel={100} onVisible={onVisible} />);
+    render(<LazyPage page={mockPage} zoomLevel={100} fitMode="width" onVisible={onVisible} />);
     expect(onVisible).toHaveBeenCalledWith(0); // 0-indexed
   });
 
   it('should work with callback refs', () => {
     const refCallback = vi.fn();
-    render(<LazyPage page={mockPage} zoomLevel={100} ref={refCallback} />);
+    render(<LazyPage page={mockPage} zoomLevel={100} fitMode="width" ref={refCallback} />);
     expect(refCallback).toHaveBeenCalled();
     expect(refCallback.mock.calls[0][0]).not.toBeNull();
   });
@@ -66,7 +66,7 @@ describe('LazyPage', () => {
     // We need to look for the SVG or something that represents RxStarFilled
     // Since we are using react-icons, it might be hard to test for the exact component
     // but we can check if it renders something or if we mock it
-    const { container } = render(<LazyPage page={mockPage} zoomLevel={100} isFavorite={true} />);
+    const { container } = render(<LazyPage page={mockPage} zoomLevel={100} fitMode="width" isFavorite={true} />);
     // Just check if an SVG is present (there's only one for the star usually)
     const svgs = container.querySelectorAll('svg');
     expect(svgs.length).toBeGreaterThan(0);

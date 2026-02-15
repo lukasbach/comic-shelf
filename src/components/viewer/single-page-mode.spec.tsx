@@ -62,7 +62,7 @@ describe('SinglePageMode', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (useTabs as any).mockReturnValue({
-      tabs: [{ id: 'tab1', currentPage: 0, zoomLevel: 100, viewMode: 'single', sidebarCollapsed: false }],
+      tabs: [{ id: 'tab1', currentPage: 0, zoomLevel: 100, fitMode: 'width', viewMode: 'single', sidebarCollapsed: false }],
       activeTabId: 'tab1',
       updateTab,
     });
@@ -95,7 +95,7 @@ describe('SinglePageMode', () => {
 
   it('navigates to prev page on click', () => {
     (useTabs as any).mockReturnValue({
-      tabs: [{ id: 'tab1', currentPage: 1, zoomLevel: 100, viewMode: 'single', sidebarCollapsed: false }],
+      tabs: [{ id: 'tab1', currentPage: 1, zoomLevel: 100, fitMode: 'width', viewMode: 'single', sidebarCollapsed: false }],
       activeTabId: 'tab1',
       updateTab,
     });

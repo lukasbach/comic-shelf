@@ -15,6 +15,7 @@ export type AppSettings = {
     prevTab: string;
   };
   defaultZoomLevel: number;       // percentage, e.g. 100
+  defaultFitMode: 'width' | 'none';
   defaultViewMode: 'single' | 'scroll' | 'overview';
   slideshowDelay: number;         // milliseconds
   slideshowAutoScroll: boolean;
@@ -38,6 +39,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
     prevTab: 'ctrl+shift+Tab',
   },
   defaultZoomLevel: 100,
+  defaultFitMode: 'width',
   defaultViewMode: 'single',
   slideshowDelay: 5000,
   slideshowAutoScroll: true,

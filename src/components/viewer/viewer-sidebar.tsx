@@ -1,10 +1,10 @@
 import React from 'react';
 import { ComicPage } from '../../types/comic';
 import {
-    RxGrid, RxFile, RxRows,
-    RxChevronLeft, RxChevronRight,
-    RxDoubleArrowLeft, RxDoubleArrowRight,
-    RxStarFilled
+  RxGrid, RxFile, RxRows,
+  RxChevronLeft, RxChevronRight,
+  RxDoubleArrowLeft, RxDoubleArrowRight,
+  RxStarFilled
 } from 'react-icons/rx';
 import { RenderedPageImage } from './rendered-page-image';
 
@@ -13,7 +13,9 @@ type ViewerSidebarProps = {
   currentPage: number;
   onPageSelect: (pageNumber: number) => void;
   zoomLevel: number;
+  fitMode: 'width' | 'none';
   onZoomChange: (zoom: number) => void;
+  onFitModeChange: (fitMode: 'width' | 'none') => void;
   viewMode: 'overview' | 'single' | 'scroll';
   onViewModeChange: (mode: 'overview' | 'single' | 'scroll') => void;
   isCollapsed: boolean;
@@ -25,7 +27,9 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
   currentPage,
   onPageSelect,
   zoomLevel,
+  fitMode,
   onZoomChange,
+  onFitModeChange,
   viewMode,
   onViewModeChange,
   isCollapsed,
@@ -108,38 +112,68 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
 
         {/* Zoom Controls */}
         <section>
-          <h4 className="text-xs font-bold mb-3 text-gray-400 uppercase">Zoom: {zoomLevel}%</h4>
+          <h4 className="text-xs font-bold mb-3 text-gray-400 uppercase">
+            {fitMode === 'width' ? 'Zoom: Fit Width' : `Zoom: ${zoomLevel}%`}
+          </h4>
           <input
             type="range"
-            min="50"
-            max="300"
+            min="10"
+            max="500"
             step="10"
             value={zoomLevel}
-            onChange={(e) => onZoomChange(parseInt(e.target.value, 10))}
+            onChange={(e) => {
+              onZoomChange(parseInt(e.target.value, 10));
+              onFitModeChange('none');
+            }}
             className="w-full h-2 bg-gray-200 dark:bg-gray-800 rounded-lg appearance-none cursor-pointer accent-blue-600 mb-4"
           />
           <div className="grid grid-cols-2 gap-2">
             <button
-              onClick={() => onZoomChange(100)}
-              className="px-2 py-1.5 text-xs bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+              onClick={() => onFitModeChange('width')}
+              className={`px-2 py-1.5 text-xs rounded transition-colors ${
+                fitMode === 'width'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
             >
               Fit Width
             </button>
             <button
-              onClick={() => onZoomChange(150)}
-              className="px-2 py-1.5 text-xs bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+              onClick={() => {
+                onZoomChange(100);
+                onFitModeChange('none');
+              }}
+              className={`px-2 py-1.5 text-xs rounded transition-colors ${
+                fitMode === 'none' && zoomLevel === 100
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
             >
-              150%
+              100%
             </button>
             <button
-              onClick={() => onZoomChange(200)}
-              className="px-2 py-1.5 text-xs bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+              onClick={() => {
+                onZoomChange(200);
+                onFitModeChange('none');
+              }}
+              className={`px-2 py-1.5 text-xs rounded transition-colors ${
+                fitMode === 'none' && zoomLevel === 200
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
             >
               200%
             </button>
             <button
-              onClick={() => onZoomChange(300)}
-              className="px-2 py-1.5 text-xs bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+              onClick={() => {
+                onZoomChange(300);
+                onFitModeChange('none');
+              }}
+              className={`px-2 py-1.5 text-xs rounded transition-colors ${
+                fitMode === 'none' && zoomLevel === 300
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
             >
               300%
             </button>

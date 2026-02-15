@@ -113,10 +113,10 @@
 ### Implementation Details
 - **Single Page Mode**: Implemented the single page mode with navigation, zoom, and sidebar thumbnails.
 - **Preloading**: Added `usePreloadImages` hook to preload the next few pages for smoother navigation.
-- **Zoom**: Supported zoom levels from 50% to 300%, with "Fit Width" as the default (100%).
-- **Sidebar**: Added a collapsible sidebar with view mode switching, zoom controls, and upcoming page thumbnails.
-- **Navigation**: Integrated with the tab system to persist current page and zoom level per tab. Added jump-to-page functionality by clicking the page number.
-- **Inconsistencies Fixed**: Standardized `currentPage` to be 0-indexed across the viewer components to simplify array access.
+- **Zoom**: Redesigned zoom system where 100% represents natural image size. Introduced "Fit Width" as a distinct mode (default) that scales images to the viewer width while maintaining aspect ratio.
+- **Sidebar**: Added a collapsible sidebar with view mode switching, zoom controls (slider and presets), and upcoming page thumbnails.
+- **Navigation**: Integrated with the tab system to persist current page, zoom level, and fit mode per tab. Added jump-to-page functionality by clicking the page number.
+- **Inconsistencies Fixed**: Standardized `currentPage` to be 0-indexed across the viewer components to simplify array access. Fixed image skewing issue by ensuring `height: auto` is always applied during zoom.
 
 ## Task 8: Comic Viewer  Scroll Mode
 - [x] Implement `useScrollPageTracker` hook for scroll synchronization

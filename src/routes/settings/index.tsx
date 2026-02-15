@@ -208,6 +208,33 @@ function SettingsPage() {
                 )}
               </form.Field>
 
+              <form.Field name="defaultFitMode">
+                {(field) => (
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium text-slate-300">Default Fit Mode</label>
+                    <div className="flex gap-2">
+                      {[
+                        { value: 'width', label: 'Fit Width' },
+                        { value: 'none', label: 'None (Zoom)' },
+                      ].map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => field.handleChange(opt.value as any)}
+                          className={`flex-1 flex flex-col items-center justify-center gap-1 p-2 rounded-lg border transition-all ${
+                            field.state.value === opt.value
+                              ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20'
+                              : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600'
+                          }`}
+                        >
+                          <span className="text-[10px] uppercase font-bold tracking-tighter">{opt.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </form.Field>
+
               <form.Field name="defaultZoomLevel">
                 {(field) => (
                   <div className="space-y-3 col-span-full">
@@ -218,8 +245,8 @@ function SettingsPage() {
                     <div className="flex items-center gap-4">
                       <input
                         type="range"
-                        min="50"
-                        max="300"
+                        min="10"
+                        max="500"
                         step="10"
                         value={field.state.value}
                         onChange={(e) => field.handleChange(Number(e.target.value))}

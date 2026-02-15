@@ -11,6 +11,17 @@ vi.mock('@tanstack/react-router', () => ({
     },
   }),
   useNavigate: () => vi.fn(),
+  useRouter: () => ({ history: { push: vi.fn() } }),
+}));
+
+vi.mock('./settings-context', () => ({
+  useSettings: () => ({
+    settings: {
+      defaultViewMode: 'overview',
+      defaultZoomLevel: 100,
+      defaultFitMode: 'width',
+    },
+  }),
 }));
 
 const mockComic: Comic = {

@@ -110,10 +110,16 @@ export const useAppHotkeys = () => {
         // Zoom
         else if (key === hotkeys.zoomIn) {
           e.preventDefault();
-          updateTab(activeTab.id, { zoomLevel: Math.min(300, (activeTab.zoomLevel || 100) + 10) });
+          updateTab(activeTab.id, { 
+            zoomLevel: Math.min(500, (activeTab.zoomLevel || 100) + 10),
+            fitMode: 'none'
+          });
         } else if (key === hotkeys.zoomOut) {
           e.preventDefault();
-          updateTab(activeTab.id, { zoomLevel: Math.max(50, (activeTab.zoomLevel || 100) - 10) });
+          updateTab(activeTab.id, { 
+            zoomLevel: Math.max(10, (activeTab.zoomLevel || 100) - 10),
+            fitMode: 'none'
+          });
         }
 
         // View Mode Toggle

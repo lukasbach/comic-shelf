@@ -6,7 +6,7 @@ import { Comic, ComicPage } from '../../types/comic';
 // Mock useTabs
 vi.mock('../../contexts/tab-context', () => ({
   useTabs: () => ({
-    tabs: [{ id: 'active-tab', currentPage: 0, zoomLevel: 100, viewMode: 'scroll', sidebarCollapsed: false }],
+    tabs: [{ id: 'active-tab', currentPage: 0, zoomLevel: 100, fitMode: 'width', viewMode: 'scroll', sidebarCollapsed: false }],
     activeTabId: 'active-tab',
     updateTab: vi.fn(),
   }),

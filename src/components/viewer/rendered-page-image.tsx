@@ -9,6 +9,7 @@ type RenderedPageImageProps = {
   className?: string;
   style?: CSSProperties;
   preferThumbnail?: boolean;
+  onLoad?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
 };
 
 export const RenderedPageImage: React.FC<RenderedPageImageProps> = ({
@@ -17,6 +18,7 @@ export const RenderedPageImage: React.FC<RenderedPageImageProps> = ({
   className,
   style,
   preferThumbnail = false,
+  onLoad,
 }) => {
   const [src, setSrc] = useState<string>('');
 
@@ -46,5 +48,5 @@ export const RenderedPageImage: React.FC<RenderedPageImageProps> = ({
     return <div className={className} style={style} />;
   }
 
-  return <img src={src} alt={alt} className={className} style={style} />;
+  return <img src={src} alt={alt} className={className} style={style} onLoad={onLoad} />;
 };

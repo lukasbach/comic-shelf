@@ -18,7 +18,7 @@ import { useIndexPaths } from '../hooks/use-index-paths'
 import { IndexingStatus } from './indexing-status'
 import { useFavoriteComics } from '../hooks/use-favorite-comics'
 import { useBookmarkedComics } from '../hooks/use-bookmarked-comics'
-import { useRecentlyOpened } from '../hooks/use-recently-opened'
+import { useRecentlyViewed } from '../hooks/use-recently-viewed'
 import { useOpenComic } from '../hooks/use-open-comic'
 import { useOpenComicPage } from '../hooks/use-open-comic-page'
 import { ComicContextMenu } from './comic-context-menu'
@@ -26,7 +26,7 @@ import { getImageUrl } from '../utils/image-utils'
 import * as indexPathService from '../services/index-path-service'
 import { open } from '@tauri-apps/plugin-dialog'
 import type { Comic } from '../types/comic'
-import type { RecentlyOpenedPage } from '../hooks/use-recently-opened'
+import type { RecentlyViewedPage } from '../hooks/use-recently-viewed'
 
 const SmallCard: FC<{
   title: string
@@ -112,7 +112,7 @@ export function LibrarySidebar() {
   const { settings } = useSettings()
   const { comics: favoriteComics, refresh: refetchFavorites } = useFavoriteComics()
   const { comics: bookmarkedComics } = useBookmarkedComics()
-  const { comics: recentComics, pages: recentPages, refetch: refetchRecent } = useRecentlyOpened(6)
+  const { comics: recentComics, pages: recentPages, refetch: refetchRecent } = useRecentlyViewed(6)
   const { refresh: refreshPaths } = useIndexPaths()
   const { startIndexing } = useIndexing()
   const openComic = useOpenComic()
@@ -236,7 +236,7 @@ export function LibrarySidebar() {
           <div className="pt-4 border-t border-gray-200 dark:border-gray-800 mt-4">
             <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
               <RxCounterClockwiseClock className="w-3.5 h-3.5" />
-              Recently Opened
+              Recently Viewed
             </div>
             <div className="grid grid-cols-3 gap-2 px-2 mt-1 pb-4">
               {[

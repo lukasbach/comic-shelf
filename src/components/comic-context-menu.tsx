@@ -79,9 +79,9 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
     page?.is_favorite === 1
   );
   const [localIsViewed, setLocalIsViewed] = useState(
-    isComic ? comic?.is_viewed === 1 : 
-    isGallery ? gallery?.is_viewed === 1 : 
-    page?.is_viewed === 1
+    isComic ? !!comic?.last_opened_at : 
+    isGallery ? !!gallery?.last_opened_at : 
+    !!page?.last_opened_at
   );
   const [localViewCount, setLocalViewCount] = useState(
     isComic ? comic?.view_count : 

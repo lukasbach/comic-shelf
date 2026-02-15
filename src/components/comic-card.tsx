@@ -15,7 +15,7 @@ type ComicCardProps = {
 
 export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen }) => {
   const [isFavorite, setIsFavorite] = useState(comic.is_favorite === 1);
-  const [isViewed, setIsViewed] = useState(comic.is_viewed === 1);
+  const [isViewed, setIsViewed] = useState(comic.last_opened_at !== null);
   const [viewCount, setViewCount] = useState(comic.view_count);
 
   const handleToggleFavorite = async (e?: React.MouseEvent) => {

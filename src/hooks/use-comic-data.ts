@@ -34,7 +34,6 @@ export const useComicData = (idOrSlug: string | number) => {
               path: `gallery://${g.id}`,
               page_count: g.page_count || 0,
               is_favorite: 0,
-              is_viewed: 0,
               view_count: 0,
               artist: null,
               series: null,
@@ -42,7 +41,7 @@ export const useComicData = (idOrSlug: string | number) => {
               cover_image_path: p[0]?.thumbnail_path || null,
               created_at: g.created_at,
               updated_at: g.updated_at,
-              last_opened_at: null,
+              last_opened_at: g.last_opened_at || null,
               bookmark_page: null,
               indexing_status: 'completed'
             } as Comic);
@@ -116,13 +115,13 @@ export const useComicData = (idOrSlug: string | number) => {
 
   const toggleComicViewed = useCallback(async () => {
     if (!comic) return;
-    const oldViewed = comic.is_viewed;
+    const oldLastOpened = comic.last_opened_at;
     try {
-      setComic(prev => prev ? { ...prev, is_viewed: prev.is_viewed === 1 ? 0 : 1 } : null);
+      setComic(prev => prev ? { ...prev, last_opened_at: prev.last_opened_at ? null : new Date().toISOString() } : null);
       await comicService.toggleViewed(comic.id);
     } catch (err) {
       console.error('Failed to toggle comic viewed:', err);
-      setComic(prev => prev ? { ...prev, is_viewed: oldViewed } : null);
+      setComic(prev => prev ? { ...prev, last_opened_at: oldLastOpened } : null);
     }
   }, [comic]);
 
@@ -166,13 +165,13 @@ export const useComicData = (idOrSlug: string | number) => {
     const pageIndex = pages.findIndex(p => p.id === pageId);
     if (pageIndex === -1) return;
     
-    const oldViewed = pages[pageIndex].is_viewed;
+    const oldLastOpened = pages[pageIndex].last_opened_at;
     try {
-      setPages(prev => prev.map(p => p.id === pageId ? { ...p, is_viewed: p.is_viewed === 1 ? 0 : 1 } : p));
+      setPages(prev => prev.map(p => p.id === pageId ? { ...p, last_opened_at: p.last_opened_at ? null : new Date().toISOString() } : p));
       await comicPageService.togglePageViewed(pageId);
     } catch (err) {
       console.error('Failed to toggle page viewed:', err);
-      setPages(prev => prev.map(p => p.id === pageId ? { ...p, is_viewed: oldViewed } : p));
+      setPages(prev => prev.map(p => p.id === pageId ? { ...p, last_opened_at: oldLastOpened } : p));
     }
   }, [pages]);
 

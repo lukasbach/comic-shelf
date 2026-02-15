@@ -1311,6 +1311,23 @@ fn get_migrations() -> Vec<Migration> {
             ",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 9,
+            description: "consolidate_viewed_status",
+            sql: "
+                ALTER TABLE galleries ADD COLUMN last_opened_at TEXT;
+                
+                UPDATE comics SET last_opened_at = updated_at 
+                WHERE is_viewed = 1 AND last_opened_at IS NULL;
+                
+                UPDATE comic_pages SET last_opened_at = datetime('now') 
+                WHERE is_viewed = 1 AND last_opened_at IS NULL;
+
+                UPDATE galleries SET last_opened_at = updated_at 
+                WHERE is_viewed = 1 AND last_opened_at IS NULL;
+            ",
+            kind: MigrationKind::Up,
+        },
     ]
 }
 

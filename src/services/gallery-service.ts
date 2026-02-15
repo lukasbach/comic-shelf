@@ -44,7 +44,7 @@ export const toggleGalleryFavorite = async (id: number): Promise<void> => {
 
 export const incrementGalleryViewCount = async (id: number): Promise<void> => {
   const db = await getDb();
-  await db.execute(`UPDATE galleries SET view_count = view_count + 1, is_viewed = 1 WHERE id = $1`, [id]);
+  await db.execute(`UPDATE galleries SET view_count = view_count + 1, last_opened_at = datetime('now') WHERE id = $1`, [id]);
 };
 
 export const decrementGalleryViewCount = async (id: number): Promise<void> => {
@@ -54,7 +54,12 @@ export const decrementGalleryViewCount = async (id: number): Promise<void> => {
 
 export const toggleGalleryViewed = async (id: number): Promise<void> => {
   const db = await getDb();
-  await db.execute(`UPDATE galleries SET is_viewed = NOT is_viewed WHERE id = $1`, [id]);
+  await db.execute(`UPDATE galleries SET last_opened_at = CASE WHEN last_opened_at IS NULL THEN datetime('now') ELSE NULL END WHERE id = $1`, [id]);
+};
+
+export const updateGalleryLastOpened = async (id: number): Promise<void> => {
+  const db = await getDb();
+  await db.execute(`UPDATE galleries SET last_opened_at = datetime('now') WHERE id = $1`, [id]);
 };
 
 export const getGalleryPages = async (galleryId: number): Promise<ComicPage[]> => {

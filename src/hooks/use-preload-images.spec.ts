@@ -15,11 +15,11 @@ class MockImage {
 
 describe('usePreloadImages', () => {
   const mockPages: ComicPage[] = [
-    { id: 1, comic_id: 1, page_number: 1, file_path: '/path/1.jpg', file_name: '1.jpg', thumbnail_path: null, is_favorite: 0, is_viewed: 0, view_count: 0, last_opened_at: null },
-    { id: 2, comic_id: 1, page_number: 2, file_path: '/path/2.jpg', file_name: '2.jpg', thumbnail_path: null, is_favorite: 0, is_viewed: 0, view_count: 0, last_opened_at: null },
-    { id: 3, comic_id: 1, page_number: 3, file_path: '/path/3.jpg', file_name: '3.jpg', thumbnail_path: null, is_favorite: 0, is_viewed: 0, view_count: 0, last_opened_at: null },
-    { id: 4, comic_id: 1, page_number: 4, file_path: '/path/4.jpg', file_name: '4.jpg', thumbnail_path: null, is_favorite: 0, is_viewed: 0, view_count: 0, last_opened_at: null },
-    { id: 5, comic_id: 1, page_number: 5, file_path: '/path/5.jpg', file_name: '5.jpg', thumbnail_path: null, is_favorite: 0, is_viewed: 0, view_count: 0, last_opened_at: null },
+    { id: 1, comic_id: 1, page_number: 1, file_path: '/path/1.jpg', file_name: '1.jpg', thumbnail_path: null, is_favorite: 0, view_count: 0, last_opened_at: null },
+    { id: 2, comic_id: 1, page_number: 2, file_path: '/path/2.jpg', file_name: '2.jpg', thumbnail_path: null, is_favorite: 0, view_count: 0, last_opened_at: null },
+    { id: 3, comic_id: 1, page_number: 3, file_path: '/path/3.jpg', file_name: '3.jpg', thumbnail_path: null, is_favorite: 0, view_count: 0, last_opened_at: null },
+    { id: 4, comic_id: 1, page_number: 4, file_path: '/path/4.jpg', file_name: '4.jpg', thumbnail_path: null, is_favorite: 0, view_count: 0, last_opened_at: null },
+    { id: 5, comic_id: 1, page_number: 5, file_path: '/path/5.jpg', file_name: '5.jpg', thumbnail_path: null, is_favorite: 0, view_count: 0, last_opened_at: null },
   ];
 
   beforeEach(() => {

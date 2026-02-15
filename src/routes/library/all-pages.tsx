@@ -17,10 +17,11 @@ const sortOptions: SortOption<AllPageItem>[] = [
   }},
   { label: 'Path', value: 'path', comparator: (a, b) => naturalSortComparator(a.file_path, b.file_path) },
   { label: 'View Count', value: 'views', comparator: (a, b) => a.view_count - b.view_count },
-  { label: 'Recently Opened', value: 'recent', comparator: (a, b) => {
+  { label: 'Recently Viewed', value: 'recent', comparator: (a, b) => {
     const timeA = a.last_opened_at ? new Date(a.last_opened_at).getTime() : 0;
     const timeB = b.last_opened_at ? new Date(b.last_opened_at).getTime() : 0;
-    return timeA - timeB;
+    // We want descending order for "Recent"
+    return timeB - timeA;
   }},
 ];
 
@@ -50,7 +51,7 @@ function AllPagesList() {
       showFavoriteFilter
       showViewFilter
       isFavorite={(p) => p.is_favorite === 1}
-      isViewed={(p) => p.is_viewed === 1}
+      isViewed={(p) => p.last_opened_at !== null}
       noItemsMessage="No pages found. Start indexing comics to see them here."
       itemHeight={450}
     />

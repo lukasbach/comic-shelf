@@ -92,7 +92,7 @@ function LibraryFavorites() {
       sortOptions={activeTab === 'comics' ? comicSortOptions : pageSortOptions}
       defaultSortKey={activeTab === 'comics' ? 'title' : 'comic_title'}
       showViewFilter
-      isViewed={(item) => item.is_viewed === 1}
+      isViewed={(item) => !!item.last_opened_at}
       emptyMessage={activeTab === 'comics' ? "No favorite comics yet." : "No favorite pages yet."}
       noItemsMessage={activeTab === 'comics' ? "No favorite comics yet." : "No favorite pages yet."}
     />

@@ -18,7 +18,7 @@ interface GalleryCardProps {
 
 export const GalleryCard: React.FC<GalleryCardProps> = ({ gallery, onClick, onDelete, onRename, onUpdate }) => {
   const [isFavorite, setIsFavorite] = useState(gallery.is_favorite === 1);
-  const [isViewed, setIsViewed] = useState(gallery.is_viewed === 1);
+  const [isViewed, setIsViewed] = useState(!!gallery.last_opened_at);
   const [viewCount, setViewCount] = useState(gallery.view_count || 0);
 
   const handleToggleFavorite = async (e?: React.MouseEvent) => {
@@ -41,7 +41,7 @@ export const GalleryCard: React.FC<GalleryCardProps> = ({ gallery, onClick, onDe
       onUpdate?.();
     } catch (error) {
       console.error('Failed to toggle gallery viewed:', error);
-      setIsViewed(isViewed);
+      setIsViewed(!!gallery.last_opened_at);
     }
   };
 

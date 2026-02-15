@@ -22,10 +22,11 @@ const sortOptions: SortOption<Comic>[] = [
   { label: 'Date Added', value: 'date', comparator: (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime() },
   { label: 'View Count', value: 'views', comparator: (a, b) => a.view_count - b.view_count },
   { label: 'Path', value: 'path', comparator: (a, b) => naturalSortComparator(a.path, b.path) },
-  { label: 'Recently Opened', value: 'recent', comparator: (a, b) => {
+  { label: 'Recently Viewed', value: 'recent', comparator: (a, b) => {
     const timeA = a.last_opened_at ? new Date(a.last_opened_at).getTime() : 0;
     const timeB = b.last_opened_at ? new Date(b.last_opened_at).getTime() : 0;
-    return timeA - timeB;
+    // We want descending order for "Recent"
+    return timeB - timeA;
   }},
 ];
 
@@ -56,7 +57,7 @@ function LibraryList() {
       showViewFilter
       showBookmarkFilter
       isFavorite={(c) => c.is_favorite === 1}
-      isViewed={(c) => c.is_viewed === 1}
+      isViewed={(c) => c.last_opened_at !== null}
       isBookmarked={(c) => !!c.bookmark_page}
       noItemsMessage="No comics found. Configure indexing paths in Settings."
       itemHeight={450}

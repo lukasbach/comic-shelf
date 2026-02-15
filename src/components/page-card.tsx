@@ -15,7 +15,7 @@ type PageCardProps = {
 
 export const PageCard: React.FC<PageCardProps> = ({ page, onOpen, onUpdate }) => {
   const [isFavorite, setIsFavorite] = useState(page.is_favorite === 1);
-  const [isViewed, setIsViewed] = useState(page.is_viewed === 1);
+  const [isViewed, setIsViewed] = useState(page.last_opened_at !== null);
   const [viewCount, setViewCount] = useState(page.view_count);
 
   const thumbUrl = page.thumbnail_path ? getImageUrl(page.thumbnail_path) : getImageUrl(page.file_path);
@@ -42,7 +42,7 @@ export const PageCard: React.FC<PageCardProps> = ({ page, onOpen, onUpdate }) =>
       onUpdate?.();
     } catch (err) {
       console.error('Failed to toggle page viewed:', err);
-      setIsViewed(page.is_viewed === 1);
+      setIsViewed(page.last_opened_at !== null);
     }
   };
 

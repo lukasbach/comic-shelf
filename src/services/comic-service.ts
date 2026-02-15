@@ -56,7 +56,6 @@ export const upsertComic = async (
     | 'id'
     | 'created_at'
     | 'updated_at'
-    | 'is_viewed'
     | 'last_opened_at'
     | 'bookmark_page'
     | 'is_favorite'
@@ -143,7 +142,7 @@ export const toggleFavorite = async (id: number): Promise<void> => {
 
 export const toggleViewed = async (id: number): Promise<void> => {
   const db = await getDb();
-  await db.execute('UPDATE comics SET is_viewed = NOT is_viewed WHERE id = $1', [id]);
+  await db.execute('UPDATE comics SET last_opened_at = CASE WHEN last_opened_at IS NULL THEN datetime(\'now\') ELSE NULL END WHERE id = $1', [id]);
   window.dispatchEvent(new CustomEvent('favorites-updated'));
 };
 
@@ -200,7 +199,7 @@ export const getFavoriteComics = async (): Promise<Comic[]> => {
   `);
 };
 
-export const getRecentlyOpenedComics = async (limit: number = 6): Promise<Comic[]> => {
+export const getRecentlyViewedComics = async (limit: number = 6): Promise<Comic[]> => {
   const db = await getDb();
   return await db.select<Comic[]>(`
     SELECT c.*, p.thumbnail_path 

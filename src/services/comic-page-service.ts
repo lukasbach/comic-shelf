@@ -11,7 +11,7 @@ export const getPagesByComicId = async (comicId: number): Promise<ComicPage[]> =
 
 export const insertPages = async (
   comicId: number,
-  pages: Omit<ComicPage, 'id' | 'comic_id' | 'is_favorite' | 'view_count' | 'is_viewed' | 'last_opened_at'>[]
+  pages: Omit<ComicPage, 'id' | 'comic_id' | 'is_favorite' | 'view_count' | 'last_opened_at'>[]
 ): Promise<void> => {
   const db = await getDb();
   // We can't do bulk insert easily with parameters in tauri-plugin-sql without constructing a large query
@@ -62,7 +62,8 @@ export const togglePageFavorite = async (id: number): Promise<void> => {
 
 export const togglePageViewed = async (id: number): Promise<void> => {
   const db = await getDb();
-  await db.execute('UPDATE comic_pages SET is_viewed = NOT is_viewed WHERE id = $1', [id]);
+  await db.execute('UPDATE comic_pages SET last_opened_at = CASE WHEN last_opened_at IS NULL THEN datetime(\'now\') ELSE NULL END WHERE id = $1', [id]);
+  window.dispatchEvent(new CustomEvent('favorites-updated'));
 };
 
 export const incrementPageViewCount = async (id: number): Promise<void> => {
@@ -102,7 +103,7 @@ export const getFavoritePages = async (): Promise<(ComicPage & { comic_title: st
   `);
 };
 
-export const getRecentlyOpenedPages = async (limit: number = 6): Promise<(ComicPage & { comic_title: string; comic_path: string })[]> => {
+export const getRecentlyViewedPages = async (limit: number = 6): Promise<(ComicPage & { comic_title: string; comic_path: string })[]> => {
   const db = await getDb();
   return await db.select<(ComicPage & { comic_title: string; comic_path: string })[]>(`
     SELECT p.*, c.title as comic_title, c.path as comic_path

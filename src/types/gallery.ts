@@ -8,7 +8,7 @@ export type Gallery = {
   page_count?: number;
   is_favorite?: number;
   view_count?: number;
-  is_viewed?: number;
+  last_opened_at?: string | null;
   thumbnail_path?: string | null;
 };
 

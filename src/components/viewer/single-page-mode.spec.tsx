@@ -58,9 +58,9 @@ const mockComic: Comic = {
 };
 
 const mockPages: ComicPage[] = [
-  { id: 1, comic_id: 1, page_number: 1, file_path: '/p1.jpg', file_name: 'p1.jpg', thumbnail_path: null, is_favorite: 0, is_viewed: 0, view_count: 0, last_opened_at: null },
-  { id: 2, comic_id: 1, page_number: 2, file_path: '/p2.jpg', file_name: 'p2.jpg', thumbnail_path: null, is_favorite: 1, is_viewed: 0, view_count: 0, last_opened_at: null },
-  { id: 3, comic_id: 1, page_number: 3, file_path: '/p3.jpg', file_name: 'p3.jpg', thumbnail_path: null, is_favorite: 0, is_viewed: 0, view_count: 0, last_opened_at: null },
+  { id: 1, comic_id: 1, page_number: 1, file_path: '/p1.jpg', file_name: 'p1.jpg', thumbnail_path: null, is_favorite: 0, view_count: 0, last_opened_at: null },
+  { id: 2, comic_id: 1, page_number: 2, file_path: '/p2.jpg', file_name: 'p2.jpg', thumbnail_path: null, is_favorite: 1, view_count: 0, last_opened_at: null },
+  { id: 3, comic_id: 1, page_number: 3, file_path: '/p3.jpg', file_name: 'p3.jpg', thumbnail_path: null, is_favorite: 0, view_count: 0, last_opened_at: null },
 ];
 
 describe('SinglePageMode', () => {

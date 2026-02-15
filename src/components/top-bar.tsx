@@ -1,7 +1,9 @@
 import { Link } from '@tanstack/react-router'
 import { BreadcrumbBar } from './breadcrumb-bar'
 import { RxGear, RxMinus, RxBox, RxCross2, RxCopy } from 'react-icons/rx'
+import { LuGithub } from 'react-icons/lu'
 import { getCurrentWindow } from '@tauri-apps/api/window'
+import { openUrl } from '@tauri-apps/plugin-opener'
 import { useEffect, useState } from 'react'
 
 export function TopBar() {
@@ -41,6 +43,15 @@ export function TopBar() {
       </div>
 
       <div className="flex items-center gap-1 relative">
+        <button
+          onClick={() => openUrl('https://github.com/lukasbach/comic-shelf')}
+          className="flex items-center gap-2 px-3 py-1.5 mr-1 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+          title="Star on GitHub"
+        >
+          <span>Star on GitHub</span>
+          <LuGithub className="w-4 h-4" />
+        </button>
+
         <Link
           to="/settings"
           className="p-1.5 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400 transition-colors mr-2 cursor-pointer"

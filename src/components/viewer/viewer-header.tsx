@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Comic } from '../../types/comic';
 import { RxGrid, RxFile, RxRows, RxPlay, RxStop, RxBookmark, RxBookmarkFilled, RxTrash } from 'react-icons/rx';
 import { FavoriteButton } from '../favorite-button';
 import { ViewCounter } from '../view-counter';
 import { ComicContextMenu, ComicDropdownMenu } from '../comic-context-menu';
 import { useSettings } from '../../contexts/settings-context';
+import { useDebounce } from '../../hooks/use-debounce';
 
 type ViewerHeaderProps = {
   comic: Comic;
@@ -22,6 +23,8 @@ type ViewerHeaderProps = {
   onClearBookmark?: () => void;
   currentPage?: number;
   currentPageFilename?: string;
+  gridSize?: number;
+  onGridSizeChange?: (size: number) => void;
 };
 
 export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
@@ -40,9 +43,25 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
   onClearBookmark,
   currentPage,
   currentPageFilename,
+  gridSize = 100,
+  onGridSizeChange,
 }) => {
   const { settings } = useSettings();
   const isBookmarkedOnCurrentPage = comic.bookmark_page === currentPage;
+
+  const [localGridSize, setLocalGridSize] = useState(gridSize);
+  const debouncedGridSize = useDebounce(localGridSize, 100);
+
+  useEffect(() => {
+    if (debouncedGridSize !== gridSize) {
+      onGridSizeChange?.(debouncedGridSize);
+    }
+  }, [debouncedGridSize, gridSize, onGridSizeChange]);
+
+  // Sync back if gridSize changes externally
+  useEffect(() => {
+    setLocalGridSize(gridSize);
+  }, [gridSize]);
 
   return (
     <ComicContextMenu
@@ -135,6 +154,21 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
               {isSlideshowActive ? <RxStop className="w-3.5 h-3.5" /> : <RxPlay className="w-3.5 h-3.5" />}
               <span className="hidden sm:inline">Slideshow</span>
             </button>
+          )}
+
+          {currentMode === 'overview' && onGridSizeChange && (
+            <div className="flex items-center gap-2 mr-2">
+              <RxGrid className="w-3.5 h-3.5 text-gray-400" />
+              <input
+                type="range"
+                min="50"
+                max="300"
+                value={localGridSize}
+                onChange={(e) => setLocalGridSize(parseInt(e.target.value))}
+                className="w-24 lg:w-32 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600 focus:outline-none"
+                title={`Grid Size: ${localGridSize}%`}
+              />
+            </div>
           )}
 
           <div className="flex items-center bg-gray-200 dark:bg-gray-800 p-0.5 rounded-md">

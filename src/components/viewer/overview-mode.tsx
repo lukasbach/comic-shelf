@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Comic, ComicPage } from '../../types/comic';
 import { PageThumbnail } from './page-thumbnail';
 import { useTabs } from '../../contexts/tab-context';
@@ -32,6 +32,15 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
   const { settings } = useSettings();
   const activeTab = tabs.find((t: Tab) => t.id === activeTabId);
   const currentPage = activeTab?.currentPage ?? 0;
+  const gridSize = activeTab?.gridSize ?? 100;
+
+  const columnsMap = useMemo(() => ({
+    xl: Math.max(1, Math.round(10 * (100 / gridSize))),
+    lg: Math.max(1, Math.round(8 * (100 / gridSize))),
+    md: Math.max(1, Math.round(6 * (100 / gridSize))),
+    sm: Math.max(1, Math.round(4 * (100 / gridSize))),
+    default: Math.max(1, Math.round(2 * (100 / gridSize))),
+  }), [gridSize]);
 
   const handlePageClick = (index: number) => {
     if (activeTabId) {
@@ -54,14 +63,8 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
     <div className="h-full overflow-hidden">
       <GridView
         items={pages || []}
-        itemHeight={300} // Pages thumbnails are usually smaller
-        columnsMap={{
-          xl: 8,
-          lg: 6,
-          md: 4,
-          sm: 3,
-          default: 2,
-        }}
+        itemHeight={300 * (gridSize / 100)}
+        columnsMap={columnsMap}
         onFocusedIndexChange={(index) => activeTabId && updateTab(activeTabId, { currentPage: index ?? 0 })}
         onActivateItem={(_, index) => handlePageClick(index)}
         renderItem={(page, index, isFocused) => (

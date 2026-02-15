@@ -313,6 +313,8 @@ function ComicViewerPage() {
         onClearBookmark={handleClearBookmark}
         currentPage={activeTab?.currentPage}
         currentPageFilename={currentPageFilename}
+        gridSize={activeTab?.gridSize}
+        onGridSizeChange={(size) => activeTabId && updateTab(activeTabId, { gridSize: size })}
       />
       {viewMode !== 'overview' && (
         <div className="h-1 bg-gray-200 dark:bg-gray-800 shrink-0 overflow-hidden">

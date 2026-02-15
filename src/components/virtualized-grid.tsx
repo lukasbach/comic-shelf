@@ -59,7 +59,7 @@ export function VirtualizedGrid<T>({
     updateColumns();
 
     return () => resizeObserver.disconnect();
-  }, []);
+  }, [columnsMap]);
 
   const rows = useMemo(() => {
     const result: T[][] = [];
@@ -87,6 +87,11 @@ export function VirtualizedGrid<T>({
       rowVirtualizer.scrollToIndex(rowIndex, { align: 'center' });
     }
   }, [scrollToIndex, columns, rowVirtualizer]);
+
+  // Re-measure when layout changes
+  useEffect(() => {
+    rowVirtualizer.measure();
+  }, [columns, itemHeight, rowVirtualizer]);
 
   return (
     <div

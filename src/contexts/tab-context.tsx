@@ -61,6 +61,7 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         zoomLevel: settings.defaultZoomLevel || 100,
         fitMode: settings.defaultFitMode || 'width',
         sidebarCollapsed: false,
+        gridSize: 100,
       };
 
       if (initialTab.type === 'comic') {
@@ -151,6 +152,7 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       zoomLevel: settings.defaultZoomLevel || 100,
       fitMode: settings.defaultFitMode || 'width',
       sidebarCollapsed: false,
+      gridSize: 100,
     };
 
     if (newTab || !activeTabId) {

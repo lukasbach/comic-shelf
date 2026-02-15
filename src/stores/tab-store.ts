@@ -12,4 +12,5 @@ export type Tab = {
   fitMode?: 'width' | 'both' | 'none';
   sidebarCollapsed?: boolean;
   slideshowActive?: boolean;
+  gridSize?: number; // 50-200, default 100
 };

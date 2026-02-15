@@ -7,6 +7,7 @@ import { FavoriteButton } from './favorite-button';
 import { ViewCounter } from './view-counter';
 import * as galleryService from '../services/gallery-service';
 import { getImageUrl } from '../utils/image-utils';
+import { useSettings } from '../contexts/settings-context';
 
 interface GalleryCardProps {
   gallery: Gallery;
@@ -17,6 +18,7 @@ interface GalleryCardProps {
 }
 
 export const GalleryCard: React.FC<GalleryCardProps> = ({ gallery, onClick, onDelete, onRename, onUpdate }) => {
+  const { settings } = useSettings();
   const [isFavorite, setIsFavorite] = useState(gallery.is_favorite === 1);
   const [isViewed, setIsViewed] = useState(!!gallery.last_opened_at);
   const [viewCount, setViewCount] = useState(gallery.view_count || 0);
@@ -111,12 +113,14 @@ export const GalleryCard: React.FC<GalleryCardProps> = ({ gallery, onClick, onDe
             size="sm"
             className={`w-7 h-7 bg-black/60 backdrop-blur-md rounded-full text-white shadow-lg transition-all ${isFavorite ? 'opacity-100 scale-100' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100'}`}
           />
-          <button
-            onClick={handleToggleViewed}
-            className={`w-7 h-7 flex items-center justify-center bg-black/60 backdrop-blur-md rounded-full shadow-lg transition-all ${isViewed ? 'opacity-100 scale-100 text-blue-400' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 text-white'} hover:bg-black/80`}
-          >
-            {isViewed ? <RxEyeOpen size={16} /> : <RxEyeClosed size={16} />}
-          </button>
+          {settings.showViewCount && (
+            <button
+              onClick={handleToggleViewed}
+              className={`w-7 h-7 flex items-center justify-center bg-black/60 backdrop-blur-md rounded-full shadow-lg transition-all ${isViewed ? 'opacity-100 scale-100 text-blue-400' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 text-white'} hover:bg-black/80`}
+            >
+              {isViewed ? <RxEyeOpen size={16} /> : <RxEyeClosed size={16} />}
+            </button>
+          )}
           <ComicDropdownMenu 
             gallery={gallery}
             isFavorite={isFavorite}

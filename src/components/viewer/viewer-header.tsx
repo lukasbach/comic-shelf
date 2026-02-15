@@ -4,6 +4,7 @@ import { RxGrid, RxFile, RxRows, RxPlay, RxStop, RxBookmark, RxBookmarkFilled, R
 import { FavoriteButton } from '../favorite-button';
 import { ViewCounter } from '../view-counter';
 import { ComicContextMenu, ComicDropdownMenu } from '../comic-context-menu';
+import { useSettings } from '../../contexts/settings-context';
 
 type ViewerHeaderProps = {
   comic: Comic;
@@ -40,6 +41,7 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
   currentPage,
   currentPageFilename,
 }) => {
+  const { settings } = useSettings();
   const isBookmarkedOnCurrentPage = comic.bookmark_page === currentPage;
 
   return (
@@ -61,18 +63,20 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
           <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
             {pageCount} {pageCount === 1 ? 'page' : 'pages'}
           </span>
-          <div className="flex items-center gap-2 border-l border-gray-200 dark:border-gray-800 ml-2 pl-3">
-            <FavoriteButton 
-              isFavorite={comic.is_favorite === 1} 
-              onToggle={onToggleFavorite} 
-              size="sm"
-            />
-            <ViewCounter 
-              count={comic.view_count} 
-              onIncrement={onIncrementViewCount} 
-              size="sm"
-            />
-          </div>
+          {(settings.showViewCount || true) && ( // FavoriteButton is always there
+            <div className="flex items-center gap-2 border-l border-gray-200 dark:border-gray-800 ml-2 pl-3">
+              <FavoriteButton 
+                isFavorite={comic.is_favorite === 1} 
+                onToggle={onToggleFavorite} 
+                size="sm"
+              />
+              <ViewCounter 
+                count={comic.view_count} 
+                onIncrement={onIncrementViewCount} 
+                size="sm"
+              />
+            </div>
+          )}
           {currentPageFilename && currentMode !== 'overview' && (
             <div className="hidden md:flex items-center gap-2 border-l border-gray-200 dark:border-gray-800 ml-2 pl-3 overflow-hidden">
               <RxFile className="w-3.5 h-3.5 text-gray-400 shrink-0" />

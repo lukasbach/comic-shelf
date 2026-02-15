@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { RxEyeOpen, RxPlus } from 'react-icons/rx';
+import { useSettings } from '../contexts/settings-context';
 
 type ViewCounterProps = {
   count: number;
@@ -14,7 +15,12 @@ export const ViewCounter: React.FC<ViewCounterProps> = ({
   size = 'md',
   className = '',
 }) => {
+  const { settings } = useSettings();
   const [isAnimating, setIsAnimating] = useState(false);
+
+  if (!settings.showViewCount) {
+    return null;
+  }
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();

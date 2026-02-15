@@ -10,6 +10,7 @@ import { RenderedPageImage } from './rendered-page-image';
 import { FavoriteButton } from '../favorite-button';
 import { ViewCounter } from '../view-counter';
 import { ComicContextMenu } from '../comic-context-menu';
+import { useSettings } from '../../contexts/settings-context';
 
 type ViewerSidebarProps = {
   pages: ComicPage[];
@@ -62,6 +63,7 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
   onAddToGallery,
   enableGalleries,
 }) => {
+  const { settings } = useSettings();
   // Show next ~6 pages
   const upcomingPages = pages.slice(
     currentPage + 1,
@@ -229,7 +231,7 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
             </button>
           </div>
 
-          {(onToggleFavorite || onIncrementViewCount) && (
+          {(onToggleFavorite || (onIncrementViewCount && settings.showViewCount)) && (
             <div className="flex items-center justify-center py-2 border-t border-gray-100 dark:border-gray-900 pt-4">
               <ComicContextMenu
                 page={page}

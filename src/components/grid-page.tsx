@@ -13,6 +13,7 @@ import {
     RxCross2
 } from 'react-icons/rx';
 import { GridView } from './grid-view';
+import { useSettings } from '../contexts/settings-context';
 
 export type SortOrder = 'asc' | 'desc';
 export type ViewFilter = 'all' | 'viewed' | 'not-viewed';
@@ -85,6 +86,7 @@ export function GridPage<T>({
   itemHeight,
   initialSearchQuery = '',
 }: GridPageProps<T>) {
+  const { settings } = useSettings();
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
 
   // Update search query when initialSearchQuery changes (e.g. navigation from artists)
@@ -97,6 +99,8 @@ export function GridPage<T>({
   const [viewFilter, setViewFilter] = useState<ViewFilter>('all');
   const [favoriteFilter, setFavoriteFilter] = useState<FavoriteFilter>('all');
   const [bookmarkFilter, setBookmarkFilter] = useState<BookmarkFilter>('all');
+
+  const effectiveShowViewFilter = showViewFilter && settings.showViewCount;
 
   const toggleSortOrder = () => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
 
@@ -228,7 +232,7 @@ export function GridPage<T>({
                   {favoriteFilter === 'favorited' ? <RxStarFilled /> : <RxStar />}
                 </button>
               )}
-              {showViewFilter && (
+              {effectiveShowViewFilter && (
                 <button
                   onClick={() => setViewFilter(prev => prev === 'all' ? 'viewed' : prev === 'viewed' ? 'not-viewed' : 'all')}
                   className={`p-1.5 rounded transition-all ${

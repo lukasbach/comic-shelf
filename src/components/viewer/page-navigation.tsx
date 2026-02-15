@@ -4,6 +4,7 @@ import { FavoriteButton } from '../favorite-button';
 import { ViewCounter } from '../view-counter';
 import { ComicContextMenu } from '../comic-context-menu';
 import { ComicPage } from '../../types/comic';
+import { useSettings } from '../../contexts/settings-context';
 
 type PageNavigationProps = {
   page?: ComicPage;
@@ -44,6 +45,7 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
   onAddToGallery,
   enableGalleries,
 }) => {
+  const { settings } = useSettings();
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(String(currentPage + 1));
   const inputRef = useRef<HTMLInputElement>(null);
@@ -141,7 +143,7 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
         <RxChevronRight className="w-6 h-6" />
       </button>
 
-      {(onToggleFavorite || onIncrementViewCount) && (
+      {(onToggleFavorite || (onIncrementViewCount && settings.showViewCount)) && (
         <ComicContextMenu
           page={page}
           isFavorite={isFavorite}

@@ -6,6 +6,7 @@ import { FavoriteButton } from './favorite-button';
 import * as comicPageService from '../services/comic-page-service';
 import { AllPageItem } from '../hooks/use-all-pages';
 import { CardItem } from './card-item';
+import { useSettings } from '../contexts/settings-context';
 
 type PageCardProps = {
   page: AllPageItem;
@@ -14,6 +15,7 @@ type PageCardProps = {
 };
 
 export const PageCard: React.FC<PageCardProps> = ({ page, onOpen, onUpdate }) => {
+  const { settings } = useSettings();
   const [isFavorite, setIsFavorite] = useState(page.is_favorite === 1);
   const [isViewed, setIsViewed] = useState(page.last_opened_at !== null);
   const [viewCount, setViewCount] = useState(page.view_count);
@@ -82,14 +84,16 @@ export const PageCard: React.FC<PageCardProps> = ({ page, onOpen, onUpdate }) =>
             size="sm"
             className={`w-7 h-7 bg-black/60 backdrop-blur-md rounded-full text-white shadow-lg transition-all ${isFavorite ? 'opacity-100 scale-100' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100'}`}
           />
-          <button
-            onClick={handleToggleViewed}
-            onAuxClick={(e) => e.stopPropagation()}
-            className={`w-7 h-7 flex items-center justify-center bg-black/60 backdrop-blur-md rounded-full shadow-lg transition-all ${isViewed ? 'opacity-100 scale-100 text-blue-400' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 text-white'} hover:bg-black/80`}
-            title={isViewed ? "Mark as Unviewed" : "Mark as Viewed"}
-          >
-            {isViewed ? <RxEyeOpen size={16} /> : <RxEyeClosed size={16} />}
-          </button>
+          {settings.showViewCount && (
+            <button
+              onClick={handleToggleViewed}
+              onAuxClick={(e) => e.stopPropagation()}
+              className={`w-7 h-7 flex items-center justify-center bg-black/60 backdrop-blur-md rounded-full shadow-lg transition-all ${isViewed ? 'opacity-100 scale-100 text-blue-400' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 text-white'} hover:bg-black/80`}
+              title={isViewed ? "Mark as Unviewed" : "Mark as Viewed"}
+            >
+              {isViewed ? <RxEyeOpen size={16} /> : <RxEyeClosed size={16} />}
+            </button>
+          )}
           <ComicDropdownMenu 
             page={page}
             isFavorite={isFavorite}

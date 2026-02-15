@@ -315,7 +315,7 @@ function SettingsPage() {
             </div>
             
             <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800 space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-6">
                 <form.Field name="enableGalleries">
                   {(field) => (
                     <div className="flex items-center gap-3">
@@ -337,6 +337,32 @@ function SettingsPage() {
                       <div>
                         <span className="text-sm font-medium text-slate-200">Enable Galleries</span>
                         <p className="text-[10px] text-slate-500">Create custom collections of pages from different comics.</p>
+                      </div>
+                    </div>
+                  )}
+                </form.Field>
+
+                <form.Field name="showViewCount">
+                  {(field) => (
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={field.state.value}
+                        onClick={() => field.handleChange(!field.state.value)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                          field.state.value ? 'bg-pink-600' : 'bg-slate-700'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            field.state.value ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                      <div>
+                        <span className="text-sm font-medium text-slate-200">Viewed Count</span>
+                        <p className="text-[10px] text-slate-500">Show how many times you have viewed a comic or page.</p>
                       </div>
                     </div>
                   )}

@@ -20,6 +20,7 @@ import { useOpenComic } from '../hooks/use-open-comic';
 import { useOpenComicPage } from '../hooks/use-open-comic-page';
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
+import { useSettings } from '../contexts/settings-context';
 
 import { Gallery } from '../types/gallery';
 import * as galleryService from '../services/gallery-service';
@@ -65,6 +66,7 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
   isDropdown = false,
   extraItems
 }) => {
+  const { settings } = useSettings();
   const openComic = useOpenComic();
   const openComicPage = useOpenComicPage();
 
@@ -337,23 +339,27 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
       
       <MenuSeparator className={separatorClass} />
       
-      <MenuItem className={itemClass} onSelect={handleIncrementViewCount}>
-        <RxPlus className="w-4 h-4" />
-        <span>Increase Viewed Count ({count})</span>
-      </MenuItem>
-      <MenuItem className={itemClass} onSelect={handleDecrementViewCount}>
-        <RxMinus className="w-4 h-4" />
-        <span>Decrease Viewed Count</span>
-      </MenuItem>
+      {settings.showViewCount && (
+        <>
+          <MenuItem className={itemClass} onSelect={handleIncrementViewCount}>
+            <RxPlus className="w-4 h-4" />
+            <span>Increase Viewed Count ({count})</span>
+          </MenuItem>
+          <MenuItem className={itemClass} onSelect={handleDecrementViewCount}>
+            <RxMinus className="w-4 h-4" />
+            <span>Decrease Viewed Count</span>
+          </MenuItem>
+          
+          <MenuItem className={itemClass} onSelect={handleToggleViewed}>
+            {viewed ? <RxEyeOpen className="w-4 h-4 text-blue-500" /> : <RxEyeClosed className="w-4 h-4" />}
+            <span>{viewed ? 'Mark as unviewed' : 'Mark as viewed'}</span>
+          </MenuItem>
+        </>
+      )}
       
       <MenuItem className={itemClass} onSelect={handleToggleFavorite}>
         {fav ? <RxStarFilled className="w-4 h-4 text-yellow-500" /> : <RxStar className="w-4 h-4" />}
         <span>{fav ? 'Remove from favorites' : 'Add to favorites'}</span>
-      </MenuItem>
-
-      <MenuItem className={itemClass} onSelect={handleToggleViewed}>
-        {viewed ? <RxEyeOpen className="w-4 h-4 text-blue-500" /> : <RxEyeClosed className="w-4 h-4" />}
-        <span>{viewed ? 'Mark as unviewed' : 'Mark as viewed'}</span>
       </MenuItem>
       
       {extraItems && (

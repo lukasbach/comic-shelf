@@ -22,6 +22,7 @@ export type AppSettings = {
   autoReindex: boolean;
   lastIndexedAt: string | null;
   enableGalleries: boolean;
+  showViewCount: boolean;
 };
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -46,6 +47,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   autoReindex: true,
   lastIndexedAt: null,
   enableGalleries: false,
+  showViewCount: true,
 };
 
 const STORE_PATH = 'settings.json';

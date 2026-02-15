@@ -25,8 +25,8 @@ const sortOptions: SortOption<Comic>[] = [
   { label: 'Recently Viewed', value: 'recent', comparator: (a, b) => {
     const timeA = a.last_opened_at ? new Date(a.last_opened_at).getTime() : 0;
     const timeB = b.last_opened_at ? new Date(b.last_opened_at).getTime() : 0;
-    // We want descending order for "Recent"
-    return timeB - timeA;
+    // Standard ascending comparator, GridPage handles descending order
+    return timeA - timeB;
   }},
 ];
 

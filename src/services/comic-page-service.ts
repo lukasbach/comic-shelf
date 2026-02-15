@@ -88,7 +88,7 @@ export const getAllPages = async (): Promise<(ComicPage & { comic_title: string;
     SELECT p.*, c.title as comic_title, c.path as comic_path, c.artist as comic_artist, c.created_at
     FROM comic_pages p 
     JOIN comics c ON p.comic_id = c.id 
-    ORDER BY c.title ASC, p.page_number ASC
+    ORDER BY p.last_opened_at DESC, c.title ASC, p.page_number ASC
   `);
 };
 

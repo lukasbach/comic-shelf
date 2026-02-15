@@ -25,8 +25,8 @@ export function GridView<T>({
   emptyMessage,
   virtualized = true,
   itemHeight,
-  gap = 16,
-  padding = 0,
+  gap = 24,
+  padding = 24,
   className = "",
   columnsMap = {
     xl: 6,

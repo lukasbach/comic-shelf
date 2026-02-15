@@ -21,8 +21,8 @@ export function VirtualizedGrid<T>({
   items,
   renderItem,
   itemHeight = 450, // Default estimate for comic/page card + info
-  gap = 16,
-  padding = 0,
+  gap = 24,
+  padding = 24,
   className = "",
   columnsMap = {
     xl: 6,
@@ -82,13 +82,10 @@ export function VirtualizedGrid<T>({
     <div
       ref={parentRef}
       className={`h-full overflow-auto ${className}`}
-      style={{
-        padding: `${padding}px`,
-      }}
     >
       <div
         style={{
-          height: `${rowVirtualizer.getTotalSize()}px`,
+          height: `${rowVirtualizer.getTotalSize() + padding * 2}px`,
           width: '100%',
           position: 'relative',
         }}
@@ -101,9 +98,9 @@ export function VirtualizedGrid<T>({
             style={{
               position: 'absolute',
               top: 0,
-              left: 0,
-              width: '100%',
-              transform: `translateY(${virtualRow.start}px)`,
+              left: `${padding}px`,
+              width: `calc(100% - ${padding * 2}px)`,
+              transform: `translateY(${virtualRow.start + padding}px)`,
               display: 'grid',
               gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
               gap: `${gap}px`,

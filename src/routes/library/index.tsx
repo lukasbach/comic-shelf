@@ -190,7 +190,6 @@ function LibraryExplorer() {
         ) : (
           <GridView
             items={currentItems}
-            padding={24}
             renderItem={(item) => (
               item.type === 'folder' ? (
                 <FolderCard 

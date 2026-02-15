@@ -55,7 +55,6 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
       <GridView
         items={pages}
         itemHeight={300} // Pages thumbnails are usually smaller
-        padding={24}
         columnsMap={{
           xl: 8,
           lg: 6,

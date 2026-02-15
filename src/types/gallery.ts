@@ -9,6 +9,7 @@ export type Gallery = {
   is_favorite?: number;
   view_count?: number;
   is_viewed?: number;
+  thumbnail_path?: string | null;
 };
 
 export type GalleryWithPages = Gallery & {

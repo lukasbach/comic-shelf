@@ -6,6 +6,7 @@ import { ComicContextMenu, ComicDropdownMenu } from './comic-context-menu';
 import { FavoriteButton } from './favorite-button';
 import { ViewCounter } from './view-counter';
 import * as galleryService from '../services/gallery-service';
+import { getImageUrl } from '../utils/image-utils';
 
 interface GalleryCardProps {
   gallery: Gallery;
@@ -95,6 +96,7 @@ export const GalleryCard: React.FC<GalleryCardProps> = ({ gallery, onClick, onDe
     <CardItem
       title={gallery.name}
       onOpen={onClick}
+      imageUrl={gallery.thumbnail_path ? getImageUrl(gallery.thumbnail_path) : null}
       fallbackIcon={<RxLayers size={48} className="text-slate-700 group-hover:text-pink-500/50 transition-colors" />}
       footer={
         <div className="flex items-center justify-between w-full text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-tight">

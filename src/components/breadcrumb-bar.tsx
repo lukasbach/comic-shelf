@@ -6,7 +6,7 @@ import { normalizePath } from '../utils/image-utils'
 
 export function BreadcrumbBar() {
   const { location } = useRouterState()
-  const { tabs, activeTabId, openLibraryTab } = useTabs()
+  const { tabs, activeTabId, openLibraryTab, updateTab } = useTabs()
   const { indexPaths } = useIndexPaths()
   const navigate = useNavigate()
   const search = useSearch({ strict: false }) as { path?: string }
@@ -18,7 +18,7 @@ export function BreadcrumbBar() {
   const isViewer = path.startsWith('/viewer')
   const isSettings = path.startsWith('/settings')
 
-  const segments: { label: string; to: string; search?: Record<string, any> }[] = [
+  const segments: { label: string; to: string; search?: Record<string, any>; onClick?: () => void }[] = [
     { label: 'Library', to: '/library' }
   ]
 
@@ -70,18 +70,30 @@ export function BreadcrumbBar() {
   } else if (isViewer && activeTab && activeTab.type === 'comic') {
     if (activeTab.galleryId) {
       segments.push({ label: 'Galleries', to: '/library/galleries' })
-      segments.push({ label: activeTab.title, to: `/viewer/gallery-${activeTab.galleryId}` })
+      segments.push({ 
+        label: activeTab.title, 
+        to: `/viewer/gallery-${activeTab.galleryId}`,
+        onClick: () => activeTabId && updateTab(activeTabId, { viewMode: 'overview' })
+      })
     } else if (activeTab.comicPath && !activeTab.comicPath.startsWith('gallery://')) {
       segments.length = 0
       segments.push({ label: 'Library', to: '/library', search: { path: '' } })
       getSegmentsForPath(activeTab.comicPath)
       
-      // Update the last path segment to be the comic title
+      // Update the last path segment to be the comic title and point to the viewer
       if (segments.length > 1) {
-        segments[segments.length - 1].label = activeTab.title
+        const lastIndex = segments.length - 1
+        segments[lastIndex].label = activeTab.title
+        segments[lastIndex].to = `/viewer/${activeTab.comicId}`
+        segments[lastIndex].search = {}
+        segments[lastIndex].onClick = () => activeTabId && updateTab(activeTabId, { viewMode: 'overview' })
       }
     } else {
-      segments.push({ label: activeTab.title, to: `/viewer/${activeTab.comicId}` })
+      segments.push({ 
+        label: activeTab.title, 
+        to: `/viewer/${activeTab.comicId}`,
+        onClick: () => activeTabId && updateTab(activeTabId, { viewMode: 'overview' })
+      })
     }
     
     if (activeTab.currentPage !== undefined) {
@@ -106,6 +118,11 @@ export function BreadcrumbBar() {
             className={`hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate max-w-40 ${
               index === segments.length - 1 ? 'text-gray-900 dark:text-gray-100 font-semibold' : ''
             }`}
+            onClick={() => {
+              if (segment.onClick) {
+                segment.onClick()
+              }
+            }}
             onAuxClick={(e) => {
               if (e.button === 1) {
                 if (segment.to.startsWith('/library')) {

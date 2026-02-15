@@ -22,10 +22,15 @@ const TabContext = createContext<TabContextType | undefined>(undefined);
 function getRouteTitle(path: string): string {
   if (path === '/library' || path === '/library/') return 'Explorer';
   if (path === '/library/list') return 'All Comics';
-  if (path === '/library/artists') return 'By Artist';
+  if (path === '/library/all-pages') return 'All Pages';
+  if (path === '/library/artists') return 'Artists';
   if (path === '/library/favorites') return 'Favorites';
+  if (path === '/library/galleries') return 'Galleries';
   if (path === '/settings' || path === '/settings/') return 'Settings';
-  if (path.startsWith('/viewer/')) return 'ComicShelf';
+  if (path.startsWith('/viewer/')) {
+    if (path.includes('gallery-')) return 'Gallery';
+    return 'Comic';
+  }
   return 'Library';
 }
 
@@ -60,6 +65,11 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         const idMatch = location.pathname.match(/\/viewer\/(\d+)/);
         if (idMatch) {
           initialTab.comicId = parseInt(idMatch[1]);
+        } else {
+          const galleryMatch = location.pathname.match(/\/viewer\/gallery-(\d+)/);
+          if (galleryMatch) {
+            initialTab.galleryId = parseInt(galleryMatch[1]);
+          }
         }
       }
 
@@ -100,6 +110,13 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                   const idMatch = location.pathname.match(/\/viewer\/(\d+)/);
                   if (idMatch) {
                     updates.comicId = parseInt(idMatch[1]);
+                    updates.galleryId = undefined;
+                  } else {
+                    const galleryMatch = location.pathname.match(/\/viewer\/gallery-(\d+)/);
+                    if (galleryMatch) {
+                      updates.galleryId = parseInt(galleryMatch[1]);
+                      updates.comicId = undefined;
+                    }
                   }
                 } else if (isLibrary || isSettings) {
                   updates.type = 'library';

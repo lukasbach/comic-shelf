@@ -53,7 +53,8 @@ export function BreadcrumbBar() {
 
   if (isLibrary) {
     if (path.endsWith('/list')) segments.push({ label: 'All Comics', to: '/library/list' })
-    else if (path.endsWith('/artists')) segments.push({ label: 'By Artist', to: '/library/artists' })
+    else if (path.endsWith('/all-pages')) segments.push({ label: 'All Pages', to: '/library/all-pages' })
+    else if (path.endsWith('/artists')) segments.push({ label: 'Artists', to: '/library/artists' })
     else if (path.endsWith('/favorites')) segments.push({ label: 'Favorites', to: '/library/favorites' })
     else if (path.endsWith('/galleries')) segments.push({ label: 'Galleries', to: '/library/galleries' })
     else if (path === '/library' || path === '/library/') {
@@ -67,7 +68,10 @@ export function BreadcrumbBar() {
       }
     }
   } else if (isViewer && activeTab && activeTab.type === 'comic') {
-    if (activeTab.comicPath) {
+    if (activeTab.galleryId) {
+      segments.push({ label: 'Galleries', to: '/library/galleries' })
+      segments.push({ label: activeTab.title, to: `/viewer/gallery-${activeTab.galleryId}` })
+    } else if (activeTab.comicPath && !activeTab.comicPath.startsWith('gallery://')) {
       segments.length = 0
       segments.push({ label: 'Library', to: '/library', search: { path: '' } })
       getSegmentsForPath(activeTab.comicPath)
@@ -83,7 +87,7 @@ export function BreadcrumbBar() {
     if (activeTab.currentPage !== undefined) {
       segments.push({ 
         label: `Page ${activeTab.currentPage + 1}`, 
-        to: `/viewer/${activeTab.comicId}`,
+        to: activeTab.galleryId ? `/viewer/gallery-${activeTab.galleryId}` : `/viewer/${activeTab.comicId}`,
         search: { page: activeTab.currentPage }
       })
     }

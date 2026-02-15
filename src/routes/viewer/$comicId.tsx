@@ -61,6 +61,29 @@ function ComicViewerPage() {
     removePageFromGallery
   } = useComicData(comicId);
 
+  // Sync comic data to tab state
+  useEffect(() => {
+    if (activeTabId && comic && !loading) {
+      const updates: Partial<Tab> = {};
+      if (comic.title && activeTab?.title !== comic.title && activeTab?.title !== 'Gallery' && activeTab?.title !== 'Comic') {
+        // We only update if it's not the generic title or if it actually changed
+      }
+      
+      // Actually, let's always sync if they differ and we have a real title
+      if (comic.title && activeTab?.title !== comic.title) {
+        updates.title = comic.title;
+      }
+      
+      if (comic.path && activeTab?.comicPath !== comic.path) {
+        updates.comicPath = comic.path;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        updateTab(activeTabId, updates);
+      }
+    }
+  }, [activeTabId, comic, loading, activeTab?.title, activeTab?.comicPath, updateTab]);
+
   // Show prompt if bookmark exists and not already handled or explicitly requested via search
   useEffect(() => {
     if (!loading && comic && comic.bookmark_page !== null && !promptHandled && search.page === undefined) {

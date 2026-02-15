@@ -1,10 +1,10 @@
 import React from 'react';
 import { ComicPage } from '../../types/comic';
 import {
-  RxGrid, RxFile, RxRows,
-  RxChevronLeft, RxChevronRight,
-  RxDoubleArrowLeft, RxDoubleArrowRight,
-  RxStarFilled
+    RxGrid, RxFile, RxRows,
+    RxChevronLeft, RxChevronRight,
+    RxDoubleArrowLeft, RxDoubleArrowRight,
+    RxStarFilled
 } from 'react-icons/rx';
 import { RenderedPageImage } from './rendered-page-image';
 

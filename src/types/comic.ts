@@ -18,6 +18,12 @@ export type Comic = {
   thumbnail_path?: string | null;
 };
 
+export type ArtistMetadata = {
+  artist: string;
+  comic_count: number;
+  thumbnail_path: string | null;
+};
+
 export type ComicPage = {
   id: number;
   comic_id: number;

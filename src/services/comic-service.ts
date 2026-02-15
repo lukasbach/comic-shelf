@@ -1,5 +1,5 @@
 import { getDb } from './database';
-import type { Comic } from '../types/comic';
+import type { Comic, ArtistMetadata } from '../types/comic';
 
 export const getAllComics = async (): Promise<Comic[]> => {
   const db = await getDb();
@@ -31,6 +31,23 @@ export const getComicsByArtist = async (artist: string): Promise<Comic[]> => {
     WHERE c.artist = $1 
     ORDER BY c.series ASC, c.issue ASC
   `, [artist]);
+};
+
+export const getArtistsWithMetadata = async (): Promise<ArtistMetadata[]> => {
+  const db = await getDb();
+  return await db.select<ArtistMetadata[]>(`
+    SELECT 
+        c.artist,
+        COUNT(c.id) as comic_count,
+        (SELECT p.thumbnail_path 
+         FROM comics c2 
+         LEFT JOIN comic_pages p ON c2.id = p.comic_id AND p.page_number = 1
+         WHERE (c2.artist = c.artist OR (c2.artist IS NULL AND c.artist IS NULL))
+         ORDER BY c2.title ASC LIMIT 1) as thumbnail_path
+    FROM comics c
+    GROUP BY c.artist
+    ORDER BY c.artist ASC
+  `);
 };
 
 export const upsertComic = async (comic: Omit<Comic, 'id' | 'created_at' | 'updated_at' | 'is_viewed' | 'last_opened_at' | 'bookmark_page' | 'is_favorite' | 'view_count'>): Promise<number> => {

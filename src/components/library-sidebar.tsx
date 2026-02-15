@@ -100,7 +100,7 @@ const navItems = [
   { name: 'Explorer', to: '/library', icon: RxArchive },
   { name: 'All Comics', to: '/library/list', icon: RxListBullet },
   { name: 'All Pages', to: '/library/all-pages', icon: RxFileText },
-  { name: 'By Artist', to: '/library/artists', icon: RxPerson },
+  { name: 'Artists', to: '/library/artists', icon: RxPerson },
   { name: 'Favorites', to: '/library/favorites', icon: RxStar },
 ]
 

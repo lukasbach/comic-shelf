@@ -8,7 +8,7 @@ import { RenderedPageImage } from './rendered-page-image';
 type LazyPageProps = {
   page: ComicPage;
   zoomLevel: number;
-  fitMode: 'width' | 'none';
+  fitMode: 'width' | 'both' | 'none';
   onVisible?: (pageNumber: number) => void;
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
@@ -72,11 +72,12 @@ export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.Ref
     };
 
     const isFitWidth = fitMode === 'width';
+    const isFitBoth = fitMode === 'both';
     
     // Estimate height based on aspect ratio if available, otherwise use a default
     // Most comics are roughly 1:1.4 aspect ratio. 
     // We use a fixed pixel min-height to avoid 0px height which breaks intersection.
-    const estimatedHeight = '800px';
+    const estimatedHeight = isFitBoth ? '100dvh' : '800px';
 
     return (
       <ComicContextMenu
@@ -90,7 +91,11 @@ export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.Ref
         <div
           ref={internalRef}
           className="group flex flex-col items-center w-full mb-2 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative"
-          style={{ minHeight: !isVisible ? estimatedHeight : 'auto' }}
+          style={{ 
+            minHeight: !isVisible ? estimatedHeight : 'auto',
+            height: isFitBoth ? '100dvh' : 'auto',
+            justifyContent: isFitBoth ? 'center' : 'stretch'
+          }}
         >
           <div className="w-full flex justify-between items-center px-4 py-1 text-xs text-gray-500 bg-gray-200 dark:bg-gray-900">
             <span>Page {page.page_number}</span>
@@ -139,11 +144,14 @@ export const LazyPage: React.ForwardRefExoticComponent<LazyPageProps & React.Ref
               style={{
                 width: isFitWidth 
                   ? '100%' 
-                  : naturalSize 
-                    ? `${(naturalSize.width * zoomLevel) / 100}px` 
-                    : 'auto',
-                height: 'auto',
-                maxWidth: isFitWidth ? '100%' : 'none',
+                  : isFitBoth
+                    ? 'auto'
+                    : naturalSize 
+                      ? `${(naturalSize.width * zoomLevel) / 100}px` 
+                      : 'auto',
+                height: isFitBoth ? 'auto' : 'auto',
+                maxWidth: (isFitWidth || isFitBoth) ? '100%' : 'none',
+                maxHeight: isFitBoth ? '100%' : 'none',
               }}
             />
           )}

@@ -88,7 +88,7 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
     }
   };
 
-  const handleFitModeChange = (mode: 'width' | 'none') => {
+  const handleFitModeChange = (mode: 'width' | 'both' | 'none') => {
     if (activeTabId) {
       updateTab(activeTabId, { fitMode: mode });
     }

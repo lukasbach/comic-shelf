@@ -5,7 +5,7 @@ import { RenderedPageImage } from './rendered-page-image';
 type PageImageProps = {
   page: ComicPage;
   zoomLevel: number; // percentage: 100 = natural size
-  fitMode: 'width' | 'none';
+  fitMode: 'width' | 'both' | 'none';
   containerRef?: RefObject<HTMLDivElement | null>;
 };
 
@@ -28,6 +28,7 @@ export const PageImage: React.FC<PageImageProps> = ({ page, zoomLevel, fitMode, 
   };
 
   const isFitWidth = fitMode === 'width';
+  const isFitBoth = fitMode === 'both';
 
   return (
     <div 
@@ -42,11 +43,14 @@ export const PageImage: React.FC<PageImageProps> = ({ page, zoomLevel, fitMode, 
         style={{
           width: isFitWidth 
             ? '100%' 
-            : naturalSize 
-              ? `${(naturalSize.width * zoomLevel) / 100}px` 
-              : 'auto',
-          height: 'auto',
-          maxWidth: isFitWidth ? '100%' : 'none',
+            : isFitBoth
+              ? 'auto'
+              : naturalSize 
+                ? `${(naturalSize.width * zoomLevel) / 100}px` 
+                : 'auto',
+          height: isFitBoth ? 'auto' : 'auto',
+          maxWidth: (isFitWidth || isFitBoth) ? '100%' : 'none',
+          maxHeight: isFitBoth ? '100%' : 'none',
           display: 'block',
         }}
       />

@@ -13,9 +13,9 @@ type ViewerSidebarProps = {
   currentPage: number;
   onPageSelect: (pageNumber: number) => void;
   zoomLevel: number;
-  fitMode: 'width' | 'none';
+  fitMode: 'width' | 'both' | 'none';
   onZoomChange: (zoom: number) => void;
-  onFitModeChange: (fitMode: 'width' | 'none') => void;
+  onFitModeChange: (fitMode: 'width' | 'both' | 'none') => void;
   viewMode: 'overview' | 'single' | 'scroll';
   onViewModeChange: (mode: 'overview' | 'single' | 'scroll') => void;
   isCollapsed: boolean;
@@ -113,7 +113,7 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
         {/* Zoom Controls */}
         <section>
           <h4 className="text-xs font-bold mb-3 text-gray-400 uppercase">
-            {fitMode === 'width' ? 'Zoom: Fit Width' : `Zoom: ${zoomLevel}%`}
+            {fitMode === 'width' ? 'Zoom: Fit Width' : fitMode === 'both' ? 'Zoom: Fit' : `Zoom: ${zoomLevel}%`}
           </h4>
           <input
             type="range"
@@ -139,17 +139,14 @@ export const ViewerSidebar: React.FC<ViewerSidebarProps> = ({
               Fit Width
             </button>
             <button
-              onClick={() => {
-                onZoomChange(50);
-                onFitModeChange('none');
-              }}
+              onClick={() => onFitModeChange('both')}
               className={`px-2 py-1.5 text-xs rounded transition-colors ${
-                fitMode === 'none' && zoomLevel === 50
+                fitMode === 'both'
                   ? 'bg-blue-600 text-white shadow-sm'
                   : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
-              50%
+              Fit
             </button>
             <button
               onClick={() => {

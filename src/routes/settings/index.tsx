@@ -389,6 +389,7 @@ function SettingsPage() {
                     <div className="flex gap-2">
                       {[
                         { value: 'width', label: 'Fit Width' },
+                        { value: 'both', label: 'Fit' },
                         { value: 'none', label: 'None (Zoom)' },
                       ].map((opt) => (
                         <button

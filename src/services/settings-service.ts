@@ -15,7 +15,7 @@ export type AppSettings = {
     prevTab: string;
   };
   defaultZoomLevel: number;       // percentage, e.g. 100
-  defaultFitMode: 'width' | 'none';
+  defaultFitMode: 'width' | 'both' | 'none';
   defaultViewMode: 'single' | 'scroll' | 'overview';
   slideshowDelay: number;         // milliseconds
   slideshowAutoScroll: boolean;

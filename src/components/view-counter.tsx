@@ -45,6 +45,7 @@ export const ViewCounter: React.FC<ViewCounterProps> = ({
       </div>
       <button
         onClick={handleClick}
+        onAuxClick={(e) => e.stopPropagation()}
         className="flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 transition-colors"
         aria-label="Increment view count"
       >

@@ -78,13 +78,21 @@ export const CardItem: React.FC<CardItemProps> = ({
         <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors pointer-events-none" />
 
         {!isIndexing && !isFailed && topRightIcons && (
-          <div className="absolute top-2 right-2 flex flex-row-reverse items-center gap-1.5 z-10">
+          <div 
+            className="absolute top-2 right-2 flex flex-row-reverse items-center gap-1.5 z-10"
+            onClick={(e) => e.stopPropagation()}
+            onAuxClick={(e) => e.stopPropagation()}
+          >
             {topRightIcons}
           </div>
         )}
 
         {!isIndexing && !isFailed && bottomLeftIcons && (
-          <div className="absolute bottom-2 left-2 flex gap-1 z-10">
+          <div 
+            className="absolute bottom-2 left-2 flex gap-1 z-10"
+            onClick={(e) => e.stopPropagation()}
+            onAuxClick={(e) => e.stopPropagation()}
+          >
             {bottomLeftIcons}
           </div>
         )}

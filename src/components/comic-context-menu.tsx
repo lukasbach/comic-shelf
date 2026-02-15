@@ -385,6 +385,8 @@ export const ComicContextMenu: React.FC<ComicMenuProps & { children: React.React
       <ContextMenu.Portal>
         <ContextMenu.Content 
           className="min-w-50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md shadow-lg p-1 z-100"
+          onClick={(e) => e.stopPropagation()}
+          onAuxClick={(e) => e.stopPropagation()}
         >
           <ComicMenuContent {...props} isDropdown={false} />
         </ContextMenu.Content>
@@ -402,6 +404,7 @@ export const ComicDropdownMenu: React.FC<ComicMenuProps & { trigger?: React.Reac
               className={`flex items-center justify-center transition-colors rounded-full shrink-0 ${className || 'w-8 h-8 p-1 hover:bg-gray-200 dark:hover:bg-gray-800'}`}
               aria-label="More options"
               onClick={(e) => e.stopPropagation()}
+              onAuxClick={(e) => e.stopPropagation()}
             >
               <RxDotsHorizontal className={`${className?.includes('w-') ? 'w-4 h-4' : 'w-5 h-5'}`} />
             </button>
@@ -411,6 +414,8 @@ export const ComicDropdownMenu: React.FC<ComicMenuProps & { trigger?: React.Reac
           <DropdownMenu.Content 
             className="min-w-50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md shadow-lg p-1 z-100"
             align="end"
+            onClick={(e) => e.stopPropagation()}
+            onAuxClick={(e) => e.stopPropagation()}
           >
             <ComicMenuContent {...props} isDropdown={true} />
           </DropdownMenu.Content>

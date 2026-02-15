@@ -111,6 +111,7 @@ export const ComicCard: React.FC<ComicCardProps> = ({ comic, onOpen }) => {
           />
           <button
             onClick={handleToggleViewed}
+            onAuxClick={(e) => e.stopPropagation()}
             className={`w-7 h-7 flex items-center justify-center bg-black/60 backdrop-blur-md rounded-full shadow-lg transition-all ${isViewed ? 'opacity-100 scale-100 text-blue-400' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 text-white'} hover:bg-black/80`}
             title={isViewed ? "Mark as Unviewed" : "Mark as Viewed"}
           >

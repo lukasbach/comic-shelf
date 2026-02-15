@@ -26,6 +26,9 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
         e.stopPropagation();
         onToggle(e);
       }}
+      onAuxClick={(e) => {
+        e.stopPropagation();
+      }}
       className={`flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-90 ${className}`}
       aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
     >

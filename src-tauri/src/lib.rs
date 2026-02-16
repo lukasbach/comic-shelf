@@ -721,13 +721,11 @@ fn build_index_payload_for_path_impl(
         let relative_path = get_relative_path(&base_path_buf, Path::new(&comic_path));
         let metadata = match extract_metadata(&relative_path, pattern) {
             Some(m) => m,
-            None => {
-                println!(
-                    "[Indexing][Rust] Skipping '{}' (does not match pattern '{}')",
-                    comic_path, pattern
-                );
-                continue;
-            }
+            None => PatternMetadata {
+                artist: Some("Unknown".to_string()),
+                series: Some(candidate.title.clone()),
+                issue: None,
+            },
         };
 
         match build_pages_for_candidate(

@@ -135,4 +135,38 @@ describe('indexing-service', () => {
     expect(seen.has('base/FolderComic')).toBe(true);
     expect(comicService.upsertComic).toHaveBeenCalled();
   });
+
+  it('indexes comics that do not match the pattern with defaults', async () => {
+    const sourceFileService = await import('./source-file-service');
+    const comicService = await import('./comic-service');
+
+    vi.mocked(sourceFileService.scanComicCandidates).mockResolvedValue({
+      candidates: [{ path: 'base/NonMatchingFolder', sourceType: 'image', title: 'NonMatchingFolder' }],
+      errors: [],
+    });
+    vi.mocked(sourceFileService.getComicPages).mockResolvedValue([
+      {
+        pageNumber: 1,
+        filePath: 'base/NonMatchingFolder/1.jpg',
+        fileName: '1.jpg',
+        sourceType: 'image',
+        sourcePath: 'base/NonMatchingFolder/1.jpg',
+        archiveEntryPath: null,
+        pdfPageNumber: null,
+      } as any,
+    ]);
+
+    // Use a pattern that clearly doesn't match a simple folder like 'NonMatchingFolder'
+    // Like '{artist}/{series}' which needs at least two segments
+    const seen = await indexingService.indexComics('base', '{artist}/{series}');
+
+    expect(seen.has('base/NonMatchingFolder')).toBe(true);
+    // Should be called with 'Unknown' artist and 'NonMatchingFolder' as title/series
+    expect(comicService.upsertComic).toHaveBeenCalledWith(
+      expect.objectContaining({
+        artist: 'Unknown',
+        series: 'NonMatchingFolder',
+      })
+    );
+  });
 });

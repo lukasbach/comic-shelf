@@ -220,9 +220,13 @@ export const indexComics = async (
         ? comicPath.substring(normalizedBasePath.length).replace(/^[\\/]/, '')
         : comicPath;
       
-      const metadata = extractMetadata(relativePath, pattern);
+      let metadata = extractMetadata(relativePath, pattern);
       if (!metadata) {
-        continue;
+        metadata = {
+          artist: 'Unknown',
+          series: candidate.title,
+          issue: null,
+        };
       }
 
       onProgress?.({
@@ -328,7 +332,14 @@ export const indexComics = async (
         const relativePath = isSubPath(normalizedBasePath, comicPath) 
           ? comicPath.substring(normalizedBasePath.length).replace(/^[\\/]/, '')
           : comicPath;
-        const metadata = extractMetadata(relativePath, pattern)!;
+        let metadata = extractMetadata(relativePath, pattern);
+        if (!metadata) {
+          metadata = {
+            artist: 'Unknown',
+            series: candidate.title,
+            issue: null,
+          };
+        }
 
         await comicService.upsertComic({
           path: comicPath,

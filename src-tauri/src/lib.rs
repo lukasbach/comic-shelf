@@ -1326,6 +1326,14 @@ fn get_migrations() -> Vec<Migration> {
             ",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 10,
+            description: "add_thumbnail_exists",
+            sql: "
+                ALTER TABLE comic_pages ADD COLUMN thumbnail_exists INTEGER NOT NULL DEFAULT 0;
+            ",
+            kind: MigrationKind::Up,
+        },
     ]
 }
 

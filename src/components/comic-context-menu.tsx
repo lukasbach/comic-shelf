@@ -375,14 +375,14 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
         <span>{fav ? 'Remove from favorites' : 'Add to favorites'}</span>
       </MenuItem>
 
-      {onAddToGallery && (
+      {settings.enableGalleries && onAddToGallery && (
         <MenuItem className={itemClass} onSelect={onAddToGallery}>
           <RxLayers className="w-4 h-4 text-pink-500" />
           <span>Add to gallery</span>
         </MenuItem>
       )}
 
-      {onRemoveFromGallery && (
+      {settings.enableGalleries && onRemoveFromGallery && (
         <MenuItem className={itemClass} onSelect={onRemoveFromGallery}>
           <RxCross2 className="w-4 h-4 text-red-500" />
           <span>Remove from gallery</span>
@@ -406,7 +406,7 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
         </>
       )}
 
-      {isGallery && (
+      {settings.enableGalleries && isGallery && (
         <>
           <MenuSeparator className={separatorClass} />
           <MenuItem className={itemClass} onSelect={handleExportGallery}>

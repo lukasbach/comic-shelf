@@ -36,9 +36,10 @@ describe('LazyPage', () => {
     }));
   });
 
-  it('should render page number', () => {
+  it('should render page number', async () => {
     render(<LazyPage page={mockPage} zoomLevel={100} fitMode="width" />);
     expect(screen.getByText('Page 1')).toBeDefined();
+    await screen.findByRole('img');
   });
 
   it('should render image when visible', async () => {
@@ -48,20 +49,22 @@ describe('LazyPage', () => {
     expect(img.getAttribute('src')).toBe('asset:///test/path.jpg');
   });
 
-  it('should call onVisible when intersecting', () => {
+  it('should call onVisible when intersecting', async () => {
     const onVisible = vi.fn();
     render(<LazyPage page={mockPage} zoomLevel={100} fitMode="width" onVisible={onVisible} />);
     expect(onVisible).toHaveBeenCalledWith(0); // 0-indexed
+    await screen.findByRole('img');
   });
 
-  it('should work with callback refs', () => {
+  it('should work with callback refs', async () => {
     const refCallback = vi.fn();
     render(<LazyPage page={mockPage} zoomLevel={100} fitMode="width" ref={refCallback} />);
     expect(refCallback).toHaveBeenCalled();
     expect(refCallback.mock.calls[0][0]).not.toBeNull();
+    await screen.findByRole('img');
   });
 
-  it('should show star icon if favorite', () => {
+  it('should show star icon if favorite', async () => {
     // We need to look for the SVG or something that represents RxStarFilled
     // Since we are using react-icons, it might be hard to test for the exact component
     // but we can check if it renders something or if we mock it
@@ -69,5 +72,6 @@ describe('LazyPage', () => {
     // Just check if an SVG is present (there's only one for the star usually)
     const svgs = container.querySelectorAll('svg');
     expect(svgs.length).toBeGreaterThan(0);
+    await screen.findByRole('img');
   });
 });

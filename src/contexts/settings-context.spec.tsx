@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { SettingsProvider, useSettings } from './settings-context';
 import * as settingsService from '../services/settings-service';
 
@@ -61,7 +61,7 @@ describe('settings-context', () => {
     await waitFor(() => expect(screen.queryByText('Loading...')).toBeNull());
     
     const button = screen.getByText('Change Zoom');
-    button.click();
+    fireEvent.click(button);
 
     await waitFor(() => expect(screen.getByTestId('zoom').textContent).toBe('150'));
     expect(settingsService.saveSettings).toHaveBeenCalledWith(expect.objectContaining({ defaultZoomLevel: 150 }));

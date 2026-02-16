@@ -88,7 +88,7 @@ describe('SinglePageMode', () => {
     expect(img.getAttribute('src')).toBe('asset:///p1.jpg');
   });
 
-  it('navigates to next page on click', () => {
+  it('navigates to next page on click', async () => {
     (useTabs as any).mockReturnValue({
       tabs: [{ id: 'tab1', currentPage: 0, zoomLevel: 100, fitMode: 'width', viewMode: 'single', sidebarCollapsed: true }],
       activeTabId: 'tab1',
@@ -99,12 +99,13 @@ describe('SinglePageMode', () => {
         <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} onDecrementPageViewCount={vi.fn()} onTogglePageViewed={vi.fn()} />
       </ViewerRefProvider>
     );
+    await screen.findByAltText('Page 1');
     const nextButton = screen.getByLabelText('Next Page');
     fireEvent.click(nextButton);
     expect(updateTab).toHaveBeenCalledWith('tab1', { currentPage: 1 });
   });
 
-  it('navigates to prev page on click', () => {
+  it('navigates to prev page on click', async () => {
     (useTabs as any).mockReturnValue({
       tabs: [{ id: 'tab1', currentPage: 1, zoomLevel: 100, fitMode: 'width', viewMode: 'single', sidebarCollapsed: true }],
       activeTabId: 'tab1',
@@ -115,12 +116,13 @@ describe('SinglePageMode', () => {
         <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} onDecrementPageViewCount={vi.fn()} onTogglePageViewed={vi.fn()} />
       </ViewerRefProvider>
     );
+    await screen.findByAltText('Page 2');
     const prevButton = screen.getByLabelText('Previous Page');
     fireEvent.click(prevButton);
     expect(updateTab).toHaveBeenCalledWith('tab1', { currentPage: 0 });
   });
 
-  it('wraps around to first page when clicking next on last page', () => {
+  it('wraps around to first page when clicking next on last page', async () => {
     (useTabs as any).mockReturnValue({
       tabs: [{ id: 'tab1', currentPage: 2, zoomLevel: 100, fitMode: 'width', viewMode: 'single', sidebarCollapsed: true }],
       activeTabId: 'tab1',
@@ -131,12 +133,13 @@ describe('SinglePageMode', () => {
         <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} onDecrementPageViewCount={vi.fn()} onTogglePageViewed={vi.fn()} />
       </ViewerRefProvider>
     );
+    await screen.findByAltText('Page 3');
     const nextButton = screen.getByLabelText('Next Page');
     fireEvent.click(nextButton);
     expect(updateTab).toHaveBeenCalledWith('tab1', { currentPage: 0 });
   });
 
-  it('wraps around to last page when clicking prev on first page', () => {
+  it('wraps around to last page when clicking prev on first page', async () => {
     (useTabs as any).mockReturnValue({
       tabs: [{ id: 'tab1', currentPage: 0, zoomLevel: 100, fitMode: 'width', viewMode: 'single', sidebarCollapsed: true }],
       activeTabId: 'tab1',
@@ -147,17 +150,19 @@ describe('SinglePageMode', () => {
         <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} onDecrementPageViewCount={vi.fn()} onTogglePageViewed={vi.fn()} />
       </ViewerRefProvider>
     );
+    await screen.findByAltText('Page 1');
     const prevButton = screen.getByLabelText('Previous Page');
     fireEvent.click(prevButton);
     expect(updateTab).toHaveBeenCalledWith('tab1', { currentPage: 2 });
   });
 
-  it('toggles sidebar', () => {
+  it('toggles sidebar', async () => {
     render(
       <ViewerRefProvider>
         <SinglePageMode comic={mockComic} pages={mockPages} onTogglePageFavorite={vi.fn()} onIncrementPageViewCount={vi.fn()} onDecrementPageViewCount={vi.fn()} onTogglePageViewed={vi.fn()} />
       </ViewerRefProvider>
     );
+    await screen.findByAltText('Page 1');
     const toggleButton = screen.getByTitle('Collapse Sidebar');
     fireEvent.click(toggleButton);
     expect(updateTab).toHaveBeenCalledWith('tab1', { sidebarCollapsed: true });

@@ -50,7 +50,7 @@ export function TopBar() {
         >
           ComicShelf
         </Link>
-        <div className="pointer-events-auto">
+        <div className="pointer-events-auto hidden lg:block">
           <BreadcrumbBar />
         </div>
       </div>

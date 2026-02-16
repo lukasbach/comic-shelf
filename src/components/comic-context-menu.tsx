@@ -2,19 +2,19 @@ import React, { useState } from 'react';
 import * as ContextMenu from '@radix-ui/react-context-menu';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import {
-  RxExternalLink,
-  RxPlus,
-  RxMinus,
-  RxStar,
-  RxStarFilled,
-  RxOpenInNewWindow,
-  RxArchive,
-  RxDotsHorizontal,
-  RxEyeOpen,
-  RxEyeClosed,
-  RxCross2,
-  RxLayers,
-  RxDownload
+    RxExternalLink,
+    RxPlus,
+    RxMinus,
+    RxStar,
+    RxStarFilled,
+    RxOpenInNewWindow,
+    RxArchive,
+    RxDotsHorizontal,
+    RxEyeOpen,
+    RxEyeClosed,
+    RxCross2,
+    RxLayers,
+    RxDownload
 } from 'react-icons/rx';
 import type { Comic, ComicPage } from '../types/comic';
 import * as comicService from '../services/comic-service';

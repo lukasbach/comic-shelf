@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Comic } from '../../types/comic';
-import { RxGrid, RxFile, RxRows, RxPlay, RxStop, RxBookmark, RxBookmarkFilled, RxTrash } from 'react-icons/rx';
+import { RxGrid, RxFile, RxRows, RxPlay, RxStop, RxBookmark, RxBookmarkFilled, RxTrash, RxDownload } from 'react-icons/rx';
 import { FavoriteButton } from '../favorite-button';
 import { ViewCounter } from '../view-counter';
 import { ComicContextMenu, ComicDropdownMenu } from '../comic-context-menu';
@@ -21,6 +21,8 @@ type ViewerHeaderProps = {
   onSetBookmark?: () => void;
   onJumpToBookmark?: () => void;
   onClearBookmark?: () => void;
+  onExportGallery?: () => void;
+  isGallery?: boolean;
   currentPage?: number;
   currentPageFilename?: string;
   gridSize?: number;
@@ -41,6 +43,8 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
   onSetBookmark,
   onJumpToBookmark,
   onClearBookmark,
+  onExportGallery,
+  isGallery = false,
   currentPage,
   currentPageFilename,
   gridSize = 100,
@@ -66,6 +70,7 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
   return (
     <ComicContextMenu
       comic={comic}
+      gallery={isGallery ? { id: comic.id, name: comic.title } as any : undefined}
       isFavorite={comic.is_favorite === 1}
       isViewed={!!comic.last_opened_at}
       viewCount={comic.view_count}
@@ -82,6 +87,15 @@ export const ViewerHeader: React.FC<ViewerHeaderProps> = ({
           <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
             {pageCount} {pageCount === 1 ? 'page' : 'pages'}
           </span>
+          {isGallery && (
+            <button
+              onClick={onExportGallery}
+              className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors ml-1"
+              title="Export Gallery"
+            >
+              <RxDownload className="w-5 h-5 shrink-0" />
+            </button>
+          )}
           {(settings.showViewCount || true) && ( // FavoriteButton is always there
             <div className="flex items-center gap-2 border-l border-gray-200 dark:border-gray-800 ml-2 pl-3">
               <FavoriteButton 

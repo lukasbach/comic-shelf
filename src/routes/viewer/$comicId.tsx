@@ -14,6 +14,7 @@ import { SlideshowIndicator } from '../../components/viewer/slideshow-indicator'
 import { Tab } from '../../stores/tab-store';
 import { useViewerRef } from '../../contexts/viewer-ref-context';
 import { AddToGalleryDialog } from '../../components/add-to-gallery-dialog';
+import * as galleryService from '../../services/gallery-service';
 
 type ComicViewerSearch = {
   page?: number;
@@ -48,6 +49,7 @@ function ComicViewerPage() {
     loading, 
     error, 
     isGallery,
+    galleryId,
     toggleComicFavorite, 
     toggleComicViewed,
     incrementComicViewCount,
@@ -61,6 +63,12 @@ function ComicViewerPage() {
     clearBookmark,
     removePageFromGallery
   } = useComicData(comicId);
+
+  const handleExportGallery = async () => {
+    if (isGallery && galleryId) {
+      await galleryService.exportGallery(galleryId);
+    }
+  };
 
   // Sync comic data to tab state
   useEffect(() => {
@@ -311,6 +319,8 @@ function ComicViewerPage() {
         onSetBookmark={handleSetBookmark}
         onJumpToBookmark={handleJumpToBookmark}
         onClearBookmark={handleClearBookmark}
+        onExportGallery={handleExportGallery}
+        isGallery={isGallery}
         currentPage={activeTab?.currentPage}
         currentPageFilename={currentPageFilename}
         gridSize={activeTab?.gridSize}

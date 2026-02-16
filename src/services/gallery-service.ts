@@ -1,6 +1,10 @@
 import { getDb } from './database';
 import { Gallery } from '../types/gallery';
 import { ComicPage } from '../types/comic';
+import { open } from '@tauri-apps/plugin-dialog';
+import { copyFile } from '@tauri-apps/plugin-fs';
+import { revealItemInDir } from '@tauri-apps/plugin-opener';
+import { join } from '@tauri-apps/api/path';
 
 export const getGalleries = async (): Promise<Gallery[]> => {
   const db = await getDb();
@@ -148,4 +152,27 @@ export const getPageGalleries = async (comicPageId: number): Promise<Gallery[]> 
     JOIN gallery_pages gp ON g.id = gp.gallery_id
     WHERE gp.comic_page_id = $1
   `, [comicPageId]);
+};
+
+export const exportGallery = async (galleryId: number): Promise<void> => {
+  const pages = await getGalleryPages(galleryId);
+  if (pages.length === 0) return;
+
+  const selectedPath = await open({
+    directory: true,
+    multiple: false,
+    title: 'Select Export Folder',
+  });
+
+  if (!selectedPath || Array.isArray(selectedPath)) return;
+
+  for (let i = 0; i < pages.length; i++) {
+    const page = pages[i];
+    const extension = page.file_path.split('.').pop() || 'jpg';
+    const fileName = `${(i + 1).toString().padStart(4, '0')}.${extension}`;
+    const targetPath = await join(selectedPath, fileName);
+    await copyFile(page.file_path, targetPath);
+  }
+
+  await revealItemInDir(selectedPath);
 };

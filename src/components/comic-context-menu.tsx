@@ -13,7 +13,8 @@ import {
   RxEyeOpen,
   RxEyeClosed,
   RxCross2,
-  RxLayers
+  RxLayers,
+  RxDownload
 } from 'react-icons/rx';
 import type { Comic, ComicPage } from '../types/comic';
 import * as comicService from '../services/comic-service';
@@ -317,6 +318,12 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
     }
   };
 
+  const handleExportGallery = async () => {
+    if (gallery?.id) {
+      await galleryService.exportGallery(gallery.id);
+    }
+  };
+
   const MenuItem = isDropdown ? DropdownMenu.Item : ContextMenu.Item;
   const MenuSeparator = isDropdown ? DropdownMenu.Separator : ContextMenu.Separator;
 
@@ -395,6 +402,16 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
           <MenuItem className={itemClass} onSelect={handleShowInExplorer}>
             <RxArchive className="w-4 h-4" />
             <span>Show in Explorer</span>
+          </MenuItem>
+        </>
+      )}
+
+      {isGallery && (
+        <>
+          <MenuSeparator className={separatorClass} />
+          <MenuItem className={itemClass} onSelect={handleExportGallery}>
+            <RxDownload className="w-4 h-4" />
+            <span>Export Gallery</span>
           </MenuItem>
         </>
       )}

@@ -1,16 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import {
-    RxMagnifyingGlass,
-    RxArrowDown,
-    RxArrowUp,
-    RxStar,
-    RxStarFilled,
-    RxEyeOpen,
-    RxEyeClosed,
-    RxBookmark,
-    RxBookmarkFilled,
-    RxSymbol,
-    RxCross2
+  RxMagnifyingGlass,
+  RxArrowDown,
+  RxArrowUp,
+  RxStar,
+  RxStarFilled,
+  RxEyeOpen,
+  RxEyeClosed,
+  RxBookmark,
+  RxBookmarkFilled,
+  RxSymbol,
+  RxCross2
 } from 'react-icons/rx';
 import { GridView } from './grid-view';
 import { useSettings } from '../contexts/settings-context';
@@ -62,6 +62,8 @@ interface GridPageProps<T> {
 
   // Grid settings
   itemHeight?: number;
+  focusedIndex?: number | null;
+  onFocusedIndexChange?: (index: number | null) => void;
 }
 
 export function GridPage<T>({
@@ -87,6 +89,8 @@ export function GridPage<T>({
   actions,
   itemHeight,
   initialSearchQuery = '',
+  focusedIndex,
+  onFocusedIndexChange,
 }: GridPageProps<T>) {
   const { settings } = useSettings();
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
@@ -304,6 +308,8 @@ export function GridPage<T>({
           renderItem={renderItem}
           emptyMessage={emptyMessage}
           itemHeight={itemHeight}
+          focusedIndex={focusedIndex}
+          onFocusedIndexChange={onFocusedIndexChange}
         />
       </div>
     </div>

@@ -44,6 +44,7 @@ export function GridView<T>({
   onActivateItem,
 }: GridViewProps<T>) {
   const { registerGrid } = useGridNavigation();
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const [internalFocusedIndex, setInternalFocusedIndex] = useState<number | null>(null);
   const [columns, setColumns] = useState(columnsMap.default || 2);
 
@@ -51,9 +52,11 @@ export function GridView<T>({
 
   // Track columns to support up/down navigation
   useEffect(() => {
+    if (!containerRef.current) return;
+
     const updateColumns = () => {
-      const width = window.innerWidth; // Approximate, but better than nothing for static grid
-      // For virtualized grid, we could pass a ref to VirtualizedGrid and get its width
+      if (!containerRef.current) return;
+      const width = containerRef.current.clientWidth;
       
       // Matching Tailwind breakpoints roughly
       if (width >= 1280) setColumns(columnsMap.xl || 6);
@@ -64,18 +67,20 @@ export function GridView<T>({
     };
 
     updateColumns();
-    window.addEventListener('resize', updateColumns);
-    return () => window.removeEventListener('resize', updateColumns);
+    const resizeObserver = new ResizeObserver(updateColumns);
+    resizeObserver.observe(containerRef.current);
+    return () => resizeObserver.disconnect();
   }, [columnsMap]);
 
   const moveFocus = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
     if (items.length === 0) return;
     
     let nextIndex = actualFocusedIndex ?? 0;
+    
     if (actualFocusedIndex === null) {
-        if (onFocusedIndexChange) onFocusedIndexChange(0);
-        else setInternalFocusedIndex(0);
-        return;
+      if (onFocusedIndexChange) onFocusedIndexChange(0);
+      else setInternalFocusedIndex(0);
+      return;
     }
     
     switch (direction) {
@@ -93,10 +98,12 @@ export function GridView<T>({
         break;
     }
     
-    if (onFocusedIndexChange) {
-      onFocusedIndexChange(nextIndex);
-    } else {
-      setInternalFocusedIndex(nextIndex);
+    if (nextIndex !== actualFocusedIndex) {
+      if (onFocusedIndexChange) {
+        onFocusedIndexChange(nextIndex);
+      } else {
+        setInternalFocusedIndex(nextIndex);
+      }
     }
   }, [items.length, actualFocusedIndex, columns, onFocusedIndexChange]);
 
@@ -124,21 +131,24 @@ export function GridView<T>({
 
   if (virtualized) {
     return (
-      <VirtualizedGrid
-        items={items}
-        renderItem={renderGridItem}
-        itemHeight={itemHeight}
-        gap={gap}
-        padding={padding}
-        className={className}
-        columnsMap={columnsMap}
-        scrollToIndex={actualFocusedIndex}
-      />
+      <div ref={containerRef} className="h-full w-full overflow-hidden">
+        <VirtualizedGrid
+          items={items}
+          renderItem={renderGridItem}
+          itemHeight={itemHeight}
+          gap={gap}
+          padding={padding}
+          className={className}
+          columnsMap={columnsMap}
+          scrollToIndex={actualFocusedIndex}
+        />
+      </div>
     );
   }
 
   return (
     <div 
+      ref={containerRef}
       className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 ${className}`}
       style={{
         gap: `${gap}px`,

@@ -65,6 +65,7 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
         items={pages || []}
         itemHeight={300 * (gridSize / 100)}
         columnsMap={columnsMap}
+        focusedIndex={currentPage}
         onFocusedIndexChange={(index) => activeTabId && updateTab(activeTabId, { currentPage: index ?? 0 })}
         onActivateItem={(_, index) => handlePageClick(index)}
         renderItem={(page, index, isFocused) => (

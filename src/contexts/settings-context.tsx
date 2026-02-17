@@ -36,10 +36,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   const applyZoom = useCallback((zoom: number) => {
-    const root = window.document.documentElement;
+    const body = window.document.body;
     // zoom property is non-standard but widely supported in Chromium (which Tauri uses)
     // alternative is transform: scale(), but that might cause layout issues
-    (root.style as any).zoom = `${zoom}%`;
+    (body.style as any).zoom = `${zoom}%`;
   }, []);
 
   const updateSettings = useCallback(async (newSettings: Partial<AppSettings>) => {

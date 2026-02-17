@@ -86,8 +86,14 @@
   * {
     @apply border-border;
   }
+  html {
+    @apply h-full w-full overflow-hidden;
+  }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground font-sans antialiased h-full w-full;
+  }
+  #root {
+    @apply h-full w-full;
   }
 
   input, select, textarea, button {

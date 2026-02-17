@@ -21,6 +21,7 @@ export const formatKeyEvent = (e: KeyboardEvent | React.KeyboardEvent): string =
 };
 
 export const getDisplayKey = (keyString: string): string => {
+  if (!keyString) return '';
   return keyString
     .split('+')
     .map(part => {

@@ -39,6 +39,20 @@ describe('settings-service', () => {
     expect(settings.hotkeys.nextPage).toBe(settingsService.DEFAULT_SETTINGS.hotkeys.nextPage);
   });
 
+  it('loadSettings should deep merge hotkeys', async () => {
+    const savedSettings = { 
+      hotkeys: { 
+        nextPage: 'CustomKey' 
+      } 
+    };
+    mockStore.get.mockResolvedValue(savedSettings);
+
+    const settings = await settingsService.loadSettings();
+
+    expect(settings.hotkeys.nextPage).toBe('CustomKey');
+    expect(settings.hotkeys.prevPage).toBe(settingsService.DEFAULT_SETTINGS.hotkeys.prevPage);
+  });
+
   it('saveSettings should call set and save', async () => {
     const newSettings = { ...settingsService.DEFAULT_SETTINGS, slideshowDelay: 5000 };
     

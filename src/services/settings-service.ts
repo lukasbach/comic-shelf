@@ -57,7 +57,15 @@ const STORE_PATH = 'settings.json';
 export const loadSettings = async (): Promise<AppSettings> => {
   const store = await load(STORE_PATH, { autoSave: 100, defaults: {} });
   const settings = await store.get<AppSettings>('settings');
-  return { ...DEFAULT_SETTINGS, ...settings };
+  if (!settings) return DEFAULT_SETTINGS;
+  return { 
+    ...DEFAULT_SETTINGS, 
+    ...settings,
+    hotkeys: {
+      ...DEFAULT_SETTINGS.hotkeys,
+      ...(settings.hotkeys || {})
+    }
+  };
 };
 
 export const saveSettings = async (settings: AppSettings): Promise<void> => {

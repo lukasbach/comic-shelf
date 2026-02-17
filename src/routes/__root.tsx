@@ -16,7 +16,7 @@ function RootLayoutContent() {
   useAppHotkeys();
   
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground">
+    <div className="flex flex-col h-full overflow-hidden bg-background text-foreground">
       <TopBar />
       <TabBar />
       <main className="flex-1 overflow-hidden relative">

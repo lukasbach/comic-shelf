@@ -1,6 +1,6 @@
 # Comic Shelf
 
-Comic Shelf is a modern, fast, and feature-rich comic reader, designed to provide a seamless reading experience for your local comic collection. It supports various viewing modes, efficient library management, easy setup and a user-friendly interface.
+Comic Shelf is a modern, fast, and feature-rich comic reader for Windows, Linux and MacOS, designed to provide a seamless reading experience for your local comic collection. It supports various viewing modes, efficient library management, easy setup and a user-friendly interface.
 
 ## Quick Look
 

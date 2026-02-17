@@ -1,7 +1,15 @@
 export const formatKeyEvent = (e: KeyboardEvent | React.KeyboardEvent): string => {
   const parts: string[] = [];
   if (e.ctrlKey) parts.push('ctrl');
-  if (e.shiftKey) parts.push('shift');
+  
+  // Only add shift if it's a multi-character key (like ArrowRight, Tab) 
+  // or if it's a single-character key where case matters (letters),
+  // or for Space which is often combined with Shift.
+  // For symbols like '+', '?', shift is already reflected in e.key.
+  if (e.shiftKey && (e.key.length > 1 || e.key.toLowerCase() !== e.key.toUpperCase() || e.key === ' ')) {
+    parts.push('shift');
+  }
+  
   if (e.altKey) parts.push('alt');
   if (e.metaKey) parts.push('meta');
   
@@ -10,9 +18,6 @@ export const formatKeyEvent = (e: KeyboardEvent | React.KeyboardEvent): string =
     // Normalization for common keys
     let key = e.key;
     if (key === ' ') key = 'Space';
-    if (key === '+') key = '='; // Usually same physical key, standardizing to '=' if '+' is used but e.key returns '+' or '=' depending on shift
-    // However the default settings use '+', so let's stick to what we get or normalize
-    // Actually '+' is often shifted '='. 
     
     parts.push(key);
   }

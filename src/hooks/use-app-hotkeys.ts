@@ -162,13 +162,13 @@ export const useAppHotkeys = () => {
         }
 
         // Zoom
-        else if (key === hotkeys.zoomIn) {
+        else if (key === hotkeys.zoomIn || (hotkeys.zoomIn === '+' && key === '=')) {
           e.preventDefault();
           updateTab(activeTab.id, { 
             zoomLevel: Math.min(500, (activeTab.zoomLevel || 100) + 10),
             fitMode: 'none'
           });
-        } else if (key === hotkeys.zoomOut) {
+        } else if (key === hotkeys.zoomOut || (hotkeys.zoomOut === '-' && key === '_')) {
           e.preventDefault();
           updateTab(activeTab.id, { 
             zoomLevel: Math.max(10, (activeTab.zoomLevel || 100) - 10),

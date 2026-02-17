@@ -1,15 +1,15 @@
 import { FC } from 'react'
 import { useRouterState } from '@tanstack/react-router'
 import {
-    RxArchive,
-    RxListBullet,
-    RxPerson,
-    RxStar,
-    RxFileText,
-    RxCounterClockwiseClock,
-    RxBookmark,
-    RxPlus,
-    RxLayers
+  RxArchive,
+  RxListBullet,
+  RxPerson,
+  RxStar,
+  RxFileText,
+  RxCounterClockwiseClock,
+  RxBookmark,
+  RxPlus,
+  RxLayers
 } from 'react-icons/rx'
 import { useIndexing } from '../contexts/indexing-context'
 import { useSettings } from '../contexts/settings-context'

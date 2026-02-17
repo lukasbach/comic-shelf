@@ -3,7 +3,6 @@ import { useRouterState, useNavigate, useRouter } from '@tanstack/react-router';
 import { Tab } from '../stores/tab-store';
 import { useSettings } from './settings-context';
 import { saveTabs, loadTabs } from '../services/tab-persistence-service';
-import { getCurrentWindow } from '@tauri-apps/api/window';
 
 interface TabContextType {
   tabs: Tab[];
@@ -91,31 +90,6 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return () => {
       if (saveTimeoutRef.current) {
         window.clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [tabs, activeTabId, settings.saveOpenedTabs, isInitialized, isLoadingSettings]);
-
-  // Save tabs on window close
-  useEffect(() => {
-    if (!isInitialized || isLoadingSettings) return;
-    if (!settings.saveOpenedTabs) return;
-
-    const appWindow = getCurrentWindow();
-    let unlisten: (() => void) | null = null;
-
-    const setupListener = async () => {
-      unlisten = await appWindow.onCloseRequested(async () => {
-        if (tabs.length > 0) {
-          await saveTabs(tabs, activeTabId);
-        }
-      });
-    };
-
-    setupListener();
-
-    return () => {
-      if (unlisten) {
-        unlisten();
       }
     };
   }, [tabs, activeTabId, settings.saveOpenedTabs, isInitialized, isLoadingSettings]);

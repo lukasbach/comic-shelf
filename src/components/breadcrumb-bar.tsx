@@ -1,14 +1,14 @@
-import { Link, useRouterState, useSearch, useNavigate } from '@tanstack/react-router'
+import { useRouterState, useSearch } from '@tanstack/react-router'
 import { RxChevronRight } from 'react-icons/rx'
 import { useTabs } from '../contexts/tab-context'
 import { useIndexPaths } from '../hooks/use-index-paths'
 import { normalizePath } from '../utils/image-utils'
+import { NavigationLink } from './navigation-link'
 
 export function BreadcrumbBar() {
   const { location } = useRouterState()
-  const { tabs, activeTabId, openLibraryTab, updateTab } = useTabs()
+  const { tabs, activeTabId, updateTab } = useTabs()
   const { indexPaths } = useIndexPaths()
-  const navigate = useNavigate()
   const search = useSearch({ strict: false }) as { path?: string }
   
   const activeTab = tabs.find(t => t.id === activeTabId)
@@ -112,9 +112,10 @@ export function BreadcrumbBar() {
       {segments.map((segment, index) => (
         <div key={`${segment.label}-${index}`} className="flex items-center">
           {index > 0 && <RxChevronRight className="mx-2 text-gray-300 shrink-0" />}
-          <Link
-            to={segment.to}
+          <NavigationLink
+            to={segment.to as any}
             search={segment.search}
+            title={segment.label}
             className={`hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate max-w-40 ${
               index === segments.length - 1 ? 'text-gray-900 dark:text-gray-100 font-semibold' : ''
             }`}
@@ -123,17 +124,9 @@ export function BreadcrumbBar() {
                 segment.onClick()
               }
             }}
-            onAuxClick={(e) => {
-              if (e.button === 1) {
-                if (segment.to.startsWith('/library')) {
-                  const searchStr = segment.search?.path ? `?path=${encodeURIComponent(segment.search.path)}` : '';
-                  openLibraryTab(segment.to + searchStr, segment.label);
-                }
-              }
-            }}
           >
             {segment.label}
-          </Link>
+          </NavigationLink>
         </div>
       ))}
     </nav>

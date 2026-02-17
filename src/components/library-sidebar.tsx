@@ -1,15 +1,15 @@
 import { FC } from 'react'
-import { Link, useRouterState } from '@tanstack/react-router'
+import { useRouterState } from '@tanstack/react-router'
 import {
-  RxArchive,
-  RxListBullet,
-  RxPerson,
-  RxStar,
-  RxFileText,
-  RxCounterClockwiseClock,
-  RxBookmark,
-  RxPlus,
-  RxLayers
+    RxArchive,
+    RxListBullet,
+    RxPerson,
+    RxStar,
+    RxFileText,
+    RxCounterClockwiseClock,
+    RxBookmark,
+    RxPlus,
+    RxLayers
 } from 'react-icons/rx'
 import { useTabs } from '../contexts/tab-context'
 import { useIndexing } from '../contexts/indexing-context'
@@ -27,6 +27,7 @@ import * as indexPathService from '../services/index-path-service'
 import { open } from '@tauri-apps/plugin-dialog'
 import type { Comic } from '../types/comic'
 import type { RecentlyViewedPage } from '../hooks/use-recently-viewed'
+import { NavigationLink } from './navigation-link'
 
 const SmallCard: FC<{
   title: string
@@ -150,9 +151,10 @@ export function LibrarySidebar() {
         {navItems
           .filter(item => !item.featureFlag || (settings as any)[item.featureFlag])
           .map((item) => (
-          <Link
+          <NavigationLink
             key={item.name}
             to={item.to}
+            title={item.name}
             activeOptions={{ exact: true }}
             activeProps={{
               className: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200',
@@ -160,18 +162,11 @@ export function LibrarySidebar() {
             inactiveProps={{
               className: 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800',
             }}
-            onAuxClick={(e) => {
-              if (e.button === 1) { // Middle click
-                e.preventDefault()
-                // Create new tab and navigate to it
-                openLibraryTab(item.to, item.name)
-              }
-            }}
             className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors"
           >
             <item.icon className="w-5 h-5 shrink-0" />
             {item.name}
-          </Link>
+          </NavigationLink>
         ))}
 
         <button

@@ -1,4 +1,5 @@
-import { createFileRoute, useNavigate, Link } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { NavigationLink } from '../../components/navigation-link';
 import { GridPage, SortOption } from '../../components/grid-page';
 import { GalleryCard } from '../../components/gallery-card';
 import { useGalleries } from '../../hooks/use-galleries';
@@ -63,9 +64,9 @@ function GalleriesPage() {
         <RxLayers size={64} className="mb-4 opacity-20" />
         <h2 className="text-xl font-bold text-slate-200">Galleries Disabled</h2>
         <p className="max-w-md mt-2">The Galleries feature is currently disabled in settings. Enable it to create and manage custom collections of pages.</p>
-        <Link to="/settings" className="mt-6 px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-lg font-medium transition-colors">
+        <NavigationLink to="/settings" title="Settings" className="mt-6 px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-lg font-medium transition-colors">
           Go to Settings
-        </Link>
+        </NavigationLink>
       </div>
     );
   }

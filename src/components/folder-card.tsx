@@ -2,6 +2,7 @@ import React from 'react';
 import { RxArchive } from 'react-icons/rx';
 import { getImageUrl } from '../utils/image-utils';
 import { CardItem } from './card-item';
+import { NavigationContextMenu } from './navigation-context-menu';
 
 type FolderCardProps = {
   name: string;
@@ -30,6 +31,16 @@ export const FolderCard: React.FC<FolderCardProps> = ({
       isFocused={isFocused}
       imageClassName="opacity-60 group-hover:opacity-80"
       fallbackIcon={<RxArchive size={48} className="text-blue-500 drop-shadow-md" />}
+      contextMenu={(children) => (
+        <NavigationContextMenu
+          path="/library"
+          search={{ path }}
+          title={name}
+          onOpen={() => onClick(path)}
+        >
+          {children}
+        </NavigationContextMenu>
+      )}
       subtitle={
         <div className="flex flex-col gap-1 items-center justify-center absolute inset-0 pointer-events-none">
            <RxArchive size={48} className="text-blue-500 drop-shadow-md" />

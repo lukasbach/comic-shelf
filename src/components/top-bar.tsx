@@ -1,17 +1,14 @@
-import { Link, useNavigate } from '@tanstack/react-router'
 import { BreadcrumbBar } from './breadcrumb-bar'
 import { RxGear, RxMinus, RxBox, RxCross2, RxCopy } from 'react-icons/rx'
 import { LuGithub } from 'react-icons/lu'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { useEffect, useState } from 'react'
-import { useTabs } from '../contexts/tab-context'
+import { NavigationLink } from './navigation-link'
 
 export function TopBar() {
   const [isMaximized, setIsMaximized] = useState(false)
   const appWindow = getCurrentWindow()
-  const { openLibraryTab } = useTabs()
-  const navigate = useNavigate()
 
   useEffect(() => {
     const updateMaximized = async () => {
@@ -30,25 +27,21 @@ export function TopBar() {
   }, [appWindow])
 
   return (
-    <header className="h-12 relative flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 z-20 select-none">
+    <header className="h-12 relative flex items-center justify-between pl-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 z-20 select-none">
       <div
         data-tauri-drag-region
         className="absolute inset-0"
         onDoubleClick={() => appWindow.toggleMaximize()}
       />
       <div className="flex items-center gap-4 relative pointer-events-none">
-        <Link
+        <NavigationLink
           to="/library"
           search={{ path: '' }}
+          title="Explorer"
           className="text-xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mr-4 pointer-events-auto cursor-pointer"
-          onAuxClick={(e) => {
-            if (e.button === 1) {
-              openLibraryTab('/library', 'Explorer')
-            }
-          }}
         >
           ComicShelf
-        </Link>
+        </NavigationLink>
         <div className="pointer-events-auto hidden lg:block">
           <BreadcrumbBar />
         </div>
@@ -64,25 +57,25 @@ export function TopBar() {
           <LuGithub className="w-4 h-4" />
         </button>
 
-        <Link
+        <NavigationLink
           to="/settings"
-          className="p-1.5 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400 transition-colors mr-2 cursor-pointer"
           title="Settings"
+          className="p-1.5 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400 transition-colors mr-2 cursor-pointer"
         >
           <RxGear className="w-5 h-5" />
-        </Link>
+        </NavigationLink>
 
-        <div className="flex items-center">
+        <div className="flex items-stretch h-12">
           <button
             onClick={() => appWindow.minimize()}
-            className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400 transition-colors cursor-pointer"
+            className="w-12 flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400 transition-colors cursor-pointer"
             title="Minimize"
           >
             <RxMinus className="w-4 h-4" />
           </button>
           <button
             onClick={() => appWindow.toggleMaximize()}
-            className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400 transition-colors cursor-pointer"
+            className="w-12 flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400 transition-colors cursor-pointer"
             title={isMaximized ? 'Restore' : 'Maximize'}
           >
             {isMaximized ? (
@@ -93,7 +86,7 @@ export function TopBar() {
           </button>
           <button
             onClick={() => appWindow.close()}
-            className="p-2 text-gray-500 hover:bg-red-500 hover:text-white dark:hover:bg-red-600 dark:text-gray-400 transition-colors cursor-pointer"
+            className="w-12 flex items-center justify-center text-gray-500 hover:bg-red-500 hover:text-white dark:hover:bg-red-600 dark:text-gray-400 transition-colors cursor-pointer"
             title="Close"
           >
             <RxCross2 className="w-4 h-4" />

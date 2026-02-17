@@ -2,19 +2,19 @@ import React, { useState } from 'react';
 import * as ContextMenu from '@radix-ui/react-context-menu';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import {
-    RxExternalLink,
-    RxPlus,
-    RxMinus,
-    RxStar,
-    RxStarFilled,
-    RxOpenInNewWindow,
-    RxArchive,
-    RxDotsHorizontal,
-    RxEyeOpen,
-    RxEyeClosed,
-    RxCross2,
-    RxLayers,
-    RxDownload
+  RxExternalLink,
+  RxPlus,
+  RxMinus,
+  RxStar,
+  RxStarFilled,
+  RxOpenInNewWindow,
+  RxArchive,
+  RxDotsHorizontal,
+  RxEyeOpen,
+  RxEyeClosed,
+  RxCross2,
+  RxLayers,
+  RxDownload
 } from 'react-icons/rx';
 import type { Comic, ComicPage } from '../types/comic';
 import * as comicService from '../services/comic-service';
@@ -159,9 +159,10 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
       const webview = new WebviewWindow(label, {
         url,
         title: comic?.title || 'ComicShelf',
-        width: 1000,
+        width: 1280,
         height: 800,
         center: true,
+        decorations: false,
       });
 
       webview.once('tauri://error', (e) => {

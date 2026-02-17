@@ -8,20 +8,20 @@ import * as indexPathService from '../../services/index-path-service';
 import { HotkeyInput } from '../../components/settings/hotkey-input';
 import { AppSettings, DEFAULT_SETTINGS } from '../../services/settings-service';
 import {
-  RxSymbol,
-  RxReload,
-  RxCheck,
-  RxPlus,
-  RxTrash,
-  RxCross2,
-  RxDesktop,
-  RxViewHorizontal,
-  RxViewVertical,
-  RxGrid,
-  RxTimer,
-  RxKeyboard,
-  RxArchive,
-  RxLayers
+    RxSymbol,
+    RxReload,
+    RxCheck,
+    RxPlus,
+    RxTrash,
+    RxCross2,
+    RxDesktop,
+    RxViewHorizontal,
+    RxViewVertical,
+    RxGrid,
+    RxTimer,
+    RxKeyboard,
+    RxArchive,
+    RxLayers
 } from 'react-icons/rx';
 import { open } from '@tauri-apps/plugin-dialog';
 

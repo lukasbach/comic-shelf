@@ -11,7 +11,6 @@ import {
     RxPlus,
     RxLayers
 } from 'react-icons/rx'
-import { useTabs } from '../contexts/tab-context'
 import { useIndexing } from '../contexts/indexing-context'
 import { useSettings } from '../contexts/settings-context'
 import { useIndexPaths } from '../hooks/use-index-paths'
@@ -99,7 +98,7 @@ const SmallCard: FC<{
   return content
 }
 
-const navItems = [
+const navItems: { name: string, to: any, icon: any, featureFlag?: string }[] = [
   { name: 'Explorer', to: '/library', icon: RxArchive },
   { name: 'All Comics', to: '/library/list', icon: RxListBullet },
   { name: 'All Pages', to: '/library/all-pages', icon: RxFileText },
@@ -109,7 +108,6 @@ const navItems = [
 ]
 
 export function LibrarySidebar() {
-  const { openLibraryTab } = useTabs()
   const { settings } = useSettings()
   const { comics: favoriteComics, refresh: refetchFavorites } = useFavoriteComics()
   const { comics: bookmarkedComics } = useBookmarkedComics()

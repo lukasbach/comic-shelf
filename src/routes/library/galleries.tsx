@@ -92,6 +92,12 @@ function GalleriesPage() {
       )}
       searchFields={(g) => [g.name]}
       sortOptions={sortOptions}
+      showFavoriteFilter
+      isFavorite={(g) => !!g.is_favorite}
+      showViewFilter
+      isViewed={(g) => g.last_opened_at !== null}
+      showViewCountFilter
+      getViewCount={(g) => g.view_count || 0}
       defaultSortKey="name"
       actions={
         <button

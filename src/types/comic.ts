@@ -36,6 +36,7 @@ export type ComicPage = {
   archive_entry_path?: string | null;
   pdf_page_number?: number | null;
   thumbnail_path: string | null;
+  thumbnail_exists: number;
   is_favorite: number;
   view_count: number;
   last_opened_at: string | null;

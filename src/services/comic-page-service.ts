@@ -19,8 +19,8 @@ export const insertPages = async (
   // though a transaction would be better if supported.
   for (const page of pages) {
     await db.execute(
-      `INSERT INTO comic_pages (comic_id, page_number, file_path, file_name, source_type, source_path, archive_entry_path, pdf_page_number, thumbnail_path)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `INSERT INTO comic_pages (comic_id, page_number, file_path, file_name, source_type, source_path, archive_entry_path, pdf_page_number, thumbnail_path, thumbnail_exists)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        ON CONFLICT(comic_id, page_number) DO UPDATE SET
          file_path = excluded.file_path,
          file_name = excluded.file_name,
@@ -28,7 +28,8 @@ export const insertPages = async (
          source_path = excluded.source_path,
          archive_entry_path = excluded.archive_entry_path,
          pdf_page_number = excluded.pdf_page_number,
-         thumbnail_path = COALESCE(excluded.thumbnail_path, comic_pages.thumbnail_path)`,
+         thumbnail_path = COALESCE(excluded.thumbnail_path, comic_pages.thumbnail_path),
+         thumbnail_exists = excluded.thumbnail_exists`,
       [
         comicId,
         page.page_number,
@@ -39,6 +40,7 @@ export const insertPages = async (
         page.archive_entry_path ?? null,
         page.pdf_page_number ?? null,
         page.thumbnail_path,
+        page.thumbnail_exists,
       ]
     );
   }

@@ -22,6 +22,7 @@ export type IndexedPagePayload = {
   archiveEntryPath: string | null;
   pdfPageNumber: number | null;
   thumbnailPath: string | null;
+  thumbnailExists: boolean;
 };
 
 export type IndexedComicPayload = {
@@ -72,7 +73,8 @@ export const getComicPages = async (
   totalComics: number,
   currentComic: number,
   comicPath: string,
-  sourceType: string
+  sourceType: string,
+  fullReindex: boolean
 ): Promise<IndexedPagePayload[]> => {
   return await invoke<IndexedPagePayload[]>('get_comic_pages', {
     basePath,
@@ -80,6 +82,7 @@ export const getComicPages = async (
     currentComic,
     comicPath,
     sourceType,
+    fullReindex,
   });
 };
 

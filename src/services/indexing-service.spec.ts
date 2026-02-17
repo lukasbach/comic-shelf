@@ -169,4 +169,34 @@ describe('indexing-service', () => {
       })
     );
   });
+
+  it('respects the indexing mode (quick vs full)', async () => {
+    const sourceFileService = await import('./source-file-service');
+    const comicService = await import('./comic-service');
+    const pageService = await import('./comic-page-service');
+
+    vi.mocked(sourceFileService.scanComicCandidates).mockResolvedValue({
+      candidates: [{ path: 'base/Comic', sourceType: 'image', title: 'Comic' }],
+      errors: [],
+    });
+    vi.mocked(sourceFileService.getComicPages).mockResolvedValue([]);
+    vi.mocked(comicService.getComicByPath).mockResolvedValue({ id: 1, path: 'base/Comic', indexing_status: 'completed', thumbnail_path: 'thumb.jpg' } as any);
+    vi.mocked(pageService.getPagesByComicId).mockResolvedValue([{ page_number: 1, thumbnail_exists: 1 }] as any);
+
+    // Quick mode: Should skip if everything exists
+    await indexingService.indexComics('base', '{series}', 'quick');
+    expect(sourceFileService.getComicPages).not.toHaveBeenCalled();
+
+    // Full mode: Should not skip even if everything exists
+    vi.mocked(sourceFileService.getComicPages).mockResolvedValue([]);
+    await indexingService.indexComics('base', '{series}', 'full');
+    expect(sourceFileService.getComicPages).toHaveBeenCalledWith(
+      'base',
+      expect.any(Number),
+      expect.any(Number),
+      'base/Comic',
+      'image',
+      true // fullReindex = true
+    );
+  });
 });

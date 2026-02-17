@@ -8,20 +8,20 @@ import * as indexPathService from '../../services/index-path-service';
 import { HotkeyInput } from '../../components/settings/hotkey-input';
 import { AppSettings, DEFAULT_SETTINGS } from '../../services/settings-service';
 import {
-    RxSymbol,
-    RxReload,
-    RxCheck,
-    RxPlus,
-    RxTrash,
-    RxCross2,
-    RxDesktop,
-    RxViewHorizontal,
-    RxViewVertical,
-    RxGrid,
-    RxTimer,
-    RxKeyboard,
-    RxArchive,
-    RxLayers
+  RxSymbol,
+  RxReload,
+  RxCheck,
+  RxPlus,
+  RxTrash,
+  RxCross2,
+  RxDesktop,
+  RxViewHorizontal,
+  RxViewVertical,
+  RxGrid,
+  RxTimer,
+  RxKeyboard,
+  RxArchive,
+  RxLayers
 } from 'react-icons/rx';
 import { open } from '@tauri-apps/plugin-dialog';
 
@@ -294,15 +294,28 @@ function SettingsPage() {
                   </div>
                 )}
 
-                <button
-                  type="button"
-                  onClick={startIndexing}
-                  disabled={isIndexing}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600/10 hover:bg-green-600/20 border border-green-600/30 rounded-lg text-sm font-medium text-green-400 transition-all disabled:opacity-50"
-                >
-                  {isIndexing ? <RxSymbol className="animate-spin" /> : <RxReload />}
-                  {isIndexing ? 'Indexing...' : 'Force Re-index All'}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => startIndexing('quick')}
+                    disabled={isIndexing}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600/10 hover:bg-green-600/20 border border-green-600/30 rounded-lg text-sm font-medium text-green-400 transition-all disabled:opacity-50"
+                  >
+                    {isIndexing ? <RxSymbol className="animate-spin" /> : <RxReload />}
+                    {isIndexing ? 'Indexing...' : 'Quick Re-index'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => startIndexing('full')}
+                    disabled={isIndexing}
+                    className="flex items-center gap-2 px-4 py-2 bg-amber-600/10 hover:bg-amber-600/20 border border-amber-600/30 rounded-lg text-sm font-medium text-amber-500 transition-all disabled:opacity-50"
+                    title="Deep scan all pages and re-generate all thumbnails"
+                  >
+                    {isIndexing ? <RxSymbol className="animate-spin" /> : <RxReload />}
+                    {isIndexing ? 'Indexing...' : 'Full Re-index'}
+                  </button>
+                </div>
               </div>
             </div>
           </section>

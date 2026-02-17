@@ -112,6 +112,7 @@ const generatePdfFallbackThumbnails = async (
   pages: sourceFileService.IndexedPagePayload[],
   comicId: number,
   existingThumbnailByPageNumber: Map<number, string>,
+  force: boolean = false,
   onProgress?: (current: number, total: number) => void
 ): Promise<Map<number, string | null>> => {
   const output = new Map<number, string | null>();
@@ -119,12 +120,14 @@ const generatePdfFallbackThumbnails = async (
     return output;
   }
 
-  pages.forEach((page) => {
-    const existingThumb = existingThumbnailByPageNumber.get(page.pageNumber);
-    if (existingThumb) {
-      output.set(page.pageNumber, normalizePath(existingThumb));
-    }
-  });
+  if (!force) {
+    pages.forEach((page) => {
+      const existingThumb = existingThumbnailByPageNumber.get(page.pageNumber);
+      if (existingThumb) {
+        output.set(page.pageNumber, normalizePath(existingThumb));
+      }
+    });
+  }
 
   const pagesToGenerate = pages.filter((page) => !output.has(page.pageNumber));
   if (pagesToGenerate.length === 0) {
@@ -174,10 +177,12 @@ const generatePdfFallbackThumbnails = async (
 export const indexComics = async (
   basePath: string,
   pattern: string,
+  mode: 'quick' | 'full' = 'quick',
   onProgress?: (progress: IndexingProgress) => void
 ): Promise<Set<string>> => {
-  console.info(`[Indexing] Starting index for base path: ${normalizePath(basePath)} (pattern: ${pattern})`);
+  console.info(`[Indexing] Starting ${mode} index for base path: ${normalizePath(basePath)} (pattern: ${pattern})`);
   const normalizedBasePath = normalizePath(basePath);
+  const fullReindex = mode === 'full';
   
   const unlistenRustProgress = await sourceFileService.listenToRustIndexingProgress((event) => {
     if (normalizePath(event.basePath) !== normalizedBasePath) {
@@ -280,6 +285,15 @@ export const indexComics = async (
         }
         const comicId = currentComic.id;
 
+        const existingPages = await pageService.getPagesByComicId(comicId);
+        const allThumbnailsExist = existingPages.length > 0 && existingPages.every(p => p.thumbnail_exists === 1);
+
+        if (!fullReindex && allThumbnailsExist && currentComic.indexing_status === 'completed' && currentComic.thumbnail_path) {
+          console.info(`[Indexing] Skipping ${comicPath} (already indexed with thumbnails)`);
+          activeComicPaths.add(comicPath);
+          continue;
+        }
+
         await comicService.updateIndexingStatus(comicId, 'processing');
 
         const pages = await sourceFileService.getComicPages(
@@ -287,7 +301,8 @@ export const indexComics = async (
           toProcessCount,
           i + 1,
           comicPath,
-          candidate.sourceType
+          candidate.sourceType,
+          fullReindex
         );
 
         if (pages.length === 0) {
@@ -296,7 +311,6 @@ export const indexComics = async (
           continue;
         }
 
-        const existingPages = await pageService.getPagesByComicId(comicId);
         const existingThumbnailByPageNumber = new Map<number, string>();
         existingPages.forEach((page) => {
           if (page.thumbnail_path) {
@@ -308,6 +322,7 @@ export const indexComics = async (
           pages,
           comicId,
           existingThumbnailByPageNumber,
+          fullReindex,
           (current, totalPages) => {
             onProgress?.({
               current: i + 1,
@@ -323,7 +338,7 @@ export const indexComics = async (
         const finalPages = pages.map((page) => {
           const fallbackThumb = thumbnailByPageNumber.get(page.pageNumber);
           if (!fallbackThumb) return page;
-          return { ...page, thumbnailPath: fallbackThumb };
+          return { ...page, thumbnailPath: fallbackThumb, thumbnailExists: true };
         });
 
         const coverImagePath = finalPages.find(p => p.pageNumber === 1)?.filePath ?? finalPages[0].filePath;
@@ -364,8 +379,10 @@ export const indexComics = async (
             archive_entry_path: page.archiveEntryPath,
             pdf_page_number: page.pdfPageNumber,
             thumbnail_path: page.thumbnailPath ? normalizePath(page.thumbnailPath) : null,
+            thumbnail_exists: page.thumbnailExists ? 1 : 0,
           }))
         );
+        activeComicPaths.add(comicPath);
       } catch (err) {
         console.error(`[Indexing] Failed processing ${comicPath}`, err);
         const errorMsg = err instanceof Error ? err.message : String(err);
@@ -402,6 +419,7 @@ export const indexComics = async (
 };
 
 export const reindexAll = async (
+  mode: 'quick' | 'full' = 'quick',
   onProgress?: (progress: GlobalIndexingProgress) => void
 ): Promise<void> => {
   const paths = await getAllIndexPaths();
@@ -421,7 +439,7 @@ export const reindexAll = async (
       errors: [...allErrors],
     });
 
-    const indexedPaths = await indexComics(path.path, path.pattern, (progress) => {
+    const indexedPaths = await indexComics(path.path, path.pattern, mode, (progress) => {
       const newErrors = progress.errors.filter((error) => !allErrors.some((known) => known.path === error.path));
       if (newErrors.length > 0) {
         allErrors.push(...newErrors);
@@ -461,11 +479,12 @@ export const reindexAll = async (
 
 export const reindexPathById = async (
   id: number,
+  mode: 'quick' | 'full' = 'quick',
   onProgress?: (progress: IndexingProgress) => void
 ): Promise<void> => {
   const paths = await getAllIndexPaths();
   const path = paths.find((currentPath) => currentPath.id === id);
   if (!path) throw new Error(`Index path with ID ${id} not found`);
 
-  await indexComics(path.path, path.pattern, onProgress);
+  await indexComics(path.path, path.pattern, mode, onProgress);
 };

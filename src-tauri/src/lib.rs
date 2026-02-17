@@ -64,6 +64,7 @@ struct IndexedPagePayload {
     archive_entry_path: Option<String>,
     pdf_page_number: Option<i64>,
     thumbnail_path: Option<String>,
+    thumbnail_exists: bool,
 }
 
 #[derive(Serialize)]
@@ -307,6 +308,16 @@ fn ensure_indexed_thumb_root(app: &AppHandle) -> Result<PathBuf, String> {
     Ok(indexed_root)
 }
 
+fn get_indexed_thumbnail_path(
+    app: &AppHandle,
+    comic_path: &str,
+    page_number: i64,
+) -> Result<PathBuf, String> {
+    let indexed_root = ensure_indexed_thumb_root(app)?;
+    let comic_hash = hash_path(comic_path);
+    Ok(indexed_root.join(comic_hash).join(format!("{}.jpg", page_number)))
+}
+
 fn ensure_indexed_thumb_comic_dir(app: &AppHandle, comic_path: &str) -> Result<PathBuf, String> {
     let indexed_root = ensure_indexed_thumb_root(app)?;
     let comic_hash = hash_path(comic_path);
@@ -488,76 +499,6 @@ fn list_image_pages_internal(comic_dir: &Path) -> Result<Vec<ImagePageEntry>, St
         .collect())
 }
 
-fn read_all_archive_image_entries_with_bytes(path: &str) -> Result<Vec<(String, Vec<u8>)>, String> {
-    let archive_path = PathBuf::from(path);
-    let ext = extension_of(&archive_path).unwrap_or_default();
-
-    if ext == "cbz" {
-        let file = fs::File::open(&archive_path)
-            .map_err(|e| format!("Failed to open CBZ archive {}: {e}", archive_path.display()))?;
-        let mut archive = ZipArchive::new(file)
-            .map_err(|e| format!("Failed to read CBZ archive {}: {e}", archive_path.display()))?;
-
-        let mut entries: Vec<(String, Vec<u8>)> = Vec::new();
-        for idx in 0..archive.len() {
-            let mut file = archive
-                .by_index(idx)
-                .map_err(|e| format!("Failed to read CBZ entry at index {}: {e}", idx))?;
-            if !file.is_file() {
-                continue;
-            }
-
-            let name = file.name().replace('\\', "/");
-            if !is_image_entry_name(&name) {
-                continue;
-            }
-
-            let mut bytes = Vec::new();
-            file.read_to_end(&mut bytes)
-                .map_err(|e| format!("Failed to read CBZ image entry {}: {e}", name))?;
-            entries.push((name, bytes));
-        }
-
-        entries.sort_by(|a, b| natural_cmp(&a.0, &b.0));
-        return Ok(entries);
-    }
-
-    if ext == "cbr" {
-        let mut archive = Archive::new(path)
-            .open_for_processing()
-            .map_err(|e| format!("Failed to open CBR for processing {}: {e}", archive_path.display()))?;
-
-        let mut entries: Vec<(String, Vec<u8>)> = Vec::new();
-
-        loop {
-            let Some(before_file) = archive
-                .read_header()
-                .map_err(|e| format!("Failed reading CBR header {}: {e}", archive_path.display()))?
-            else {
-                break;
-            };
-
-            let name = before_file.entry().filename.to_string_lossy().replace('\\', "/");
-            if is_image_entry_name(&name) {
-                let (data, next_archive) = before_file
-                    .read()
-                    .map_err(|e| format!("Failed reading CBR image entry {}: {e}", name))?;
-                entries.push((name, data));
-                archive = next_archive;
-            } else {
-                archive = before_file
-                    .skip()
-                    .map_err(|e| format!("Failed skipping CBR entry while collecting images: {e}"))?;
-            }
-        }
-
-        entries.sort_by(|a, b| natural_cmp(&a.0, &b.0));
-        return Ok(entries);
-    }
-
-    Err(format!("Unsupported archive extension for file: {}", archive_path.display()))
-}
-
 fn build_pages_for_candidate(
     app: &AppHandle,
     base_path: &str,
@@ -565,6 +506,7 @@ fn build_pages_for_candidate(
     current_comic: usize,
     comic_path: &str,
     source_type: &str,
+    full_reindex: bool,
 ) -> Result<Vec<IndexedPagePayload>, String> {
     if source_type == "image" {
         let entries = list_image_pages_internal(Path::new(comic_path))?;
@@ -574,20 +516,28 @@ fn build_pages_for_candidate(
         return entries
             .into_par_iter()
             .map(|entry| {
-                let task = format!(
-                    "Generating image thumbnail for page {} ({})",
-                    entry.page_number, entry.file_name
-                );
-                emit_indexing_progress(app, base_path, total_comics, current_comic, comic_path, &task);
-                println!(
-                    "[Indexing][Rust][Thumbnail] Processing image source '{}' page {}",
-                    entry.file_path, entry.page_number
-                );
-                let bytes = fs::read(PathBuf::from(entry.file_path.clone())).map_err(|e| {
-                    format!("Failed to read source image for thumbnail generation: {e}")
-                })?;
-                let thumbnail_path =
-                    generate_indexed_thumbnail_from_bytes(app, &bytes, comic_path, entry.page_number)?;
+                let thumb_path = get_indexed_thumbnail_path(app, comic_path, entry.page_number)?;
+                let thumb_exists = thumb_path.exists();
+
+                let (final_thumb_path, exists) = if thumb_exists && !full_reindex {
+                    (thumb_path.to_str().unwrap().to_string(), true)
+                } else {
+                    let task = format!(
+                        "Generating image thumbnail for page {} ({})",
+                        entry.page_number, entry.file_name
+                    );
+                    emit_indexing_progress(app, base_path, total_comics, current_comic, comic_path, &task);
+                    println!(
+                        "[Indexing][Rust][Thumbnail] Processing image source '{}' page {}",
+                        entry.file_path, entry.page_number
+                    );
+                    let bytes = fs::read(PathBuf::from(entry.file_path.clone())).map_err(|e| {
+                        format!("Failed to read source image for thumbnail generation: {e}")
+                    })?;
+                    let thumbnail_path =
+                        generate_indexed_thumbnail_from_bytes(app, &bytes, comic_path, entry.page_number)?;
+                    (thumbnail_path, true)
+                };
 
                 Ok(IndexedPagePayload {
                     page_number: entry.page_number,
@@ -597,7 +547,8 @@ fn build_pages_for_candidate(
                     source_path: entry.file_path,
                     archive_entry_path: None,
                     pdf_page_number: None,
-                    thumbnail_path: Some(thumbnail_path),
+                    thumbnail_path: Some(normalize_path_string(&final_thumb_path)),
+                    thumbnail_exists: exists,
                 })
             })
             .collect();
@@ -605,10 +556,15 @@ fn build_pages_for_candidate(
 
     if source_type == "pdf" {
         let page_count = count_pdf_pages(comic_path.to_string())?;
+        let mut pages = Vec::new();
         for page_number in 1..=page_count {
+            let thumb_path = get_indexed_thumbnail_path(app, comic_path, page_number)?;
+            let thumb_exists = thumb_path.exists();
+
             let task = format!(
-                "Preparing PDF page {} metadata (thumbnail generated in frontend)",
-                page_number
+                "Preparing PDF page {} metadata (thumbnail {})",
+                page_number,
+                if thumb_exists { "exists" } else { "generated in frontend" }
             );
             emit_indexing_progress(
                 app,
@@ -618,14 +574,8 @@ fn build_pages_for_candidate(
                 comic_path,
                 &task,
             );
-            println!(
-                "[Indexing][Rust][Thumbnail] PDF page {} for '{}' has no Rust thumbnail (frontend fallback)",
-                page_number,
-                comic_path
-            );
-        }
-        return Ok((1..=page_count)
-            .map(|page_number| IndexedPagePayload {
+            
+            pages.push(IndexedPagePayload {
                 page_number,
                 file_path: normalize_path_string(comic_path),
                 file_name: format!("page-{}.pdf", page_number),
@@ -633,49 +583,242 @@ fn build_pages_for_candidate(
                 source_path: normalize_path_string(comic_path),
                 archive_entry_path: None,
                 pdf_page_number: Some(page_number),
-                thumbnail_path: None,
-            })
-            .collect());
+                thumbnail_path: if thumb_exists { Some(normalize_path_string(thumb_path.to_str().unwrap())) } else { None },
+                thumbnail_exists: thumb_exists,
+            });
+        }
+        return Ok(pages);
     }
 
-    let entries = read_all_archive_image_entries_with_bytes(comic_path)?;
-    // Pre-create comic thumbnail directory once to avoid contention in parallel loop
+    let entry_names = list_archive_image_entries(comic_path.to_string())?;
     ensure_indexed_thumb_comic_dir(app, comic_path)?;
 
-    entries
-        .into_par_iter()
-        .enumerate()
-        .map(|(idx, (entry_path, bytes))| {
-            let page_number = (idx + 1) as i64;
-            let task = format!(
-                "Generating archive thumbnail for page {} ({})",
-                page_number, entry_path
-            );
-            emit_indexing_progress(app, base_path, total_comics, current_comic, comic_path, &task);
-            println!(
-                "[Indexing][Rust][Thumbnail] Processing archive entry '{}' in '{}' as page {}",
-                entry_path, comic_path, page_number
-            );
-            let thumbnail_path =
-                generate_indexed_thumbnail_from_bytes(app, &bytes, comic_path, page_number)?;
-            let file_name = Path::new(&entry_path)
-                .file_name()
-                .and_then(|segment| segment.to_str())
-                .unwrap_or(&entry_path)
-                .to_string();
+    let archive_path = PathBuf::from(comic_path);
+    let ext = extension_of(&archive_path).unwrap_or_default();
 
-            Ok(IndexedPagePayload {
-                page_number,
-                file_path: normalize_path_string(comic_path),
-                file_name,
-                source_type: "archive".to_string(),
-                source_path: normalize_path_string(comic_path),
-                archive_entry_path: Some(entry_path),
-                pdf_page_number: None,
-                thumbnail_path: Some(thumbnail_path),
-            })
-        })
-        .collect()
+    if ext == "cbz" {
+        let file = fs::File::open(&archive_path)
+            .map_err(|e| format!("Failed to open CBZ archive {}: {e}", archive_path.display()))?;
+        let mut archive = ZipArchive::new(file)
+            .map_err(|e| format!("Failed to read CBZ archive {}: {e}", archive_path.display()))?;
+
+        enum CbzTask {
+            AlreadyExists {
+                page_number: i64,
+                entry_path: String,
+                thumb_path: String,
+            },
+            Generate {
+                page_number: i64,
+                entry_path: String,
+                bytes: Vec<u8>,
+            },
+        }
+
+        let mut tasks = Vec::with_capacity(entry_names.len());
+        
+        for (idx, entry_path) in entry_names.into_iter().enumerate() {
+            let page_number = (idx + 1) as i64;
+            let thumb_path = get_indexed_thumbnail_path(app, comic_path, page_number)?;
+            let thumb_exists = thumb_path.exists();
+
+            if thumb_exists && !full_reindex {
+                tasks.push(CbzTask::AlreadyExists {
+                    page_number,
+                    entry_path,
+                    thumb_path: thumb_path.to_str().unwrap().to_string(),
+                });
+            } else {
+                let mut entry_file = archive.by_name(&entry_path)
+                    .map_err(|e| format!("Failed to find entry {} in archive: {e}", entry_path))?;
+                
+                let mut bytes = Vec::new();
+                entry_file.read_to_end(&mut bytes)
+                    .map_err(|e| format!("Failed to read CBZ image entry {}: {e}", entry_path))?;
+                
+                tasks.push(CbzTask::Generate {
+                    page_number,
+                    entry_path,
+                    bytes,
+                });
+            }
+        }
+
+        return tasks.into_par_iter().map(|task| {
+            let comic_path_str = comic_path.to_string();
+            match task {
+                CbzTask::AlreadyExists { page_number, entry_path, thumb_path } => {
+                    let task_desc = format!("Preparing CBZ page {} metadata (exists)", page_number);
+                    emit_indexing_progress(app, base_path, total_comics, current_comic, &comic_path_str, &task_desc);
+                    
+                    let file_name = Path::new(&entry_path)
+                        .file_name()
+                        .and_then(|s| s.to_str())
+                        .unwrap_or(&entry_path)
+                        .to_string();
+
+                    Ok(IndexedPagePayload {
+                        page_number,
+                        file_path: normalize_path_string(&comic_path_str),
+                        file_name,
+                        source_type: "archive".to_string(),
+                        source_path: normalize_path_string(&comic_path_str),
+                        archive_entry_path: Some(entry_path),
+                        pdf_page_number: None,
+                        thumbnail_path: Some(normalize_path_string(&thumb_path)),
+                        thumbnail_exists: true,
+                    })
+                },
+                CbzTask::Generate { page_number, entry_path, bytes } => {
+                    let task_desc = format!("Generating CBZ thumbnail for page {} ({})", page_number, entry_path);
+                    emit_indexing_progress(app, base_path, total_comics, current_comic, &comic_path_str, &task_desc);
+                    
+                    let thumbnail_path = generate_indexed_thumbnail_from_bytes(app, &bytes, &comic_path_str, page_number)?;
+                    
+                    let file_name = Path::new(&entry_path)
+                        .file_name()
+                        .and_then(|s| s.to_str())
+                        .unwrap_or(&entry_path)
+                        .to_string();
+
+                    Ok(IndexedPagePayload {
+                        page_number,
+                        file_path: normalize_path_string(&comic_path_str),
+                        file_name,
+                        source_type: "archive".to_string(),
+                        source_path: normalize_path_string(&comic_path_str),
+                        archive_entry_path: Some(entry_path),
+                        pdf_page_number: None,
+                        thumbnail_path: Some(normalize_path_string(&thumbnail_path)),
+                        thumbnail_exists: true,
+                    })
+                }
+            }
+        }).collect();
+    }
+
+    if ext == "cbr" {
+        let mut archive = Archive::new(comic_path)
+            .open_for_processing()
+            .map_err(|e| format!("Failed to open CBR for processing {}: {e}", archive_path.display()))?;
+
+        enum CbrTask {
+            AlreadyExists {
+                page_number: i64,
+                entry_path: String,
+                thumb_path: String,
+            },
+            Generate {
+                page_number: i64,
+                entry_path: String,
+                bytes: Vec<u8>,
+            },
+        }
+
+        let mut name_to_page = HashMap::new();
+        for (idx, name) in entry_names.iter().enumerate() {
+            name_to_page.insert(name.clone(), (idx + 1) as i64);
+        }
+
+        let mut tasks = Vec::new();
+
+        loop {
+            let Some(before_file) = archive
+                .read_header()
+                .map_err(|e| format!("Failed reading CBR header {}: {e}", archive_path.display()))?
+            else {
+                break;
+            };
+
+            let entry_path = before_file.entry().filename.to_string_lossy().replace('\\', "/");
+            if is_image_entry_name(&entry_path) {
+                let page_number = *name_to_page.get(&entry_path).ok_or_else(|| format!("Entry {} not found in pre-scanned list", entry_path))?;
+                let thumb_path = get_indexed_thumbnail_path(app, comic_path, page_number)?;
+                let thumb_exists = thumb_path.exists();
+
+                if thumb_exists && !full_reindex {
+                    tasks.push(CbrTask::AlreadyExists {
+                        page_number,
+                        entry_path,
+                        thumb_path: thumb_path.to_str().unwrap().to_string(),
+                    });
+                    archive = before_file.skip().map_err(|e| format!("Failed skipping CBR entry: {e}"))?;
+                } else {
+                    let (data, next_archive) = before_file
+                        .read()
+                        .map_err(|e| format!("Failed reading CBR image entry {}: {e}", entry_path))?;
+                    
+                    tasks.push(CbrTask::Generate {
+                        page_number,
+                        entry_path,
+                        bytes: data,
+                    });
+                    archive = next_archive;
+                }
+            } else {
+                archive = before_file
+                    .skip()
+                    .map_err(|e| format!("Failed skipping CBR entry: {e}"))?;
+            }
+        }
+
+        let mut results: Vec<IndexedPagePayload> = tasks.into_par_iter().map(|task| {
+            let comic_path_str = comic_path.to_string();
+            match task {
+                CbrTask::AlreadyExists { page_number, entry_path, thumb_path } => {
+                    let task_desc = format!("Preparing CBR page {} metadata (exists)", page_number);
+                    emit_indexing_progress(app, base_path, total_comics, current_comic, &comic_path_str, &task_desc);
+
+                    let file_name = Path::new(&entry_path)
+                        .file_name()
+                        .and_then(|s| s.to_str())
+                        .unwrap_or(&entry_path)
+                        .to_string();
+
+                    Ok(IndexedPagePayload {
+                        page_number,
+                        file_path: normalize_path_string(&comic_path_str),
+                        file_name,
+                        source_type: "archive".to_string(),
+                        source_path: normalize_path_string(&comic_path_str),
+                        archive_entry_path: Some(entry_path),
+                        pdf_page_number: None,
+                        thumbnail_path: Some(normalize_path_string(&thumb_path)),
+                        thumbnail_exists: true,
+                    })
+                },
+                CbrTask::Generate { page_number, entry_path, bytes } => {
+                    let task_desc = format!("Generating CBR thumbnail for page {} ({})", page_number, entry_path);
+                    emit_indexing_progress(app, base_path, total_comics, current_comic, &comic_path_str, &task_desc);
+
+                    let thumbnail_path = generate_indexed_thumbnail_from_bytes(app, &bytes, &comic_path_str, page_number)?;
+                    
+                    let file_name = Path::new(&entry_path)
+                        .file_name()
+                        .and_then(|s| s.to_str())
+                        .unwrap_or(&entry_path)
+                        .to_string();
+
+                    Ok(IndexedPagePayload {
+                        page_number,
+                        file_path: normalize_path_string(&comic_path_str),
+                        file_name,
+                        source_type: "archive".to_string(),
+                        source_path: normalize_path_string(&comic_path_str),
+                        archive_entry_path: Some(entry_path),
+                        pdf_page_number: None,
+                        thumbnail_path: Some(normalize_path_string(&thumbnail_path)),
+                        thumbnail_exists: true,
+                    })
+                }
+            }
+        }).collect::<Result<Vec<IndexedPagePayload>, String>>()?;
+
+        results.sort_by(|a, b| a.page_number.cmp(&b.page_number));
+        return Ok(results);
+    }
+
+    Err(format!("Unsupported archive extension for file: {}", archive_path.display()))
 }
 
 fn build_index_payload_for_path_impl(
@@ -735,6 +878,7 @@ fn build_index_payload_for_path_impl(
             current_comic,
             &comic_path,
             &candidate.source_type,
+            false,
         ) {
             Ok(pages) => {
                 if pages.is_empty() {
@@ -845,6 +989,7 @@ async fn get_comic_pages(
     current_comic: usize,
     comic_path: String,
     source_type: String,
+    full_reindex: bool,
 ) -> Result<Vec<IndexedPagePayload>, String> {
     tauri::async_runtime::spawn_blocking(move || {
         build_pages_for_candidate(
@@ -854,6 +999,7 @@ async fn get_comic_pages(
             current_comic,
             &comic_path,
             &source_type,
+            full_reindex,
         )
     })
     .await

@@ -5,7 +5,7 @@ import { useSettings } from './settings-context';
 type IndexingContextType = {
   isIndexing: boolean;
   progress: GlobalIndexingProgress | null;
-  startIndexing: () => Promise<void>;
+  startIndexing: (mode?: 'quick' | 'full') => Promise<void>;
   lastIndexedAt: string | null;
   errors: IndexingError[];
   clearErrors: () => void;
@@ -24,14 +24,14 @@ export const IndexingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setErrors([]);
   }, []);
 
-  const startIndexing = useCallback(async () => {
+  const startIndexing = useCallback(async (mode: 'quick' | 'full' = 'quick') => {
     if (isIndexing) return;
     
     setIsIndexing(true);
     setProgress(null);
     setErrors([]); // Clear old errors when starting new indexing
     try {
-      await reindexAll((p) => {
+      await reindexAll(mode, (p) => {
         setProgress(p);
         if (p.errors && p.errors.length > 0) {
             setErrors(p.errors);

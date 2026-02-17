@@ -57,8 +57,10 @@ function AllPagesList() {
       defaultSortOrder="desc"
       showFavoriteFilter
       showViewFilter
+      showViewCountFilter
       isFavorite={(p) => p.is_favorite === 1}
       isViewed={(p) => p.last_opened_at !== null}
+      getViewCount={(p) => p.view_count}
       noItemsMessage="No pages found. Start indexing comics to see them here."
       itemHeight={450}
     />

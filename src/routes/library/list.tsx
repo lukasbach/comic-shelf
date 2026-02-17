@@ -57,9 +57,11 @@ function LibraryList() {
       defaultSortKey="title"
       showFavoriteFilter
       showViewFilter
+      showViewCountFilter
       showBookmarkFilter
       isFavorite={(c) => c.is_favorite === 1}
       isViewed={(c) => c.last_opened_at !== null}
+      getViewCount={(c) => c.view_count}
       isBookmarked={(c) => !!c.bookmark_page}
       noItemsMessage="No comics found. Configure indexing paths in Settings."
       itemHeight={450}

@@ -10,13 +10,15 @@ import {
   RxBookmark,
   RxBookmarkFilled,
   RxSymbol,
-  RxCross2
+  RxCross2,
+  RxPlus
 } from 'react-icons/rx';
 import { GridView } from './grid-view';
 import { useSettings } from '../contexts/settings-context';
 
 export type SortOrder = 'asc' | 'desc';
 export type ViewFilter = 'all' | 'viewed' | 'not-viewed';
+export type ViewCountFilter = 'all' | 'counted';
 export type FavoriteFilter = 'all' | 'favorited' | 'not-favorited';
 export type BookmarkFilter = 'all' | 'bookmarked' | 'not-bookmarked';
 
@@ -49,12 +51,14 @@ interface GridPageProps<T> {
   
   // Filtering capabilities
   showViewFilter?: boolean;
+  showViewCountFilter?: boolean;
   showFavoriteFilter?: boolean;
   showBookmarkFilter?: boolean;
   
   // Property accessors for filtering
   isFavorite?: (item: T) => boolean;
   isViewed?: (item: T) => boolean;
+  getViewCount?: (item: T) => number;
   isBookmarked?: (item: T) => boolean;
   
   // Actions
@@ -81,10 +85,12 @@ export function GridPage<T>({
   defaultSortKey,
   defaultSortOrder = 'asc',
   showViewFilter = false,
+  showViewCountFilter = false,
   showFavoriteFilter = false,
   showBookmarkFilter = false,
   isFavorite,
   isViewed,
+  getViewCount,
   isBookmarked,
   actions,
   itemHeight,
@@ -103,10 +109,12 @@ export function GridPage<T>({
   const [sortKey, setSortKey] = useState(defaultSortKey || (sortOptions[0]?.value));
   const [sortOrder, setSortOrder] = useState<SortOrder>(defaultSortOrder);
   const [viewFilter, setViewFilter] = useState<ViewFilter>('all');
+  const [viewCountFilter, setViewCountFilter] = useState<ViewCountFilter>('all');
   const [favoriteFilter, setFavoriteFilter] = useState<FavoriteFilter>('all');
   const [bookmarkFilter, setBookmarkFilter] = useState<BookmarkFilter>('all');
 
-  const effectiveShowViewFilter = showViewFilter && settings.showViewCount;
+  const effectiveShowViewFilter = showViewFilter;
+  const effectiveShowViewCountFilter = showViewCountFilter && settings.showViewCount;
 
   const toggleSortOrder = () => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
 
@@ -126,6 +134,11 @@ export function GridPage<T>({
     if (showViewFilter && isViewed) {
       if (viewFilter === 'viewed') result = result.filter(isViewed);
       else if (viewFilter === 'not-viewed') result = result.filter(i => !isViewed(i));
+    }
+
+    // View Count filter
+    if (showViewCountFilter && getViewCount) {
+      if (viewCountFilter === 'counted') result = result.filter(i => getViewCount(i) >= 1);
     }
 
     // Favorite filter
@@ -158,13 +171,16 @@ export function GridPage<T>({
     sortOrder, 
     sortOptions, 
     viewFilter, 
+    viewCountFilter,
     favoriteFilter, 
     bookmarkFilter,
     showViewFilter,
+    showViewCountFilter,
     showFavoriteFilter,
     showBookmarkFilter,
     isFavorite,
     isViewed,
+    getViewCount,
     isBookmarked
   ]);
 
@@ -249,6 +265,21 @@ export function GridPage<T>({
                   title="Filter Viewed"
                 >
                   {viewFilter === 'viewed' ? <RxEyeOpen /> : <RxEyeClosed />}
+                </button>
+              )}
+              {effectiveShowViewCountFilter && (
+                <button
+                  onClick={() => setViewCountFilter(prev => prev === 'all' ? 'counted' : 'all')}
+                  className={`p-1.5 rounded transition-all ${
+                    viewCountFilter === 'counted' ? 'bg-primary text-primary-foreground shadow-sm' : 
+                    'hover:bg-muted text-muted-foreground'
+                  }`}
+                  title="Filter by View Count"
+                >
+                  <div className="relative">
+                    <RxEyeOpen />
+                    <RxPlus className="absolute -top-1 -right-1 text-[8px] bg-background rounded-full" />
+                  </div>
                 </button>
               )}
               {showBookmarkFilter && (

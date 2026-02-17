@@ -1,6 +1,6 @@
 [package]
 name = "comic-shelf"
-version = "0.1.4"
+version = "0.1.5"
 description = "A simple comic viewing app"
 authors = ["Lukas Bach"]
 edition = "2021"

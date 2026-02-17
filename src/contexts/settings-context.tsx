@@ -19,6 +19,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const loadedSettings = await loadSettings();
         setSettings(loadedSettings);
         applyTheme();
+        applyZoom(loadedSettings.appZoom);
       } catch (error) {
         console.error('Failed to load settings:', error);
       } finally {
@@ -34,6 +35,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     root.classList.add('dark');
   }, []);
 
+  const applyZoom = useCallback((zoom: number) => {
+    const root = window.document.documentElement;
+    // zoom property is non-standard but widely supported in Chromium (which Tauri uses)
+    // alternative is transform: scale(), but that might cause layout issues
+    (root.style as any).zoom = `${zoom}%`;
+  }, []);
+
   const updateSettings = useCallback(async (newSettings: Partial<AppSettings>) => {
     const updated = await new Promise<AppSettings>((resolve) => {
       setSettings((prev) => {
@@ -42,8 +50,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return next;
       });
     });
+    
+    if (newSettings.appZoom !== undefined) {
+      applyZoom(newSettings.appZoom);
+    }
+    
     await saveSettings(updated);
-  }, []);
+  }, [applyZoom]);
 
   return (
     <SettingsContext.Provider value={{ settings, updateSettings, isLoading }}>

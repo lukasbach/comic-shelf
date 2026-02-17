@@ -23,6 +23,7 @@ export type AppSettings = {
   lastIndexedAt: string | null;
   enableGalleries: boolean;
   showViewCount: boolean;
+  appZoom: number;               // percentage, e.g. 100
 };
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -48,6 +49,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   lastIndexedAt: null,
   enableGalleries: false,
   showViewCount: false,
+  appZoom: 100,
 };
 
 const STORE_PATH = 'settings.json';

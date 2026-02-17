@@ -451,9 +451,9 @@ function SettingsPage() {
 
               <form.Field name="defaultZoomLevel">
                 {(field) => (
-                  <div className="space-y-3 col-span-full">
+                  <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <label className="text-sm font-medium text-slate-300">Default Zoom Level</label>
+                      <label className="text-sm font-medium text-slate-300">Default Comic Zoom</label>
                       <span className="text-blue-400 font-mono font-bold">{field.state.value}%</span>
                     </div>
                     <div className="flex items-center gap-4">
@@ -462,6 +462,28 @@ function SettingsPage() {
                         min="10"
                         max="500"
                         step="10"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(Number(e.target.value))}
+                        className="flex-1 accent-blue-500 h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                )}
+              </form.Field>
+
+              <form.Field name="appZoom">
+                {(field) => (
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <label className="text-sm font-medium text-slate-300">Application Zoom</label>
+                      <span className="text-blue-400 font-mono font-bold">{field.state.value}%</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="range"
+                        min="50"
+                        max="200"
+                        step="5"
                         value={field.state.value}
                         onChange={(e) => field.handleChange(Number(e.target.value))}
                         className="flex-1 accent-blue-500 h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer"

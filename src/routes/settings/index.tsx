@@ -492,6 +492,34 @@ function SettingsPage() {
                   </div>
                 )}
               </form.Field>
+
+              <div className="md:col-span-2 pt-4 border-t border-slate-800">
+                <form.Field name="saveOpenedTabs">
+                  {(field) => (
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={field.state.value}
+                        onClick={() => field.handleChange(!field.state.value)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                          field.state.value ? 'bg-blue-600' : 'bg-slate-700'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            field.state.value ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                      <div>
+                        <span className="text-sm font-medium text-slate-200">Save opened tabs when closing</span>
+                        <p className="text-[10px] text-slate-500">Restore your tabs and their state when reopening the app.</p>
+                      </div>
+                    </div>
+                  )}
+                </form.Field>
+              </div>
             </div>
           </section>
 

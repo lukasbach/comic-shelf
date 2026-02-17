@@ -24,6 +24,7 @@ export type AppSettings = {
   enableGalleries: boolean;
   showViewCount: boolean;
   appZoom: number;               // percentage, e.g. 100
+  saveOpenedTabs: boolean;       // save and restore tabs on app restart
 };
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -50,6 +51,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   enableGalleries: false,
   showViewCount: false,
   appZoom: 100,
+  saveOpenedTabs: true,
 };
 
 const STORE_PATH = 'settings.json';

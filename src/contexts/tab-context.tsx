@@ -1,7 +1,9 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect, useRef } from 'react';
 import { useRouterState, useNavigate, useRouter } from '@tanstack/react-router';
 import { Tab } from '../stores/tab-store';
 import { useSettings } from './settings-context';
+import { saveTabs, loadTabs } from '../services/tab-persistence-service';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 
 interface TabContextType {
   tabs: Tab[];
@@ -38,14 +40,89 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [isSwitchingTab, setIsSwitchingTab] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const { location } = useRouterState();
   const navigate = useNavigate();
   const router = useRouter();
   const { settings, isLoading: isLoadingSettings } = useSettings();
+  const saveTimeoutRef = useRef<number | null>(null);
+
+  // Load saved tabs on mount
+  useEffect(() => {
+    if (isLoadingSettings) return;
+    if (isInitialized) return;
+
+    const initializeTabs = async () => {
+      if (settings.saveOpenedTabs) {
+        const savedState = await loadTabs();
+        if (savedState && savedState.tabs.length > 0) {
+          setTabs(savedState.tabs);
+          setActiveTabId(savedState.activeTabId);
+          
+          // Navigate to the active tab's path
+          const activeTab = savedState.tabs.find(t => t.id === savedState.activeTabId);
+          if (activeTab) {
+            router.history.push(activeTab.path);
+          }
+        }
+      }
+      setIsInitialized(true);
+    };
+
+    initializeTabs();
+  }, [isLoadingSettings, isInitialized, settings.saveOpenedTabs, router]);
+
+  // Save tabs when they change (debounced)
+  useEffect(() => {
+    if (!isInitialized || isLoadingSettings) return;
+    if (!settings.saveOpenedTabs) return;
+    if (tabs.length === 0) return;
+
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      window.clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Save after 500ms of inactivity
+    saveTimeoutRef.current = window.setTimeout(() => {
+      saveTabs(tabs, activeTabId);
+    }, 500);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        window.clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [tabs, activeTabId, settings.saveOpenedTabs, isInitialized, isLoadingSettings]);
+
+  // Save tabs on window close
+  useEffect(() => {
+    if (!isInitialized || isLoadingSettings) return;
+    if (!settings.saveOpenedTabs) return;
+
+    const appWindow = getCurrentWindow();
+    let unlisten: (() => void) | null = null;
+
+    const setupListener = async () => {
+      unlisten = await appWindow.onCloseRequested(async () => {
+        if (tabs.length > 0) {
+          await saveTabs(tabs, activeTabId);
+        }
+      });
+    };
+
+    setupListener();
+
+    return () => {
+      if (unlisten) {
+        unlisten();
+      }
+    };
+  }, [tabs, activeTabId, settings.saveOpenedTabs, isInitialized, isLoadingSettings]);
 
   // Sync current route with tabs
   useEffect(() => {
-    if (isLoadingSettings) return;
+    if (isLoadingSettings || !isInitialized) return;
     
     const currentPath = location.pathname + (location.searchStr ? `?${location.searchStr}` : '');
     

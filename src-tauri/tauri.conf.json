@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "comic-shelf",
+  "productName": "Comic Shelf",
   "version": "0.1.5",
   "identifier": "comic-shelf",
   "build": {

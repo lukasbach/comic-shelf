@@ -92,7 +92,7 @@ export const NavigationContextMenu: React.FC<NavigationContextMenuProps> = ({
     try {
       const webview = new WebviewWindow(label, {
         url: fullPath,
-        title: `ComicShelf - ${getTitle()}`,
+        title: `Comic Shelf - ${getTitle()}`,
         width: 1280,
         height: 800,
         center: true,

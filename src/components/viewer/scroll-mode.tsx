@@ -46,7 +46,7 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
   
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef<number | null>(null);
-  const { scrollContainerRef: containerRef, registerScrollToPage } = useViewerRef();
+  const { scrollContainerRef: containerRef, registerScrollToPage, registerNextPage, registerPrevPage } = useViewerRef();
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Register scroll jump function
@@ -56,8 +56,29 @@ export const ScrollMode: React.FC<ScrollModeProps> = ({
         pageRefs.current[pageIndex]?.scrollIntoView({ behavior, block: 'start' });
       }
     });
-    return () => registerScrollToPage(() => {});
-  }, [registerScrollToPage]);
+    registerNextPage(() => {
+      const nextIndex = currentPage + 1;
+      if (nextIndex < pages.length) {
+        handleGoToPage(nextIndex);
+      } else {
+        handleGoToPage(0);
+      }
+    });
+    registerPrevPage(() => {
+      const prevIndex = currentPage - 1;
+      if (prevIndex >= 0) {
+        handleGoToPage(prevIndex);
+      } else {
+        handleGoToPage(pages.length - 1);
+      }
+    });
+
+    return () => {
+      registerScrollToPage(() => {});
+      registerNextPage(() => {});
+      registerPrevPage(() => {});
+    };
+  }, [registerScrollToPage, registerNextPage, registerPrevPage, currentPage, pages.length]);
 
   // Initialize pageRefs array
   useEffect(() => {

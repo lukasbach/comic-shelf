@@ -158,7 +158,7 @@ const ComicMenuContent: React.FC<ComicMenuProps & { isDropdown?: boolean }> = ({
     try {
       const webview = new WebviewWindow(label, {
         url,
-        title: comic?.title || 'ComicShelf',
+        title: comic?.title || 'Comic Shelf',
         width: 1280,
         height: 800,
         center: true,

@@ -40,7 +40,7 @@ export function TopBar() {
           title="Explorer"
           className="text-xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mr-4 pointer-events-auto cursor-pointer"
         >
-          ComicShelf
+          Comic Shelf
         </NavigationLink>
         <div className="pointer-events-auto hidden lg:block">
           <BreadcrumbBar />

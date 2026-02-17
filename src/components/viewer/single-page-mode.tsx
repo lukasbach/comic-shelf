@@ -46,7 +46,17 @@ export const SinglePageMode: React.FC<SinglePageModeProps> = ({
   const viewMode = activeTab?.viewMode ?? 'single';
   const isSidebarCollapsed = activeTab?.sidebarCollapsed ?? false;
   
-  const { scrollContainerRef: containerRef } = useViewerRef();
+  const { scrollContainerRef: containerRef, registerNextPage, registerPrevPage } = useViewerRef();
+
+  // Register navigation functions
+  React.useEffect(() => {
+    registerNextPage(() => handleNextPage());
+    registerPrevPage(() => handlePrevPage());
+    return () => {
+      registerNextPage(() => {});
+      registerPrevPage(() => {});
+    };
+  }, [registerNextPage, registerPrevPage, currentPage, pages.length]);
 
   // Preload adjacent images
   usePreloadImages(pages, currentPage);

@@ -60,8 +60,8 @@ describe('ScrollMode', () => {
     };
 
     const mockPages: ComicPage[] = [
-        { id: 1, comic_id: 1, page_number: 1, file_path: '/path/1.jpg', file_name: '1.jpg', thumbnail_path: null, is_favorite: 0, view_count: 0, last_opened_at: null },
-        { id: 2, comic_id: 1, page_number: 2, file_path: '/path/2.jpg', file_name: '2.jpg', thumbnail_path: null, is_favorite: 0, view_count: 0, last_opened_at: null },
+        { id: 1, comic_id: 1, page_number: 1, file_path: '/path/1.jpg', file_name: '1.jpg', thumbnail_path: null, thumbnail_exists: 0, is_favorite: 0, view_count: 0, last_opened_at: null },
+        { id: 2, comic_id: 1, page_number: 2, file_path: '/path/2.jpg', file_name: '2.jpg', thumbnail_path: null, thumbnail_exists: 0, is_favorite: 0, view_count: 0, last_opened_at: null },
     ];
 
     beforeEach(() => {

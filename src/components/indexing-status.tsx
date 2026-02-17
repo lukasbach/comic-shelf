@@ -15,7 +15,7 @@ export const IndexingStatus: React.FC = () => {
                         : 'Never indexed'}
                 </span>
                 <button 
-                    onClick={startIndexing}
+                    onClick={() => startIndexing()}
                     className="p-1 hover:bg-gray-200 dark:hover:bg-gray-800 rounded transition-colors"
                     title="Re-index library"
                 >
@@ -40,7 +40,7 @@ export const IndexingStatus: React.FC = () => {
                 </div>
                 {!isIndexing && errors.length > 0 && (
                     <button 
-                        onClick={startIndexing}
+                        onClick={() => startIndexing()}
                         className="p-1 hover:bg-gray-200 dark:hover:bg-gray-800 rounded transition-colors"
                     >
                         <RxReload className="w-3 h-3" />

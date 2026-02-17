@@ -128,7 +128,6 @@ export function BreadcrumbBar() {
                 if (segment.to.startsWith('/library')) {
                   const searchStr = segment.search?.path ? `?path=${encodeURIComponent(segment.search.path)}` : '';
                   openLibraryTab(segment.to + searchStr, segment.label);
-                  navigate({ to: segment.to as any, search: segment.search as any });
                 }
               }
             }}

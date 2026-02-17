@@ -44,7 +44,6 @@ export function TopBar() {
           onAuxClick={(e) => {
             if (e.button === 1) {
               openLibraryTab('/library', 'Explorer')
-              navigate({ to: '/library', search: { path: '' } })
             }
           }}
         >

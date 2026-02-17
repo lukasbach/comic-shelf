@@ -156,14 +156,19 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
 
     if (newTab || !activeTabId) {
+      const newTabId = crypto.randomUUID();
       const newTabObj: Tab = {
         ...tabData as Tab,
-        id: crypto.randomUUID(),
+        id: newTabId,
       };
-      setIsSwitchingTab(true);
+      
       setTabs(prevTabs => [...prevTabs, newTabObj]);
-      setActiveTabId(newTabObj.id);
-      router.history.push(newTabObj.path);
+
+      if (!activeTabId) {
+        setIsSwitchingTab(true);
+        setActiveTabId(newTabId);
+        router.history.push(newTabObj.path);
+      }
     } else {
       setIsSwitchingTab(true);
       setTabs(prevTabs => 
@@ -185,14 +190,19 @@ export const TabProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
 
     if (newTab || !activeTabId) {
+      const newTabId = crypto.randomUUID();
       const newTabObj: Tab = {
         ...tabData as Tab,
-        id: crypto.randomUUID(),
+        id: newTabId,
       };
-      setIsSwitchingTab(true);
+      
       setTabs(prevTabs => [...prevTabs, newTabObj]);
-      setActiveTabId(newTabObj.id);
-      router.history.push(newTabObj.path);
+
+      if (!activeTabId) {
+        setIsSwitchingTab(true);
+        setActiveTabId(newTabId);
+        router.history.push(newTabObj.path);
+      }
     } else {
       setIsSwitchingTab(true);
       setTabs(prevTabs => 

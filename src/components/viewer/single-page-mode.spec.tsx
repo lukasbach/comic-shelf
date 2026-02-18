@@ -73,7 +73,9 @@ describe('SinglePageMode', () => {
       updateTab,
     });
     (useViewerRef as any).mockReturnValue({
-      scrollContainerRef: { current: { scrollTo: vi.fn() } }
+      scrollContainerRef: { current: { scrollTo: vi.fn() } },
+      registerNextPage: vi.fn(),
+      registerPrevPage: vi.fn(),
     });
   });
 

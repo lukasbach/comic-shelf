@@ -25,6 +25,8 @@ vi.mock('../../contexts/viewer-ref-context', () => ({
     scrollContainerRef: { current: null },
     scrollToPage: vi.fn(),
     registerScrollToPage: vi.fn(),
+    registerNextPage: vi.fn(),
+    registerPrevPage: vi.fn(),
   }),
 }));
 
